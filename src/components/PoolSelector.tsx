@@ -1,0 +1,58 @@
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import { Pool } from "../app/types";
+
+interface PoolSelectorProps {
+  pools: Pool[];
+  selectedPoolId: number;
+  onPoolChange: (poolId: string) => void;
+  loading: boolean;
+}
+
+export function PoolSelector({
+  pools,
+  selectedPoolId,
+  onPoolChange,
+  loading,
+}: PoolSelectorProps) {
+  if (pools.length === 0) return null;
+
+  return (
+    <div className="mb-6 w-full sm:w-64">
+      <Label htmlFor="pool-select" className="text-white/80 mb-2 block">
+        Poule
+      </Label>
+      <Select
+        onValueChange={onPoolChange}
+        value={selectedPoolId.toString()}
+        disabled={loading}
+      >
+        <SelectTrigger
+          id="pool-select"
+          name="pool"
+          className="w-full bg-gray-800 border-gray-600 text-white hover:bg-gray-700 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+        >
+          <SelectValue placeholder="Sélectionner une pool" />
+        </SelectTrigger>
+        <SelectContent className="bg-gray-800 border-gray-600">
+          {pools.map((pool) => (
+            <SelectItem
+              key={pool.id}
+              value={pool.id.toString()}
+              className="text-white hover:bg-gray-700 truncate"
+            >
+              {pool.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
