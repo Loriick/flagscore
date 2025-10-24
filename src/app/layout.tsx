@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { Toaster } from "@/components/ui/sonner";
 
@@ -115,6 +117,8 @@ export default function RootLayout({
           <main className="min-h-screen bg-black">{children}</main>
           <Footer />
           <Toaster />
+          <Analytics />
+          <SpeedInsights />
         </ErrorBoundary>
       </body>
     </html>

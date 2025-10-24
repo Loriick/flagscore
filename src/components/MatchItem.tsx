@@ -4,13 +4,9 @@ import { Match } from "../app/types";
 
 interface MatchItemProps {
   match: Match;
-  index: number;
 }
 
-export const MatchItem = memo(function MatchItem({
-  match,
-  index,
-}: MatchItemProps) {
+export const MatchItem = memo(function MatchItem({ match }: MatchItemProps) {
   const teamAWon = match.team_a.score > match.team_b.score;
   const teamBWon = match.team_b.score > match.team_a.score;
 

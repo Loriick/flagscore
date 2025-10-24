@@ -63,6 +63,18 @@ export default function Header() {
             >
               À propos
             </Link>
+            {process.env.NODE_ENV === "development" && (
+              <Link
+                href="/monitoring"
+                className={`text-sm transition-colors ${
+                  isActive("/monitoring")
+                    ? "text-white"
+                    : "text-white/80 hover:text-white"
+                }`}
+              >
+                Monitoring
+              </Link>
+            )}
           </div>
 
           <button

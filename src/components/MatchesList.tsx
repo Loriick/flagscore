@@ -39,7 +39,6 @@ export const MatchesList = memo(function MatchesList({
             match.team_b.name
           }-${index}`}
           match={match}
-          index={index}
         />
       ))}
     </div>

@@ -93,10 +93,8 @@ export function PoolsSelector() {
     setSelectedPoolId(Number(poolId));
   }, []);
 
-  // Prefetching intelligent
   useEffect(() => {
     if (pools.length > 0) {
-      // Précharger les données des premières poules
       pools.slice(0, 3).forEach((pool) => {
         prefetchRankings(pool.id);
         prefetchMatches(pool.id);
@@ -106,7 +104,6 @@ export function PoolsSelector() {
 
   useEffect(() => {
     if (effectiveChampionshipId > 0) {
-      // Précharger les poules de la compétition
       prefetchPools(effectiveChampionshipId);
     }
   }, [effectiveChampionshipId, prefetchPools]);
