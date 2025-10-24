@@ -1,63 +1,33 @@
 {
-  "version": 2,
-  "name": "flagscore",
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  },
+  "buildCommand": "pnpm build",
+  "devCommand": "pnpm dev",
+  "installCommand": "pnpm install",
+  "framework": "nextjs",
+  "nodeVersion": "18.x",
   "functions": {
     "src/app/api/**/*.ts": {
-      "maxDuration": 30
+      "runtime": "nodejs18.x"
     }
   },
   "headers": [
     {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "origin-when-cross-origin"
-        }
-      ]
-    },
-    {
-      "source": "/api/(.*)",
+      "source": "/sw.js",
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=300, s-maxage=300"
+          "value": "public, max-age=0, must-revalidate"
+        },
+        {
+          "key": "Service-Worker-Allowed",
+          "value": "/"
         }
       ]
     }
   ],
-  "redirects": [
+  "rewrites": [
     {
-      "source": "/home",
-      "destination": "/",
-      "permanent": true
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
     }
   ]
 }
