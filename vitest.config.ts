@@ -1,11 +1,20 @@
 /// <reference types="vitest" />
 import path from "path";
 
-import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
+// Try to import react plugin, fallback if it fails
+let reactPlugin: () => any;
+try {
+  const react = require("@vitejs/plugin-react");
+  reactPlugin = react.default || react;
+} catch (error) {
+  console.warn("Failed to load @vitejs/plugin-react:", error);
+  reactPlugin = () => ({});
+}
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [reactPlugin()],
   test: {
     globals: true,
     environment: "jsdom",
