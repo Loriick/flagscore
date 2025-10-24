@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+import { structuredData } from "../lib/seo";
 
 import "./globals.css";
 
@@ -38,8 +39,11 @@ export const metadata: Metadata = {
     "sport",
     "football américain",
     "FFFA",
+    "fédération française flag football",
+    "sport français",
+    "compétition sportive",
   ],
-  authors: [{ name: "Flagscore" }],
+  authors: [{ name: "Flagscore", url: "https://flagscore.fr" }],
   creator: "Flagscore",
   publisher: "Flagscore",
   formatDetection: {
@@ -50,6 +54,9 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://flagscore.fr"),
   alternates: {
     canonical: "/",
+    languages: {
+      "fr-FR": "https://flagscore.fr",
+    },
   },
   openGraph: {
     type: "website",
@@ -65,6 +72,7 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt: "Flagscore - Résultats Flag Football France",
+        type: "image/png",
       },
     ],
   },
@@ -75,6 +83,7 @@ export const metadata: Metadata = {
       "Découvrez tous les résultats du championnat de France de flag football et de la coupe de France.",
     images: ["/flagscore-logo-removebg-preview.png"],
     creator: "@flagscore",
+    site: "@flagscore",
   },
   robots: {
     index: true,
@@ -88,12 +97,38 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: "your-google-verification-code",
+    google: process.env.GOOGLE_VERIFICATION_CODE,
+    yandex: process.env.YANDEX_VERIFICATION_CODE,
+    yahoo: process.env.YAHOO_VERIFICATION_CODE,
   },
   icons: {
-    icon: "/favicon.ico?v=3",
+    icon: [
+      { url: "/favicon.ico?v=3", sizes: "any" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
     shortcut: "/favicon.ico?v=3",
-    apple: "/favicon.ico?v=3",
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    other: [
+      {
+        rel: "mask-icon",
+        url: "/safari-pinned-tab.svg",
+        color: "#000000",
+      },
+    ],
+  },
+  manifest: "/site.webmanifest",
+  category: "Sports",
+  classification: "Flag Football Results",
+  other: {
+    "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "black-translucent",
+    "theme-color": "#000000",
+    "msapplication-TileColor": "#000000",
+    "msapplication-config": "/browserconfig.xml",
   },
 };
 
@@ -103,11 +138,33 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark bg-black">
+    <html lang="fr" className="dark bg-black">
       <head>
-        <link rel="icon" href="/favicon.ico?v=3" />
-        <link rel="shortcut icon" href="/favicon.ico?v=3" />
-        <link rel="apple-touch-icon" href="/favicon.ico?v=3" />
+        {/* Données structurées globales */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData.organization),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData.website),
+          }}
+        />
+
+        {/* Preconnect pour les performances */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+
+        {/* DNS prefetch pour les domaines externes */}
+        <link rel="dns-prefetch" href="https://api.example.com" />
+        <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased relative bg-black`}

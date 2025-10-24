@@ -1,26 +1,8 @@
 import { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "À propos",
-  description:
-    "Découvrez Flagscore, votre plateforme de référence pour les résultats du flag football français. En partenariat avec la FFFA.",
-  keywords: [
-    "flagscore à propos",
-    "flag football france",
-    "FFFA",
-    "fédération française flag football",
-    "résultats flag football",
-  ],
-  openGraph: {
-    title: "À propos - Flagscore",
-    description:
-      "Découvrez Flagscore, votre plateforme de référence pour les résultats du flag football français.",
-    url: "https://flagscore.fr/a-propos",
-  },
-  alternates: {
-    canonical: "https://flagscore.fr/a-propos",
-  },
-};
+import { pageMetadata, structuredData } from "../../lib/seo";
+
+export const metadata: Metadata = pageMetadata.about;
 
 export default function About() {
   return (
