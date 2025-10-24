@@ -21,7 +21,7 @@ fi
 
 # Tests
 echo "🧪 Running tests..."
-pnpm test:run
+pnpm test
 if [ $? -ne 0 ]; then
   echo "❌ Tests failed"
   exit 1
