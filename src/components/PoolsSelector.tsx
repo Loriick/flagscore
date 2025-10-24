@@ -1,14 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
 
-import { Day } from "../app/types";
-import { useChampionships } from "../hooks/useChampionships";
-import { useMatches } from "../hooks/useMatches";
-import { usePools } from "../hooks/usePools";
-import { usePrefetch } from "../hooks/usePrefetch";
+import { useAppData } from "../hooks/useAppData";
 
 import { ChampionshipSelector } from "./ChampionshipSelector";
 import { DaysNavigation } from "./DaysNavigation";
@@ -18,127 +14,69 @@ import { SeasonSelector } from "./SeasonSelector";
 import { SkeletonLoader } from "./SkeletonLoader";
 
 export function PoolsSelector() {
-  const [seasons] = useState<number[]>([2026]);
-  const [currentSeason, setCurrentSeason] = useState<number>(2026);
-  const [selectedChampionshipId, setSelectedChampionshipId] =
-    useState<number>(0);
-  const [selectedPoolId, setSelectedPoolId] = useState<number>(0);
-
-  const { prefetchRankings, prefetchPools, prefetchMatches } = usePrefetch();
+  const seasons = [2026]; // Saisons disponibles
 
   const {
+    // État
+    currentSeason,
+    selectedChampionshipId,
+    selectedPoolId,
+
+    // Données
     championships,
-    loading: championshipsLoading,
-    error: championshipsError,
-  } = useChampionships(currentSeason);
-
-  const effectiveChampionshipId = useMemo(() => {
-    if (selectedChampionshipId > 0) return selectedChampionshipId;
-    return championships.length > 0 ? championships[0].id : 0;
-  }, [selectedChampionshipId, championships]);
-
-  const {
     pools,
-    loading: poolsLoading,
-    error: poolsError,
-  } = usePools(effectiveChampionshipId);
-
-  const effectivePoolId = useMemo(() => {
-    if (selectedPoolId > 0) return selectedPoolId;
-    return pools.length > 0 ? pools[0].id : 0;
-  }, [selectedPoolId, pools]);
-
-  const {
     days,
     matches,
-    loading: matchesLoading,
-    error: matchesError,
-  } = useMatches(effectivePoolId);
 
+    // États de chargement
+    loading,
+    initialLoading,
+    poolsAreLoading,
+    hasData,
+    hasPools,
+
+    // Erreurs
+    errors,
+
+    // Handlers
+    handleSeasonChange,
+    handleChampionshipChange,
+    handlePoolChange,
+    handleDayChange,
+  } = useAppData();
+
+  // Gestion des erreurs avec notifications
   useEffect(() => {
-    if (championshipsError) {
+    if (errors.championships) {
       toast.error("Erreur de chargement des compétitions", {
-        description: championshipsError,
+        description: errors.championships,
       });
     }
-  }, [championshipsError]);
+  }, [errors.championships]);
 
   useEffect(() => {
-    if (poolsError) {
+    if (errors.pools) {
       toast.error("Erreur de chargement des poules", {
-        description: poolsError,
+        description: errors.pools,
       });
     }
-  }, [poolsError]);
+  }, [errors.pools]);
 
   useEffect(() => {
-    if (matchesError) {
+    if (errors.matches) {
       toast.error("Erreur de chargement des matchs", {
-        description: matchesError,
+        description: errors.matches,
       });
     }
-  }, [matchesError]);
-
-  const handleSeasonChange = useCallback((season: string) => {
-    setCurrentSeason(Number(season));
-  }, []);
-
-  const handleChampionshipChange = useCallback((championshipId: string) => {
-    setSelectedChampionshipId(Number(championshipId));
-    setSelectedPoolId(0);
-  }, []);
-
-  const handlePoolChange = useCallback((poolId: string) => {
-    setSelectedPoolId(Number(poolId));
-  }, []);
+  }, [errors.matches]);
 
   useEffect(() => {
-    if (pools.length > 0) {
-      pools.slice(0, 3).forEach(pool => {
-        prefetchRankings(pool.id);
-        prefetchMatches(pool.id);
+    if (errors.rankings) {
+      toast.error("Erreur de chargement des classements", {
+        description: errors.rankings,
       });
     }
-  }, [pools, prefetchRankings, prefetchMatches]);
-
-  useEffect(() => {
-    if (effectiveChampionshipId > 0) {
-      prefetchPools(effectiveChampionshipId);
-    }
-  }, [effectiveChampionshipId, prefetchPools]);
-
-  const handleDaySelect = useCallback((day: Day) => {
-    console.log("Journée sélectionnée:", day);
-    // TODO: Implémenter la logique de sélection de journée
-  }, []);
-
-  const initialLoading = useMemo(
-    () => championshipsLoading && championships.length === 0,
-    [championshipsLoading, championships.length]
-  );
-
-  const poolsAreLoading = useMemo(() => poolsLoading, [poolsLoading]);
-
-  const hasPools = useMemo(
-    () => championships.length > 0 && pools.length > 0,
-    [championships.length, pools.length]
-  );
-
-  const shouldShowNoPoolsMessage = useMemo(
-    () =>
-      !initialLoading &&
-      !poolsAreLoading &&
-      !championshipsLoading &&
-      effectiveChampionshipId > 0 &&
-      pools.length === 0,
-    [
-      initialLoading,
-      poolsAreLoading,
-      championshipsLoading,
-      effectiveChampionshipId,
-      pools.length,
-    ]
-  );
+  }, [errors.rankings]);
 
   return (
     <div className="w-full max-w-md mx-auto py-4 sm:max-w-lg md:max-w-2xl lg:max-w-4xl">
@@ -151,48 +89,37 @@ export function PoolsSelector() {
           />
           <ChampionshipSelector
             championships={championships}
-            selectedChampionshipId={effectiveChampionshipId}
+            selectedChampionshipId={selectedChampionshipId}
             onChampionshipChange={handleChampionshipChange}
-            loading={championshipsLoading}
+            loading={loading.championships}
           />
         </div>
-      </div>
 
-      {(initialLoading || poolsAreLoading) && <SkeletonLoader />}
-
-      {!initialLoading && !poolsAreLoading && hasPools && (
-        <div>
-          {days.length > 0 ? (
-            <DaysNavigation days={days} onDaySelect={handleDaySelect} />
-          ) : !matchesLoading ? (
-            <div className="mb-4">
-              <div className="text-white text-center">
-                <Image
-                  src="/404.png"
-                  alt="Aucune journée trouvée"
-                  className="w-16 h-16 mx-auto mb-2 opacity-60"
-                  width={100}
-                  height={100}
-                />
-                <div>Aucune journée trouvée pour cette poule</div>
-              </div>
-            </div>
-          ) : null}
+        {hasPools && (
           <PoolSelector
             pools={pools}
-            selectedPoolId={effectivePoolId}
+            selectedPoolId={selectedPoolId}
             onPoolChange={handlePoolChange}
-            loading={poolsLoading}
+            loading={loading.pools}
           />
-          <div className="relative">
-            <MatchesList matches={matches} loading={matchesLoading} />
-          </div>
+        )}
+      </div>
+
+      {initialLoading && <SkeletonLoader />}
+
+      {!initialLoading && hasData && (
+        <div>
+          <DaysNavigation
+            days={days}
+            onDaySelect={day => handleDayChange(day.id.toString())}
+          />
+          <MatchesList matches={matches} loading={loading.matches} />
         </div>
       )}
 
-      {shouldShowNoPoolsMessage && (
+      {!initialLoading && !poolsAreLoading && !hasPools && (
         <div className="text-center py-8">
-          <div className="text-white">
+          <div className="text-white/60">
             <Image
               src="/404.png"
               alt="Aucune poule trouvée"
@@ -201,6 +128,21 @@ export function PoolsSelector() {
               height={100}
             />
             Aucune poule trouvée pour cette compétition
+          </div>
+        </div>
+      )}
+
+      {!initialLoading && !hasData && days.length === 0 && (
+        <div className="text-center py-8">
+          <div className="text-white/60">
+            <Image
+              src="/404.png"
+              alt="Aucune journée trouvée"
+              className="w-16 h-16 mx-auto mb-2 opacity-60"
+              width={100}
+              height={100}
+            />
+            Aucune journée trouvée pour cette poule
           </div>
         </div>
       )}

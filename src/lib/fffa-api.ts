@@ -62,7 +62,7 @@ async function api<T>(params: Record<string, string | string[]>): Promise<T> {
     process.env.NEXT_PUBLIC_FLAGSCORE_ORIGIN ?? "http://localhost:3000"
   );
   Object.entries(params).forEach(([k, v]) => {
-    if (Array.isArray(v)) v.forEach((val) => url.searchParams.append(k, val));
+    if (Array.isArray(v)) v.forEach(val => url.searchParams.append(k, val));
     else url.searchParams.append(k, v);
   });
 
@@ -90,16 +90,23 @@ export async function getChampionships(season: number) {
   });
 
   const allowedNames = ["Championnat de France mixte", "Coupe de France"];
-  const filteredChampionships = allChampionships.filter((championship) =>
-    allowedNames.some((name) => championship.label.includes(name))
+  const filteredChampionships = allChampionships.filter(championship =>
+    allowedNames.some(name => championship.label.includes(name))
   );
 
-  // Garder seulement la première occurrence de "Championnat de France mixte"
-  const mixteChampionship = filteredChampionships.find((championship) =>
-    championship.label.includes("Championnat de France mixte")
-  );
+  // Garder la Qualification en priorité, sinon D1, sinon la première occurrence de "Championnat de France mixte"
+  const mixteChampionship =
+    filteredChampionships.find(championship =>
+      championship.label.includes("Championnat de France mixte - Qualification")
+    ) ||
+    filteredChampionships.find(championship =>
+      championship.label.includes("Championnat de France mixte - D1")
+    ) ||
+    filteredChampionships.find(championship =>
+      championship.label.includes("Championnat de France mixte")
+    );
 
-  const coupeChampionships = filteredChampionships.filter((championship) =>
+  const coupeChampionships = filteredChampionships.filter(championship =>
     championship.label.includes("Coupe de France")
   );
 

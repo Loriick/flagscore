@@ -3,47 +3,45 @@ import { describe, expect, it, vi } from "vitest";
 
 import { PoolsSelector } from "../PoolsSelector";
 
-// Mock des hooks
-vi.mock("../../hooks/useAppData", () => ({
-  useAppData: () => ({
-    // État
-    currentSeason: 2026,
-    selectedChampionshipId: 1,
-    selectedPoolId: 1,
-
-    // Données
+// Mock des hooks avec des données réalistes
+vi.mock("../../hooks/useChampionships", () => ({
+  useChampionships: () => ({
     championships: [{ id: 1, name: "Championnat de France mixte" }],
+    loading: false,
+    error: null,
+  }),
+}));
+
+vi.mock("../../hooks/usePools", () => ({
+  usePools: () => ({
     pools: [{ id: 1, name: "Poule A" }],
+    loading: false,
+    error: null,
+  }),
+}));
+
+vi.mock("../../hooks/useMatches", () => ({
+  useMatches: () => ({
     days: [{ id: 1, name: "Journée 1", date: "2026-01-01" }],
-    matches: [],
+    matches: [
+      {
+        id: 1,
+        homeTeam: "Équipe A",
+        awayTeam: "Équipe B",
+        homeScore: 2,
+        awayScore: 1,
+      },
+    ],
+    loading: false,
+    error: null,
+  }),
+}));
 
-    // États de chargement
-    loading: {
-      championships: false,
-      pools: false,
-      days: false,
-      matches: false,
-      rankings: false,
-    },
-    initialLoading: false,
-    poolsAreLoading: false,
-    hasData: true,
-    hasPools: true,
-
-    // Erreurs
-    errors: {
-      championships: null,
-      pools: null,
-      days: null,
-      matches: null,
-      rankings: null,
-    },
-
-    // Handlers
-    handleSeasonChange: vi.fn(),
-    handleChampionshipChange: vi.fn(),
-    handlePoolChange: vi.fn(),
-    handleDayChange: vi.fn(),
+vi.mock("../../hooks/useRankings", () => ({
+  useRankings: () => ({
+    rankings: [],
+    loading: false,
+    error: null,
   }),
 }));
 
@@ -91,8 +89,8 @@ vi.mock("../SkeletonLoader", () => ({
   SkeletonLoader: () => <div data-testid="skeleton-loader">Loading...</div>,
 }));
 
-describe("PoolsSelectorRefactored", () => {
-  it("should render with Zustand state management", () => {
+describe("PoolsSelector - Data Loading", () => {
+  it("should load and display data correctly", async () => {
     render(<PoolsSelector />);
 
     // Vérifier que les composants sont rendus
@@ -102,7 +100,7 @@ describe("PoolsSelectorRefactored", () => {
     expect(screen.getByTestId("days-navigation")).toBeInTheDocument();
     expect(screen.getByTestId("matches-list")).toBeInTheDocument();
 
-    // Vérifier le contenu
+    // Vérifier le contenu avec les données mockées
     expect(screen.getByText("Season: 2026 (1 seasons)")).toBeInTheDocument();
     expect(
       screen.getByText("Championship: 1 (1 championships)")
@@ -110,21 +108,13 @@ describe("PoolsSelectorRefactored", () => {
     expect(screen.getByText("Pool: 1 (1 pools)")).toBeInTheDocument();
     expect(screen.getByText("Days: 1 days")).toBeInTheDocument();
     expect(
-      screen.getByText("Matches: 0 matches (loading: false)")
+      screen.getByText("Matches: 1 matches (loading: false)")
     ).toBeInTheDocument();
   });
 
-  it("should not render skeleton when not loading", () => {
+  it("should not show skeleton when data is loaded", () => {
     render(<PoolsSelector />);
 
     expect(screen.queryByTestId("skeleton-loader")).not.toBeInTheDocument();
-  });
-
-  it("should handle empty states correctly", () => {
-    // Test simplifié - vérifier que le composant se rend sans erreur
-    render(<PoolsSelector />);
-
-    // Vérifier que le composant principal est rendu
-    expect(screen.getByTestId("season-selector")).toBeInTheDocument();
   });
 });
