@@ -13,8 +13,8 @@ export function usePrefetch() {
     }
 
     const promise = fetch(`/api/rankings?poolId=${poolId}`)
-      .then((res) => res.json())
-      .catch((err) => {
+      .then(res => res.json())
+      .catch(err => {
         console.error("Prefetch error:", err);
         return { rankings: [], error: err.message };
       });
@@ -22,9 +22,12 @@ export function usePrefetch() {
     prefetchCache.set(cacheKey, promise);
 
     // Nettoyer le cache après 10 minutes
-    setTimeout(() => {
-      prefetchCache.delete(cacheKey);
-    }, 10 * 60 * 1000);
+    setTimeout(
+      () => {
+        prefetchCache.delete(cacheKey);
+      },
+      10 * 60 * 1000
+    );
 
     return promise;
   }, []);
@@ -39,17 +42,20 @@ export function usePrefetch() {
     const promise = fetch(
       `/api/fffa/flag?championshipId=${championshipId}&action=pools`
     )
-      .then((res) => res.json())
-      .catch((err) => {
+      .then(res => res.json())
+      .catch(err => {
         console.error("Prefetch pools error:", err);
         return { pools: [], error: err.message };
       });
 
     prefetchCache.set(cacheKey, promise);
 
-    setTimeout(() => {
-      prefetchCache.delete(cacheKey);
-    }, 10 * 60 * 1000);
+    setTimeout(
+      () => {
+        prefetchCache.delete(cacheKey);
+      },
+      10 * 60 * 1000
+    );
 
     return promise;
   }, []);
@@ -63,8 +69,8 @@ export function usePrefetch() {
     }
 
     const promise = fetch(`/api/matches?poolId=${poolId}`)
-      .then((res) => res.json())
-      .catch((err) => {
+      .then(res => res.json())
+      .catch(err => {
         console.error("Prefetch matches error:", err);
         return { matches: [], days: [], error: err.message };
       });
@@ -72,9 +78,12 @@ export function usePrefetch() {
     prefetchCache.set(cacheKey, promise);
 
     // Nettoyer le cache après 10 minutes
-    setTimeout(() => {
-      prefetchCache.delete(cacheKey);
-    }, 10 * 60 * 1000);
+    setTimeout(
+      () => {
+        prefetchCache.delete(cacheKey);
+      },
+      10 * 60 * 1000
+    );
 
     return promise;
   }, []);

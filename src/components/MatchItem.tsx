@@ -13,13 +13,13 @@ export const MatchItem = memo(function MatchItem({ match }: MatchItemProps) {
   const teamAStyle = teamAWon
     ? "text-white"
     : teamBWon
-    ? "text-gray-400 text-sm"
-    : "text-white";
+      ? "text-gray-400 text-sm"
+      : "text-white";
   const teamBStyle = teamBWon
     ? "text-white"
     : teamAWon
-    ? "text-gray-400 text-sm"
-    : "text-white";
+      ? "text-gray-400 text-sm"
+      : "text-white";
 
   const formattedDate = new Date(match.date).toLocaleDateString("fr-FR", {
     day: "numeric",

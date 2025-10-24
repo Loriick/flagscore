@@ -24,7 +24,10 @@
 
 ## 🎯 Overview
 
-Flagscore is the official platform for French Flag Football results, providing real-time scores, rankings, and statistics for the French Championship and French Cup. Built in partnership with the FFFA (French Flag Football Federation), it offers a comprehensive view of the sport's competitive landscape in France.
+Flagscore is the official platform for French Flag Football results, providing real-time scores,
+rankings, and statistics for the French Championship and French Cup. Built in partnership with the
+FFFA (French Flag Football Federation), it offers a comprehensive view of the sport's competitive
+landscape in France.
 
 ### Key Highlights
 
@@ -336,7 +339,6 @@ src/
 ### Vercel Deployment
 
 1. **Connect Repository**
-
    - Link your GitHub repository to Vercel
    - Configure build settings
 

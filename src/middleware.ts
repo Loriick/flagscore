@@ -17,7 +17,10 @@ const SECURITY_HEADERS = {
 // Rate limiting simple en mémoire (pour la production, utiliser Redis)
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW = securityConfig.rateLimit.api.windowMs;
-const RATE_LIMIT_MAX_REQUESTS = securityConfig.rateLimit.api.maxRequests;
+const RATE_LIMIT_MAX_REQUESTS =
+  process.env.NODE_ENV === "development"
+    ? 1000 // En dev: 1000 requêtes par fenêtre
+    : securityConfig.rateLimit.api.maxRequests;
 
 function getRateLimitKey(request: NextRequest): string {
   const forwarded = request.headers.get("x-forwarded-for");

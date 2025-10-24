@@ -34,7 +34,7 @@ export const SeasonSelector = memo(function SeasonSelector({
           <SelectValue placeholder="Sélectionner une saison" />
         </SelectTrigger>
         <SelectContent className="bg-gray-800 border-gray-600">
-          {seasons.map((season) => (
+          {seasons.map(season => (
             <SelectItem
               key={`season-${season}`}
               value={season.toString()}

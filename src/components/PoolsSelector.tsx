@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect } from "react";
 import { toast } from "sonner";
 
@@ -8,10 +7,10 @@ import { useAppData } from "../hooks/useAppData";
 
 import { ChampionshipSelector } from "./ChampionshipSelector";
 import { DaysNavigation } from "./DaysNavigation";
-import { MatchesList } from "./MatchesList";
+import { DeflagLoader } from "./DeflagLoader";
+import { OptimizedMatchesList } from "./organisms/OptimizedMatchesList";
 import { PoolSelector } from "./PoolSelector";
 import { SeasonSelector } from "./SeasonSelector";
-import { SkeletonLoader } from "./SkeletonLoader";
 
 export function PoolsSelector() {
   const seasons = [2026]; // Saisons disponibles
@@ -31,8 +30,7 @@ export function PoolsSelector() {
     // États de chargement
     loading,
     initialLoading,
-    poolsAreLoading,
-    hasData,
+    poolChangeLoading,
     hasPools,
 
     // Erreurs
@@ -45,22 +43,33 @@ export function PoolsSelector() {
     handleDayChange,
   } = useAppData();
 
-  // Gestion des erreurs avec notifications
+  // Gestion des erreurs avec notifications - seulement pour les vraies erreurs
   useEffect(() => {
-    if (errors.championships) {
-      toast.error("Erreur de chargement des compétitions", {
-        description: errors.championships,
-      });
+    if (errors.championships && !initialLoading) {
+      if (
+        errors.championships.includes("too many requests") ||
+        errors.championships.includes("rate limit")
+      ) {
+        toast.error("Trop de requêtes - Veuillez patienter", {
+          description:
+            "L'API est temporairement limitée. Réessayez dans quelques minutes.",
+          duration: 10000,
+        });
+      } else {
+        toast.error("Erreur de chargement des compétitions", {
+          description: errors.championships,
+        });
+      }
     }
-  }, [errors.championships]);
+  }, [errors.championships, initialLoading]);
 
   useEffect(() => {
-    if (errors.pools) {
+    if (errors.pools && !initialLoading) {
       toast.error("Erreur de chargement des poules", {
         description: errors.pools,
       });
     }
-  }, [errors.pools]);
+  }, [errors.pools, initialLoading]);
 
   useEffect(() => {
     if (errors.matches) {
@@ -100,50 +109,43 @@ export function PoolsSelector() {
             pools={pools}
             selectedPoolId={selectedPoolId}
             onPoolChange={handlePoolChange}
-            loading={loading.pools}
+            loading={poolChangeLoading}
           />
         )}
       </div>
 
-      {initialLoading && <SkeletonLoader />}
+      {initialLoading && (
+        <div className="text-center py-8">
+          <DeflagLoader />
+          <div className="text-white/60 text-sm mt-2">Chargement...</div>
+        </div>
+      )}
 
-      {!initialLoading && hasData && (
+      {!initialLoading &&
+        ((!hasPools && championships.length > 0) ||
+          (hasPools && days.length === 0)) && (
+          <div className="text-center py-8">
+            <DeflagLoader />
+            <div className="text-white/60 text-sm mt-2">
+              {!hasPools && championships.length > 0
+                ? "Chargement des poules..."
+                : hasPools && days.length === 0
+                  ? poolChangeLoading
+                    ? "Chargement des données de la poule..."
+                    : "Chargement des journées..."
+                  : null}
+            </div>
+          </div>
+        )}
+
+      {!initialLoading && hasPools && days.length > 0 && (
         <div>
           <DaysNavigation
             days={days}
             onDaySelect={day => handleDayChange(day.id.toString())}
           />
-          <MatchesList matches={matches} loading={loading.matches} />
-        </div>
-      )}
 
-      {!initialLoading && !poolsAreLoading && !hasPools && (
-        <div className="text-center py-8">
-          <div className="text-white/60">
-            <Image
-              src="/404.png"
-              alt="Aucune poule trouvée"
-              className="w-16 h-16 mx-auto mb-2 opacity-60"
-              width={100}
-              height={100}
-            />
-            Aucune poule trouvée pour cette compétition
-          </div>
-        </div>
-      )}
-
-      {!initialLoading && !hasData && days.length === 0 && (
-        <div className="text-center py-8">
-          <div className="text-white/60">
-            <Image
-              src="/404.png"
-              alt="Aucune journée trouvée"
-              className="w-16 h-16 mx-auto mb-2 opacity-60"
-              width={100}
-              height={100}
-            />
-            Aucune journée trouvée pour cette poule
-          </div>
+          <OptimizedMatchesList matches={matches} loading={poolChangeLoading} />
         </div>
       )}
     </div>

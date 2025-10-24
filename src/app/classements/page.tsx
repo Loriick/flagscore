@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
-import { useState, useCallback, useMemo, useEffect } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { toast } from "sonner";
 
 import { ChampionshipSelector } from "../../components/ChampionshipSelector";
+import { DeflagLoader } from "../../components/DeflagLoader";
 import { PoolSelector } from "../../components/PoolSelector";
 import { SeasonSelector } from "../../components/SeasonSelector";
 import { useChampionships } from "../../hooks/useChampionships";
@@ -14,7 +14,7 @@ import { usePools } from "../../hooks/usePools";
 import { useRankings } from "@/src/hooks/useRankings";
 import { Ranking } from "@/src/lib/fffa-api";
 
-export default function Rankings() {
+const Rankings = React.memo(() => {
   const [seasons] = useState<number[]>([2026]);
   const [currentSeason, setCurrentSeason] = useState<number>(2026);
   const [selectedChampionshipId, setSelectedChampionshipId] =
@@ -22,8 +22,8 @@ export default function Rankings() {
   const [selectedPoolId, setSelectedPoolId] = useState<number>(0);
 
   const {
-    championships,
-    loading: championshipsLoading,
+    data: championships = [],
+    isLoading: championshipsLoading,
     error: championshipsError,
   } = useChampionships(currentSeason);
 
@@ -33,28 +33,30 @@ export default function Rankings() {
   }, [selectedChampionshipId, championships]);
 
   const {
-    pools,
-    loading: poolsLoading,
+    data: pools = [],
+    isLoading: poolsLoading,
     error: poolsError,
-  } = usePools(effectiveChampionshipId);
+  } = usePools(effectiveChampionshipId > 0 ? effectiveChampionshipId : 0);
 
   const effectivePoolId = useMemo(() => {
     if (selectedPoolId > 0) return selectedPoolId;
     return pools.length > 0 ? pools[0].id : 0;
   }, [selectedPoolId, pools]);
 
-  const { days, loading: daysLoading } = useMatches(effectivePoolId);
+  useMatches(effectivePoolId > 0 ? effectivePoolId : 0);
 
   const {
-    rankings,
-    loading: rankingsLoading,
+    data: rankingsData,
+    isLoading: rankingsLoading,
     error: rankingsError,
-  } = useRankings(effectivePoolId);
+  } = useRankings(effectivePoolId > 0 ? effectivePoolId : 0);
+
+  const rankings = rankingsData?.rankings || [];
 
   useEffect(() => {
     if (championshipsError) {
       toast.error("Erreur de chargement des compétitions", {
-        description: championshipsError,
+        description: championshipsError.message || "Erreur inconnue",
       });
     }
   }, [championshipsError]);
@@ -62,7 +64,7 @@ export default function Rankings() {
   useEffect(() => {
     if (poolsError) {
       toast.error("Erreur de chargement des poules", {
-        description: poolsError,
+        description: poolsError.message || "Erreur inconnue",
       });
     }
   }, [poolsError]);
@@ -70,7 +72,7 @@ export default function Rankings() {
   useEffect(() => {
     if (rankingsError) {
       toast.error("Erreur de chargement des classements", {
-        description: rankingsError,
+        description: rankingsError.message || "Erreur inconnue",
       });
     }
   }, [rankingsError]);
@@ -88,7 +90,7 @@ export default function Rankings() {
     setSelectedPoolId(Number(poolId));
   }, []);
 
-  const initialLoading = championshipsLoading && championships.length === 0;
+  const initialLoading = championshipsLoading;
   const poolsAreLoading = poolsLoading && pools.length === 0;
   const hasPools = championships.length > 0 && pools.length > 0;
 
@@ -132,34 +134,14 @@ export default function Rankings() {
           </div>
 
           {initialLoading || poolsAreLoading ? (
-            <div className="space-y-2">
-              {[...Array(5)].map((_, i) => (
-                <div
-                  key={`skeleton-${i}`}
-                  className="bg-white/5 rounded p-4 animate-pulse"
-                >
-                  <div className="h-6 bg-gray-700 rounded w-3/4 mb-2"></div>
-                  <div className="h-4 bg-gray-700 rounded w-1/2"></div>
-                </div>
-              ))}
+            <div className="text-center py-8">
+              <DeflagLoader />
+              <div className="text-white/60 text-sm mt-2">
+                Chargement des données...
+              </div>
             </div>
           ) : hasPools && effectivePoolId > 0 ? (
             <div className="space-y-6">
-              {!daysLoading && days.length === 0 && (
-                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
-                  <div className="text-white text-center">
-                    <Image
-                      src="/404.png"
-                      alt="Aucune journée trouvée"
-                      className="w-16 h-16 mx-auto mb-2 opacity-60"
-                      width={100}
-                      height={100}
-                    />
-                    Aucune journée trouvée pour cette poule
-                  </div>
-                </div>
-              )}
-
               <div className="bg-white/10 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-2xl font-semibold">
@@ -168,17 +150,15 @@ export default function Rankings() {
                 </div>
 
                 {rankingsLoading ? (
-                  <div className="space-y-2">
-                    {[...Array(8)].map((_, i) => (
-                      <div
-                        key={`ranking-skeleton-${i}`}
-                        className="bg-white/5 rounded p-3 animate-pulse"
-                      >
-                        <div className="h-5 bg-gray-700 rounded w-full"></div>
-                      </div>
-                    ))}
+                  <div className="text-center py-8">
+                    <DeflagLoader />
+                    <div className="text-white/60 text-sm mt-2">
+                      Chargement du classement...
+                    </div>
                   </div>
-                ) : rankings.length > 0 ? (
+                ) : !rankingsLoading &&
+                  !initialLoading &&
+                  rankings.length > 0 ? (
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
@@ -210,37 +190,90 @@ export default function Rankings() {
                         </tr>
                       </thead>
                       <tbody>
-                        {rankings.map((ranking: Ranking, index: number) => (
-                          <tr
-                            key={ranking.club.id}
-                            className="border-b border-white/10 hover:bg-white/5"
-                          >
-                            <td className="py-3 px-4 font-medium">
-                              {index + 1}
-                            </td>
-                            <td className="py-3 px-4">{ranking.club.label}</td>
-                            <td className="py-3 px-4 text-center font-medium">
-                              {ranking.points}
-                            </td>
-                            <td className="py-3 px-4 text-center">
-                              {ranking.j}
-                            </td>
-                            <td className="py-3 px-4 text-center text-green-400">
-                              {ranking.g}
-                            </td>
-                            <td className="py-3 px-4 text-center text-yellow-400">
-                              {ranking.n}
-                            </td>
-                            <td className="py-3 px-4 text-center text-red-400">
-                              {ranking.p}
-                            </td>
-                            <td className="py-3 px-4 text-center">
-                              {ranking.points_diff}
-                            </td>
-                          </tr>
-                        ))}
+                        {rankings.map((ranking: Ranking, index: number) => {
+                          const position = index + 1;
+
+                          console.log("position", position);
+
+                          return (
+                            <tr
+                              key={ranking.club.id}
+                              className="border-b border-white/10 hover:bg-white/5"
+                              style={
+                                position <= 2
+                                  ? {
+                                      backgroundColor: "rgba(34, 197, 94, 0.2)",
+                                      borderLeft: "4px solid #22c55e",
+                                    }
+                                  : position === 3
+                                    ? {
+                                        backgroundColor:
+                                          "rgba(234, 179, 8, 0.2)",
+                                        borderLeft: "4px solid #eab308",
+                                      }
+                                    : {}
+                              }
+                            >
+                              <td className="py-3 px-4 font-medium">
+                                <span className="text-white text-sm">
+                                  {position}
+                                </span>
+                              </td>
+                              <td className="py-3 px-4">
+                                <span className="text-white text-sm">
+                                  {ranking.club.label}
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 text-center font-medium">
+                                {ranking.points}
+                              </td>
+                              <td className="py-3 px-4 text-center">
+                                {ranking.j}
+                              </td>
+                              <td className="py-3 px-4 text-center text-green-400">
+                                {ranking.g}
+                              </td>
+                              <td className="py-3 px-4 text-center text-yellow-400">
+                                {ranking.n}
+                              </td>
+                              <td className="py-3 px-4 text-center text-red-400">
+                                {ranking.p}
+                              </td>
+                              <td className="py-3 px-4 text-center">
+                                {ranking.points_diff}
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
+
+                    {/* Légende */}
+                    <div className="mt-6 p-4 bg-white/5 rounded-lg border border-white/10">
+                      <h3 className="text-sm font-medium text-white/80 mb-3">
+                        Légende des qualifications
+                      </h3>
+                      <div className="flex flex-wrap gap-4 text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="w-3 h-3 bg-green-500/20 border border-green-500/30 rounded-full"></span>
+                          <span className="text-green-300">
+                            1er & 2ème : Qualifiés directement
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="w-3 h-3 bg-yellow-500/20 border border-yellow-500/30 rounded-full"></span>
+                          <span className="text-yellow-300">
+                            3ème : Barrage (chance de qualification)
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="w-3 h-3 bg-gray-500/20 border border-gray-500/30 rounded-full"></span>
+                          <span className="text-gray-400">
+                            4ème et suivants : Éliminés
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <div className="text-center py-8">
@@ -291,4 +324,6 @@ export default function Rankings() {
       </div>
     </div>
   );
-}
+});
+
+export default Rankings;

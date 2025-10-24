@@ -1,34 +1,15 @@
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 
-import { Championship } from "../app/types";
 import { getChampionships } from "../lib/fffa-api";
 
 export function useChampionships(season: number) {
-  const [championships, setChampionships] = useState<Championship[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchChampionships = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const championshipsData = await getChampionships(season);
-        setChampionships(championshipsData);
-      } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Erreur lors du chargement des compétitions"
-        );
-        console.error("Erreur lors du chargement des compétitions:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchChampionships();
-  }, [season]);
-
-  return { championships, loading, error };
+  return useQuery({
+    queryKey: ["championships", season],
+    queryFn: () => getChampionships(season),
+    staleTime: 0, // Pas de cache pour debug
+    gcTime: 0, // Pas de cache pour debug
+    retry: 3,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+    enabled: season > 0,
+  });
 }

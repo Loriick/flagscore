@@ -41,29 +41,33 @@ export function useAppData() {
 
   // Hooks existants pour la logique de fetching
   const {
-    championships: fetchedChampionships,
-    loading: championshipsLoading,
+    data: fetchedChampionships = [],
+    isLoading: championshipsLoading,
     error: championshipsError,
   } = useChampionshipsHook(currentSeason);
 
   const {
-    pools: fetchedPools,
-    loading: poolsLoading,
+    data: fetchedPools = [],
+    isLoading: poolsLoading,
     error: poolsError,
   } = usePoolsHook(selectedChampionshipId);
 
   const {
-    days: fetchedDays,
-    matches: fetchedMatches,
-    loading: matchesLoading,
+    data: matchesData,
+    isLoading: matchesLoading,
     error: matchesError,
   } = useMatchesHook(selectedPoolId);
 
+  const fetchedDays = matchesData?.days || [];
+  const fetchedMatches = matchesData?.matches || [];
+
   const {
-    rankings: fetchedRankings,
-    loading: rankingsLoading,
+    data: rankingsData,
+    isLoading: rankingsLoading,
     error: rankingsError,
   } = useRankingsHook(selectedPoolId);
+
+  const fetchedRankings = rankingsData?.rankings || [];
 
   // Synchronisation des données avec les stores
   useEffect(() => {
@@ -116,20 +120,20 @@ export function useAppData() {
 
   // Synchronisation des erreurs
   useEffect(() => {
-    setError("championships", championshipsError);
+    setError("championships", championshipsError?.message || null);
   }, [championshipsError, setError]);
 
   useEffect(() => {
-    setError("pools", poolsError);
+    setError("pools", poolsError?.message || null);
   }, [poolsError, setError]);
 
   useEffect(() => {
-    setError("days", matchesError);
-    setError("matches", matchesError);
+    setError("days", matchesError?.message || null);
+    setError("matches", matchesError?.message || null);
   }, [matchesError, setError]);
 
   useEffect(() => {
-    setError("rankings", rankingsError);
+    setError("rankings", rankingsError?.message || null);
   }, [rankingsError, setError]);
 
   // Données depuis les stores

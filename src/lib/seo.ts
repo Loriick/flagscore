@@ -161,7 +161,8 @@ export const pageMetadata = {
 
   monitoring: generateMetadata({
     title: "Monitoring",
-    description: "Tableau de bord de monitoring et métriques de performance de Flagscore.",
+    description:
+      "Tableau de bord de monitoring et métriques de performance de Flagscore.",
     keywords: ["monitoring", "métriques", "performance", "statistiques"],
     canonical: "/monitoring",
     noindex: true, // Ne pas indexer les pages de monitoring
@@ -174,13 +175,11 @@ export const structuredData = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "Flagscore",
-    description: "Plateforme officielle des résultats du flag football en France",
+    description:
+      "Plateforme officielle des résultats du flag football en France",
     url: "https://flagscore.fr",
     logo: "https://flagscore.fr/flagscore-logo-removebg-preview.png",
-    sameAs: [
-      "https://twitter.com/flagscore",
-      "https://facebook.com/flagscore",
-    ],
+    sameAs: ["https://twitter.com/flagscore", "https://facebook.com/flagscore"],
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "customer service",

@@ -16,7 +16,7 @@ export function RetryButton({
   const [retryCount, setRetryCount] = useState(0);
 
   const handleRetry = () => {
-    setRetryCount((prev) => prev + 1);
+    setRetryCount(prev => prev + 1);
     onRetry();
   };
 

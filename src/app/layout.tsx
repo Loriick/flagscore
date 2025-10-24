@@ -6,6 +6,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+import { PerformanceMonitor } from "../components/PerformanceMonitor";
+import { PreloadManager } from "../components/PreloadManager";
+import { QueryProvider } from "../components/QueryProvider";
+import { ServiceWorkerManager } from "../components/ServiceWorkerManager";
 import { structuredData } from "../lib/seo";
 
 import { Toaster } from "@/components/ui/sonner";
@@ -169,14 +173,22 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased relative bg-black`}
       >
-        <ErrorBoundary>
-          <Header />
-          <main className="min-h-screen bg-black">{children}</main>
-          <Footer />
-          <Toaster />
-          <Analytics />
-          <SpeedInsights />
-        </ErrorBoundary>
+        <QueryProvider>
+          <ServiceWorkerManager>
+            <PreloadManager>
+              <PerformanceMonitor>
+                <ErrorBoundary>
+                  <Header />
+                  <main className="min-h-screen bg-black">{children}</main>
+                  <Footer />
+                  <Toaster />
+                  <Analytics />
+                  <SpeedInsights />
+                </ErrorBoundary>
+              </PerformanceMonitor>
+            </PreloadManager>
+          </ServiceWorkerManager>
+        </QueryProvider>
       </body>
     </html>
   );

@@ -30,11 +30,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 }
 
-function generateSeasonPages(baseUrl: string, currentDate: Date): MetadataRoute.Sitemap {
+function generateSeasonPages(
+  baseUrl: string,
+  currentDate: Date
+): MetadataRoute.Sitemap {
   const currentYear = new Date().getFullYear();
   const seasons = [currentYear - 1, currentYear, currentYear + 1];
-  
-  return seasons.map((season) => ({
+
+  return seasons.map(season => ({
     url: `${baseUrl}/saison/${season}`,
     lastModified: currentDate,
     changeFrequency: "weekly" as const,
@@ -42,14 +45,17 @@ function generateSeasonPages(baseUrl: string, currentDate: Date): MetadataRoute.
   }));
 }
 
-function generateCompetitionPages(baseUrl: string, currentDate: Date): MetadataRoute.Sitemap {
+function generateCompetitionPages(
+  baseUrl: string,
+  currentDate: Date
+): MetadataRoute.Sitemap {
   const competitions = [
     { id: 464, name: "championnat-france-mixte" },
     { id: 432, name: "coupe-france" },
     { id: 433, name: "championnat-france-masculin" },
   ];
-  
-  return competitions.map((competition) => ({
+
+  return competitions.map(competition => ({
     url: `${baseUrl}/competition/${competition.id}/${competition.name}`,
     lastModified: currentDate,
     changeFrequency: "daily" as const,

@@ -131,18 +131,19 @@ export const rateLimitConfigs = {
       "Limite de requêtes API atteinte. Veuillez réessayer dans 15 minutes.",
   },
 
-  // API de données : 50 requêtes par 5 minutes
+  // API de données : 50 requêtes par 5 minutes (dev: 1000 requêtes par minute)
   dataApi: {
-    windowMs: 5 * 60 * 1000,
-    maxRequests: 50,
+    windowMs:
+      process.env.NODE_ENV === "development" ? 60 * 1000 : 5 * 60 * 1000,
+    maxRequests: process.env.NODE_ENV === "development" ? 1000 : 50,
     message:
       "Limite de requêtes de données atteinte. Veuillez réessayer dans 5 minutes.",
   },
 
-  // API stricte : 20 requêtes par minute
+  // API stricte : 20 requêtes par minute (dev: 500 requêtes par minute)
   strict: {
     windowMs: 60 * 1000,
-    maxRequests: 20,
+    maxRequests: process.env.NODE_ENV === "development" ? 500 : 20,
     message:
       "Limite de requêtes stricte atteinte. Veuillez réessayer dans 1 minute.",
   },

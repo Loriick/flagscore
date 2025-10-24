@@ -1,11 +1,11 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useChampionships as useChampionshipsHook } from "../hooks/useChampionships";
 import { useMatches as useMatchesHook } from "../hooks/useMatches";
 import { usePools as usePoolsHook } from "../hooks/usePools";
 import { useRankings as useRankingsHook } from "../hooks/useRankings";
 
-// Hook simplifié qui utilise directement les hooks existants
+// Hook simplifié qui utilise directement les hooks React Query
 export function useAppData() {
   // État local pour les sélections
   const [currentSeason, setCurrentSeason] = useState(2026);
@@ -13,10 +13,13 @@ export function useAppData() {
   const [selectedPoolId, setSelectedPoolId] = useState(0);
   const [selectedDayId, setSelectedDayId] = useState(0);
 
-  // Hooks existants pour la logique de fetching
+  // État pour tracker les changements de poule
+  const [isChangingPool, setIsChangingPool] = useState(false);
+
+  // Hooks React Query pour la logique de fetching
   const {
-    championships: fetchedChampionships,
-    loading: championshipsLoading,
+    data: fetchedChampionships = [],
+    isLoading: championshipsLoading,
     error: championshipsError,
   } = useChampionshipsHook(currentSeason);
 
@@ -27,8 +30,8 @@ export function useAppData() {
   }, [selectedChampionshipId, fetchedChampionships]);
 
   const {
-    pools: fetchedPools,
-    loading: poolsLoading,
+    data: fetchedPools = [],
+    isLoading: poolsLoading,
     error: poolsError,
   } = usePoolsHook(effectiveChampionshipId);
 
@@ -38,11 +41,13 @@ export function useAppData() {
   }, [selectedPoolId, fetchedPools]);
 
   const {
-    days: fetchedDays,
-    matches: fetchedMatches,
-    loading: matchesLoading,
+    data: matchesData,
+    isLoading: matchesLoading,
     error: matchesError,
   } = useMatchesHook(effectivePoolId);
+
+  const fetchedDays = matchesData?.days || [];
+  const fetchedMatches = matchesData?.matches || [];
 
   const effectiveDayId = useMemo(() => {
     if (selectedDayId > 0) return selectedDayId;
@@ -50,10 +55,19 @@ export function useAppData() {
   }, [selectedDayId, fetchedDays]);
 
   const {
-    rankings: fetchedRankings,
-    loading: rankingsLoading,
+    data: rankingsData,
+    isLoading: rankingsLoading,
     error: rankingsError,
   } = useRankingsHook(effectivePoolId);
+
+  const fetchedRankings = rankingsData?.rankings || [];
+
+  // Désactiver l'état de changement de poule quand les données sont chargées
+  useEffect(() => {
+    if (isChangingPool && fetchedDays.length > 0) {
+      setIsChangingPool(false);
+    }
+  }, [isChangingPool, fetchedDays.length]);
 
   // Handlers optimisés avec useCallback
   const handleSeasonChange = useCallback((season: string) => {
@@ -73,6 +87,7 @@ export function useAppData() {
 
   const handlePoolChange = useCallback((poolId: string) => {
     const id = Number(poolId);
+    setIsChangingPool(true);
     setSelectedPoolId(id);
     setSelectedDayId(0);
   }, []);
@@ -84,12 +99,14 @@ export function useAppData() {
 
   // États calculés
   const initialLoading = useMemo(() => {
-    return championshipsLoading && fetchedChampionships.length === 0;
+    // Le skeleton reste affiché tant qu'on charge les championnats OU qu'on n'a pas encore de championnats
+    const shouldShowSkeleton =
+      championshipsLoading || fetchedChampionships.length === 0;
+
+    return shouldShowSkeleton;
   }, [championshipsLoading, fetchedChampionships.length]);
 
-  const poolsAreLoading = useMemo(() => {
-    return poolsLoading && fetchedPools.length === 0;
-  }, [poolsLoading, fetchedPools.length]);
+  const poolsAreLoading = poolsLoading && fetchedPools.length === 0;
 
   const hasData = useMemo(() => {
     return (
@@ -102,6 +119,9 @@ export function useAppData() {
   const hasPools = useMemo(() => {
     return fetchedChampionships.length > 0 && fetchedPools.length > 0;
   }, [fetchedChampionships.length, fetchedPools.length]);
+
+  // État de chargement pour les changements de poule
+  const poolChangeLoading = isChangingPool;
 
   return {
     // État
@@ -127,16 +147,17 @@ export function useAppData() {
     },
     initialLoading,
     poolsAreLoading,
+    poolChangeLoading,
     hasData,
     hasPools,
 
     // Erreurs
     errors: {
-      championships: championshipsError,
-      pools: poolsError,
-      days: matchesError,
-      matches: matchesError,
-      rankings: rankingsError,
+      championships: championshipsError?.message || null,
+      pools: poolsError?.message || null,
+      days: matchesError?.message || null,
+      matches: matchesError?.message || null,
+      rankings: rankingsError?.message || null,
     },
 
     // Handlers
