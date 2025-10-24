@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -13,7 +15,7 @@ interface SeasonSelectorProps {
   onSeasonChange: (season: string) => void;
 }
 
-export function SeasonSelector({
+export const SeasonSelector = memo(function SeasonSelector({
   seasons,
   currentSeason,
   onSeasonChange,
@@ -34,7 +36,7 @@ export function SeasonSelector({
         <SelectContent className="bg-gray-800 border-gray-600">
           {seasons.map((season) => (
             <SelectItem
-              key={season}
+              key={`season-${season}`}
               value={season.toString()}
               className="text-white hover:bg-gray-700"
             >
@@ -45,4 +47,4 @@ export function SeasonSelector({
       </Select>
     </div>
   );
-}
+});

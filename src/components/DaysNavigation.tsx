@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 import { Day } from "../app/types";
 
 interface DaysNavigationProps {
@@ -5,7 +7,10 @@ interface DaysNavigationProps {
   onDaySelect: (day: Day) => void;
 }
 
-export function DaysNavigation({ days, onDaySelect }: DaysNavigationProps) {
+export const DaysNavigation = memo(function DaysNavigation({
+  days,
+  onDaySelect,
+}: DaysNavigationProps) {
   if (days.length === 0) return null;
 
   return (
@@ -30,4 +35,4 @@ export function DaysNavigation({ days, onDaySelect }: DaysNavigationProps) {
       </div>
     </div>
   );
-}
+});

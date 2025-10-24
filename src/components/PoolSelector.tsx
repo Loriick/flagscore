@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -16,7 +18,7 @@ interface PoolSelectorProps {
   loading: boolean;
 }
 
-export function PoolSelector({
+export const PoolSelector = memo(function PoolSelector({
   pools,
   selectedPoolId,
   onPoolChange,
@@ -44,7 +46,7 @@ export function PoolSelector({
         <SelectContent className="bg-gray-800 border-gray-600">
           {pools.map((pool) => (
             <SelectItem
-              key={pool.id}
+              key={`pool-${pool.id}`}
               value={pool.id.toString()}
               className="text-white hover:bg-gray-700 truncate"
             >
@@ -55,4 +57,4 @@ export function PoolSelector({
       </Select>
     </div>
   );
-}
+});

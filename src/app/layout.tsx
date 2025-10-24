@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import { Toaster } from "@/components/ui/sonner";
 
+import { ErrorBoundary } from "../components/ErrorBoundary";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 
@@ -100,19 +101,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark bg-black">
       <head>
         <link rel="icon" href="/favicon.ico?v=3" />
         <link rel="shortcut icon" href="/favicon.ico?v=3" />
         <link rel="apple-touch-icon" href="/favicon.ico?v=3" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased relative`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased relative bg-black`}
       >
-        <Header />
-        <main className="min-h-screen">{children}</main>
-        <Footer />
-        <Toaster />
+        <ErrorBoundary>
+          <Header />
+          <main className="min-h-screen bg-black">{children}</main>
+          <Footer />
+          <Toaster />
+        </ErrorBoundary>
       </body>
     </html>
   );

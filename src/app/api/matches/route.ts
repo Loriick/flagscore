@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getRankings } from "@/src/lib/fffa-api";
+import { getMatches } from "@/src/lib/fffa-api";
 
-// Cache des classements (5 minutes)
-const rankingsCache = new Map<string, { data: any[]; timestamp: number }>();
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+// Cache des matchs (3 minutes - plus fréquent que les classements)
+const matchesCache = new Map<string, { data: any[]; timestamp: number }>();
+const CACHE_DURATION = 3 * 60 * 1000; // 3 minutes
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,41 +16,41 @@ export async function GET(request: NextRequest) {
     }
 
     // Vérifier le cache
-    const cacheKey = `rankings-${poolId}`;
-    const cached = rankingsCache.get(cacheKey);
+    const cacheKey = `matches-${poolId}`;
+    const cached = matchesCache.get(cacheKey);
 
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
       return NextResponse.json({
-        rankings: cached.data,
+        matches: cached.data,
         cached: true,
         timestamp: cached.timestamp,
       });
     }
 
     // Récupérer les données fraîches
-    const rankingsData = await getRankings(Number(poolId));
+    const matchesData = await getMatches(Number(poolId));
 
     // Mettre en cache
-    rankingsCache.set(cacheKey, {
-      data: rankingsData,
+    matchesCache.set(cacheKey, {
+      data: matchesData,
       timestamp: Date.now(),
     });
 
     return NextResponse.json({
-      rankings: rankingsData,
+      matches: matchesData,
       cached: false,
       timestamp: Date.now(),
     });
   } catch (error) {
-    console.error("Erreur dans l'API rankings:", error);
+    console.error("Erreur dans l'API matches:", error);
 
     const errorMessage =
       error instanceof Error ? error.message : "Erreur inconnue";
 
     return NextResponse.json(
       {
-        error: `Erreur lors du chargement des classements: ${errorMessage}`,
-        rankings: [],
+        error: `Erreur lors du chargement des matchs: ${errorMessage}`,
+        matches: [],
       },
       { status: 500 }
     );

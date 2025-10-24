@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 import { Pool } from "../app/types";
+import { ErrorHandler } from "../lib/error-handler";
 import { getPhases, getPools } from "../lib/fffa-api";
 
 export function usePools(championshipId: number) {
@@ -8,10 +9,16 @@ export function usePools(championshipId: number) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const memoizedChampionshipId = useMemo(
+    () => championshipId,
+    [championshipId]
+  );
+
   useEffect(() => {
     const fetchPools = async () => {
       if (!championshipId) {
         setPools([]);
+        setLoading(false);
         return;
       }
 
@@ -36,12 +43,12 @@ export function usePools(championshipId: number) {
         setPools(allPools);
         console.log("Pools récupérées:", allPools);
       } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Erreur lors du chargement des pools"
+        const errorMessage = ErrorHandler.handleApiError(
+          err,
+          `pools-${championshipId}`,
+          { showToast: false }
         );
-        console.error("Erreur lors du chargement des pools:", err);
+        setError(errorMessage);
         setPools([]);
       } finally {
         setLoading(false);
@@ -49,7 +56,7 @@ export function usePools(championshipId: number) {
     };
 
     fetchPools();
-  }, [championshipId]);
+  }, [memoizedChampionshipId]);
 
   return { pools, loading, error };
 }

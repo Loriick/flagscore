@@ -42,7 +42,7 @@ function SeasonSelector({ seasons, onSeasonChange }: SeasonSelectorProps) {
         <SelectContent className="bg-gray-800 border-gray-600">
           {seasons.map((season) => (
             <SelectItem
-              key={season}
+              key={`selector-season-${season}`}
               value={season.toString()}
               className="text-white hover:bg-gray-700"
             >
@@ -100,7 +100,7 @@ function ChampionshipSelector({
         <SelectContent className="bg-gray-800 border-gray-600">
           {championships.map((championship) => (
             <SelectItem
-              key={championship.id}
+              key={`selector-championship-${championship.id}`}
               value={championship.id.toString()}
               className="text-white hover:bg-gray-700"
             >
@@ -126,8 +126,6 @@ function PoolSelector({ championshipId, onPoolChange }: PoolSelectorProps) {
 
       setLoading(true);
       try {
-        // Pour récupérer les pools, on a besoin du phase_id
-        // On va utiliser le championshipId comme phase_id pour l'instant
         const data = await getPools(championshipId);
         setPools(data);
       } catch (error) {
@@ -158,7 +156,7 @@ function PoolSelector({ championshipId, onPoolChange }: PoolSelectorProps) {
         <SelectContent className="bg-gray-800 border-gray-600">
           {pools.map((pool) => (
             <SelectItem
-              key={pool.id}
+              key={`selector-pool-${pool.id}`}
               value={pool.id.toString()}
               className="text-white hover:bg-gray-700"
             >

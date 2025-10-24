@@ -144,7 +144,7 @@ export function PoolsList() {
             <SelectContent className="bg-gray-800 border-gray-600">
               {seasons.map((season) => (
                 <SelectItem
-                  key={season}
+                  key={`poolslist-season-${season}`}
                   value={season.toString()}
                   className="text-white hover:bg-gray-700"
                 >
@@ -159,7 +159,7 @@ export function PoolsList() {
       <Accordion type="multiple" className="space-y-2">
         {championships.map((championship) => (
           <AccordionItem
-            key={championship.id}
+            key={`poolslist-championship-${championship.id}`}
             value={`championship-${championship.id}`}
             className="bg-gray-800 border border-gray-600 rounded-lg"
           >
@@ -177,7 +177,7 @@ export function PoolsList() {
                 {poolsByChampionship[championship.id]?.length > 0 ? (
                   poolsByChampionship[championship.id].map((pool) => (
                     <div
-                      key={pool.id}
+                      key={`poolslist-pool-${pool.id}`}
                       className="bg-gray-700 p-3 rounded-md hover:bg-gray-600 cursor-pointer transition-colors"
                       onClick={() => console.log("Pool sélectionné:", pool)}
                     >

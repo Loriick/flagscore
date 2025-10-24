@@ -49,6 +49,7 @@ export default function Rankings() {
     rankings,
     loading: rankingsLoading,
     error: rankingsError,
+    cached: rankingsCached,
   } = useRankings(effectivePoolId);
 
   useEffect(() => {
@@ -134,7 +135,10 @@ export default function Rankings() {
           {initialLoading || poolsAreLoading ? (
             <div className="space-y-2">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="bg-white/5 rounded p-4 animate-pulse">
+                <div
+                  key={`skeleton-${i}`}
+                  className="bg-white/5 rounded p-4 animate-pulse"
+                >
                   <div className="h-6 bg-gray-700 rounded w-3/4 mb-2"></div>
                   <div className="h-4 bg-gray-700 rounded w-1/2"></div>
                 </div>
@@ -158,15 +162,17 @@ export default function Rankings() {
               )}
 
               <div className="bg-white/10 rounded-lg p-4">
-                <h2 className="text-2xl font-semibold mb-4">
-                  Classement de la poule
-                </h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-2xl font-semibold">
+                    Classement de la poule
+                  </h2>
+                </div>
 
                 {rankingsLoading ? (
                   <div className="space-y-2">
                     {[...Array(8)].map((_, i) => (
                       <div
-                        key={i}
+                        key={`ranking-skeleton-${i}`}
                         className="bg-white/5 rounded p-3 animate-pulse"
                       >
                         <div className="h-5 bg-gray-700 rounded w-full"></div>

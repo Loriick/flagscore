@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -16,7 +18,7 @@ interface ChampionshipSelectorProps {
   loading: boolean;
 }
 
-export function ChampionshipSelector({
+export const ChampionshipSelector = memo(function ChampionshipSelector({
   championships,
   selectedChampionshipId,
   onChampionshipChange,
@@ -47,7 +49,7 @@ export function ChampionshipSelector({
         <SelectContent className="bg-gray-800 border-gray-600">
           {championships.map((championship) => (
             <SelectItem
-              key={championship.id}
+              key={`championship-${championship.id}`}
               value={championship.id.toString()}
               className="text-white hover:bg-gray-700 truncate"
             >
@@ -60,4 +62,4 @@ export function ChampionshipSelector({
       </Select>
     </div>
   );
-}
+});

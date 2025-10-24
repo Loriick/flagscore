@@ -2,10 +2,9 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-black border-t border-white/10 mt-12">
+    <footer className="w-full bg-black border-t border-white/10">
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="grid md:grid-cols-3 gap-8">
-          {/* Logo et description */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-white">Flagscore</h3>
             <p className="text-white/70 text-sm">
