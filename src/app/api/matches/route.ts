@@ -37,7 +37,23 @@ export async function GET(request: NextRequest) {
     }
 
     // Get fresh data
-    const matchesData = await getMatches(Number(poolId));
+    let matchesData: Match[] = [];
+    try {
+      matchesData = await getMatches(Number(poolId));
+    } catch (error) {
+      console.error("Error fetching matches:", error);
+
+      // Return empty array instead of throwing
+      return createOptimizedResponse(
+        {
+          matches: [],
+          cached: false,
+          timestamp: Date.now(),
+          error: "Unable to fetch matches data",
+        },
+        { cacheMaxAge: 60 } // Cache error for 1 minute
+      );
+    }
 
     // Cache the data
     matchesCache.set(cacheKey, {

@@ -1,10 +1,15 @@
 // Service Worker for caching resources
-const STATIC_CACHE_NAME = "flagscore-static-v1";
-const DYNAMIC_CACHE_NAME = "flagscore-dynamic-v1";
+const STATIC_CACHE_NAME = "flagscore-static-v2";
+const DYNAMIC_CACHE_NAME = "flagscore-dynamic-v2";
 
 // Utility function to safely clone a response
 function safeCloneResponse(response) {
   try {
+    // Check if response is already consumed
+    if (response.bodyUsed) {
+      console.warn("Response body already consumed, cannot clone");
+      return null;
+    }
     return response.clone();
   } catch (error) {
     console.warn("Unable to clone response:", error);
@@ -12,8 +17,13 @@ function safeCloneResponse(response) {
   }
 }
 
-// Resources to cache statically
-const STATIC_ASSETS = ["/", "/404.png", "/flagscore-logo-removebg-preview.png"];
+// Resources to cache statically (only essential assets)
+const STATIC_ASSETS = [
+  "/",
+  "/404.png",
+  "/flagscore-logo-removebg-preview.png",
+  "/favicon.ico",
+];
 
 // Install service worker
 self.addEventListener("install", event => {
@@ -78,63 +88,128 @@ self.addEventListener("fetch", event => {
   }
 });
 
-// Cache First strategy
+// Cache First strategy - optimized for static assets
 async function cacheFirst(request, cacheName) {
-  const cachedResponse = await caches.match(request);
-  if (cachedResponse) {
-    return cachedResponse;
-  }
-
   try {
+    // Try cache first
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
+    // Fetch from network
     const networkResponse = await fetch(request);
-    if (networkResponse.ok) {
+
+    // Only cache successful responses
+    if (networkResponse.ok && networkResponse.status === 200) {
       const cache = await caches.open(cacheName);
       const clonedResponse = safeCloneResponse(networkResponse);
+
       if (clonedResponse) {
-        await cache.put(request, clonedResponse);
+        try {
+          await cache.put(request, clonedResponse);
+        } catch (cacheError) {
+          console.warn("Failed to cache response:", cacheError);
+        }
       }
     }
+
     return networkResponse;
-  } catch {
-    // Return error page if available
-    const errorResponse = await caches.match("/404.png");
-    return errorResponse || new Response("Offline", { status: 503 });
+  } catch (error) {
+    console.warn("Cache first strategy failed:", error);
+    // Return offline page if available
+    const offlineResponse = await caches.match("/404.png");
+    return (
+      offlineResponse ||
+      new Response("Service Unavailable", {
+        status: 503,
+        statusText: "Service Unavailable",
+      })
+    );
   }
 }
 
-// Stale While Revalidate strategy
+// Stale While Revalidate strategy - optimized for dynamic content
 async function staleWhileRevalidate(request, cacheName) {
-  const cachedResponse = await caches.match(request);
+  try {
+    const cachedResponse = await caches.match(request);
 
-  const fetchPromise = fetch(request).then(async networkResponse => {
-    if (networkResponse.ok) {
-      const cache = await caches.open(cacheName);
-      const clonedResponse = safeCloneResponse(networkResponse);
-      if (clonedResponse) {
-        await cache.put(request, clonedResponse);
-      }
-    }
-    return networkResponse;
-  });
+    // Start network request in parallel
+    const networkPromise = fetch(request)
+      .then(async networkResponse => {
+        // Only cache successful responses
+        if (networkResponse.ok && networkResponse.status === 200) {
+          try {
+            const cache = await caches.open(cacheName);
+            const clonedResponse = safeCloneResponse(networkResponse);
 
-  return cachedResponse || fetchPromise;
+            if (clonedResponse) {
+              await cache.put(request, clonedResponse);
+            }
+          } catch (cacheError) {
+            console.warn("Failed to cache network response:", cacheError);
+          }
+        }
+        return networkResponse;
+      })
+      .catch(error => {
+        console.warn("Network request failed:", error);
+        return null;
+      });
+
+    // Return cached response immediately if available, otherwise wait for network
+    return cachedResponse || networkPromise;
+  } catch (error) {
+    console.warn("Stale while revalidate strategy failed:", error);
+    return new Response("Service Unavailable", {
+      status: 503,
+      statusText: "Service Unavailable",
+    });
+  }
 }
 
-// Network First strategy
+// Network First strategy - optimized for API requests
 async function networkFirst(request, cacheName) {
   try {
+    // Try network first
     const networkResponse = await fetch(request);
-    if (networkResponse.ok) {
-      const cache = await caches.open(cacheName);
-      const clonedResponse = safeCloneResponse(networkResponse);
-      if (clonedResponse) {
-        await cache.put(request, clonedResponse);
+
+    // Cache successful responses
+    if (networkResponse.ok && networkResponse.status === 200) {
+      try {
+        const cache = await caches.open(cacheName);
+        const clonedResponse = safeCloneResponse(networkResponse);
+
+        if (clonedResponse) {
+          await cache.put(request, clonedResponse);
+        }
+      } catch (cacheError) {
+        console.warn("Failed to cache API response:", cacheError);
       }
     }
+
     return networkResponse;
-  } catch {
+  } catch (error) {
+    console.warn("Network first strategy failed, trying cache:", error);
+
+    // Fallback to cache
     const cachedResponse = await caches.match(request);
-    return cachedResponse || new Response("Offline", { status: 503 });
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
+    // Return offline response
+    return new Response(
+      JSON.stringify({
+        error: "Service Unavailable",
+        message: "Unable to fetch data. Please check your connection.",
+      }),
+      {
+        status: 503,
+        statusText: "Service Unavailable",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
 }
 
@@ -168,25 +243,58 @@ function isApiRequest(pathname) {
 
 // Message handler for communication with the app
 self.addEventListener("message", event => {
-  if (event.data && event.data.type === "SKIP_WAITING") {
-    self.skipWaiting();
+  if (!event.data || !event.data.type) {
+    return;
   }
 
-  if (event.data && event.data.type === "CLEAR_CACHE") {
-    event.waitUntil(
-      caches
-        .keys()
-        .then(cacheNames => {
-          return Promise.all(
-            cacheNames.map(cacheName => caches.delete(cacheName))
-          );
+  switch (event.data.type) {
+    case "SKIP_WAITING":
+      self.skipWaiting();
+      break;
+
+    case "CLEAR_CACHE":
+      event.waitUntil(clearAllCaches());
+      break;
+
+    case "GET_CACHE_STATUS":
+      event.waitUntil(
+        getCacheStatus().then(status => {
+          event.ports[0]?.postMessage(status);
         })
-        .then(() => {
-          console.log("Cache cleared successfully");
-        })
-        .catch(error => {
-          console.error("Error during cache cleanup:", error);
-        })
-    );
+      );
+      break;
+
+    default:
+      console.warn("Unknown message type:", event.data.type);
   }
 });
+
+// Helper function to clear all caches
+async function clearAllCaches() {
+  try {
+    const cacheNames = await caches.keys();
+    await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
+    console.log("All caches cleared successfully");
+  } catch (error) {
+    console.error("Error during cache cleanup:", error);
+  }
+}
+
+// Helper function to get cache status
+async function getCacheStatus() {
+  try {
+    const cacheNames = await caches.keys();
+    const status = {};
+
+    for (const cacheName of cacheNames) {
+      const cache = await caches.open(cacheName);
+      const keys = await cache.keys();
+      status[cacheName] = keys.length;
+    }
+
+    return status;
+  } catch (error) {
+    console.error("Error getting cache status:", error);
+    return { error: "Failed to get cache status" };
+  }
+}

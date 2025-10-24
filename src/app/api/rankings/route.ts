@@ -99,7 +99,27 @@ async function handleRankings(request: NextRequest) {
       timestamp: new Date(),
     });
 
-    const rankingsData = await getRankings(poolIdNum);
+    let rankingsData: Ranking[] = [];
+    try {
+      rankingsData = await getRankings(poolIdNum);
+    } catch (error) {
+      logger.error("RANKINGS_API_FETCH_ERROR", {
+        poolId: poolIdNum,
+        error: error instanceof Error ? error.message : "Unknown error",
+        timestamp: new Date(),
+      });
+
+      // Return empty array instead of throwing
+      return createOptimizedResponse(
+        {
+          rankings: [],
+          cached: false,
+          timestamp: Date.now(),
+          error: "Unable to fetch rankings data",
+        },
+        { cacheMaxAge: 60 } // Cache error for 1 minute
+      );
+    }
 
     // Cache the data
     rankingsCache.set(cacheKey, {

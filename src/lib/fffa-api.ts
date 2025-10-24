@@ -57,25 +57,42 @@ export type Ranking = {
 };
 
 async function api<T>(params: Record<string, string | string[]>): Promise<T> {
-  const url = new URL(
-    "/api/fffa/flag",
-    process.env.NEXT_PUBLIC_FLAGSCORE_ORIGIN ?? "http://localhost:3000"
-  );
-  Object.entries(params).forEach(([k, v]) => {
-    if (Array.isArray(v)) v.forEach(val => url.searchParams.append(k, val));
-    else url.searchParams.append(k, v);
-  });
+  try {
+    // Use relative URL for same-origin requests
+    const baseUrl = process.env.NEXT_PUBLIC_FLAGSCORE_ORIGIN || "";
+    const url = new URL(
+      "/api/fffa/flag",
+      baseUrl || (typeof window !== "undefined" ? window.location.origin : "")
+    );
 
-  const res = await fetch(url.toString(), { cache: "no-store" });
-  if (!res.ok) {
-    throw new Error(`FFFA API error ${res.status}`);
+    Object.entries(params).forEach(([k, v]) => {
+      if (Array.isArray(v)) v.forEach(val => url.searchParams.append(k, val));
+      else url.searchParams.append(k, v);
+    });
+
+    const res = await fetch(url.toString(), {
+      cache: "no-store",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error(`FFFA API error ${res.status}: ${res.statusText}`);
+    }
+
+    const ct = res.headers.get("content-type") || "";
+    if (!ct.includes("application/json")) {
+      const txt = await res.text();
+      throw new Error(`FFFA API non-JSON: ${txt.slice(0, 200)}`);
+    }
+
+    return res.json() as Promise<T>;
+  } catch (error) {
+    console.error("FFFA API Error:", error);
+    throw error;
   }
-  const ct = res.headers.get("content-type") || "";
-  if (!ct.includes("application/json")) {
-    const txt = await res.text();
-    throw new Error(`FFFA API non-JSON: ${txt.slice(0, 200)}`);
-  }
-  return res.json() as Promise<T>;
 }
 
 // ---- API ----

@@ -22,6 +22,8 @@ export const securityConfig = {
       "'self'",
       "https://api.example.com", // API FFFA
       "https://vitals.vercel-insights.com",
+      "https://flagscore.vercel.app", // Production domain
+      "https://flagscore.fr", // Production domain
     ],
     "frame-src": ["'none'"],
     "object-src": ["'none'"],
