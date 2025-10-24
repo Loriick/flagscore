@@ -12,8 +12,12 @@ export function ServiceWorkerManager({ children }: ServiceWorkerManagerProps) {
     useState<ServiceWorkerRegistration | null>(null);
   const [swError, setSwError] = useState<string | null>(null);
   const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [isDevelopment, setIsDevelopment] = useState(false);
 
   useEffect(() => {
+    // Set development mode after hydration
+    setIsDevelopment(process.env.NODE_ENV === "development");
+
     // Handle connectivity
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
@@ -117,14 +121,14 @@ export function ServiceWorkerManager({ children }: ServiceWorkerManagerProps) {
       )}
 
       {/* Service Worker error indicator */}
-      {swError && process.env.NODE_ENV === "development" && (
+      {swError && isDevelopment && (
         <div className="fixed top-12 left-0 right-0 bg-yellow-600 text-white text-center py-1 z-50">
           <span className="text-xs">⚠️ Service Worker Error: {swError}</span>
         </div>
       )}
 
       {/* Development buttons (only in development) */}
-      {process.env.NODE_ENV === "development" && (
+      {isDevelopment && (
         <div className="fixed bottom-4 right-4 space-x-2 z-50">
           <button
             onClick={updateServiceWorker}

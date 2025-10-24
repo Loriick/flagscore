@@ -6,7 +6,6 @@ import {
   createOptimizedResponse,
   createErrorResponse,
 } from "@/src/lib/compression";
-import { getRankings } from "@/src/lib/fffa-api";
 import logger from "@/src/lib/logger";
 import { withMonitoring } from "@/src/lib/monitoring";
 import {
@@ -101,7 +100,25 @@ async function handleRankings(request: NextRequest) {
 
     let rankingsData: Ranking[] = [];
     try {
-      rankingsData = await getRankings(poolIdNum);
+      // Call FFFA API directly instead of using getRankings to avoid internal API calls
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_FLAGSCORE_ORIGIN || "http://localhost:3000"}/api/fffa/flag?resource=rankings&args[]=${poolIdNum}`,
+        {
+          cache: "no-store",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `FFFA API error ${response.status}: ${response.statusText}`
+        );
+      }
+
+      rankingsData = await response.json();
     } catch (error) {
       logger.error("RANKINGS_API_FETCH_ERROR", {
         poolId: poolIdNum,
