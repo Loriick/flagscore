@@ -17,8 +17,8 @@ export function getBaseUrl(): string {
     return "http://localhost:3000";
   }
 
-  // Fallback to production domain
-  return "https://flagscore.fr";
+  // Fallback to Vercel domain
+  return "https://flagscore.vercel.app";
 }
 
 // Function to get the share image URL
