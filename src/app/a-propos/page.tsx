@@ -45,7 +45,7 @@ export default function About() {
                     FFFA (Fédération Française de Flag Football)
                   </a>
                   . Découvrez les résultats de toutes les équipes participantes
-                  et suivez l&apos;évolution du championnat en temps réel.
+                  et suivez l&apos;évolution du championnat.
                 </p>
               </div>
               <div>

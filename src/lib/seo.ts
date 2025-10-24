@@ -1,5 +1,32 @@
 import { Metadata } from "next";
 
+// Function to get the base URL dynamically based on environment
+export function getBaseUrl(): string {
+  // In production, use the production domain
+  if (process.env.NODE_ENV === "production" && process.env.VERCEL_URL) {
+    // If deployed on Vercel with custom domain
+    if (process.env.VERCEL_URL.includes("flagscore.fr")) {
+      return "https://flagscore.fr";
+    }
+    // If deployed on Vercel preview (vercel.app domain)
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  // For local development
+  if (process.env.NODE_ENV === "development") {
+    return "http://localhost:3000";
+  }
+
+  // Fallback to production domain
+  return "https://flagscore.fr";
+}
+
+// Function to get the share image URL
+export function getShareImageUrl(): string {
+  const baseUrl = getBaseUrl();
+  return `${baseUrl}/share-image.png`;
+}
+
 export interface SEOConfig {
   title: string;
   description: string;
@@ -16,10 +43,9 @@ export interface SEOConfig {
   structuredData?: Record<string, unknown>;
 }
 
-const baseUrl = "https://flagscore.fr";
 const siteName = "Flagscore";
 const defaultImage = {
-  url: "/flagscore-logo-removebg-preview.png",
+  url: "/share-image.png", // Relative URL - will be resolved by getBaseUrl()
   width: 1200,
   height: 630,
   alt: "Flagscore - Résultats Flag Football France",
@@ -34,37 +60,26 @@ export function generateMetadata(config: SEOConfig): Metadata {
     noindex = false,
     nofollow = false,
     image = defaultImage,
+    structuredData,
   } = config;
 
-  const fullTitle = title.includes(siteName) ? title : `${title} | ${siteName}`;
+  const baseUrl = getBaseUrl();
+  const fullTitle = `${title} | ${siteName}`;
   const canonicalUrl = canonical ? `${baseUrl}${canonical}` : baseUrl;
 
   return {
     title: fullTitle,
     description,
-    keywords: [
-      "flag football",
-      "championnat france",
-      "coupe france",
-      "résultats",
-      "scores",
-      "classements",
-      "sport",
-      "football américain",
-      "FFFA",
-      ...keywords,
-    ],
-    authors: [{ name: "Flagscore" }],
-    creator: "Flagscore",
-    publisher: "Flagscore",
-    formatDetection: {
-      email: false,
-      address: false,
-      telephone: false,
-    },
+    keywords: keywords.join(", "),
+    authors: [{ name: siteName, url: baseUrl }],
+    creator: siteName,
+    publisher: siteName,
     metadataBase: new URL(baseUrl),
     alternates: {
       canonical: canonicalUrl,
+      languages: {
+        "fr-FR": baseUrl,
+      },
     },
     openGraph: {
       type: "website",
@@ -73,14 +88,26 @@ export function generateMetadata(config: SEOConfig): Metadata {
       siteName,
       title: fullTitle,
       description,
-      images: [image],
+      images: [
+        {
+          url: image.url.startsWith("http")
+            ? image.url
+            : `${baseUrl}${image.url}`,
+          width: image.width,
+          height: image.height,
+          alt: image.alt,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: fullTitle,
       description,
-      images: [image.url],
+      images: [
+        image.url.startsWith("http") ? image.url : `${baseUrl}${image.url}`,
+      ],
       creator: "@flagscore",
+      site: "@flagscore",
     },
     robots: {
       index: !noindex,
@@ -94,17 +121,12 @@ export function generateMetadata(config: SEOConfig): Metadata {
       },
     },
     verification: {
-      google: process.env.GOOGLE_VERIFICATION_CODE,
-      yandex: process.env.YANDEX_VERIFICATION_CODE,
-      yahoo: process.env.YAHOO_VERIFICATION_CODE,
+      google: process.env.GOOGLE_SITE_VERIFICATION,
     },
-    category: "Sports",
-    classification: "Flag Football Results",
     other: {
-      "mobile-web-app-capable": "yes",
-      "apple-mobile-web-app-capable": "yes",
-      "apple-mobile-web-app-status-bar-style": "black-translucent",
+      "msapplication-TileColor": "#000000",
       "theme-color": "#000000",
+      ...(structuredData || {}),
     },
   };
 }
@@ -114,7 +136,7 @@ export const pageMetadata = {
   home: generateMetadata({
     title: "Accueil",
     description:
-      "Consultez tous les résultats du championnat de France de flag football et de la coupe de France. Scores en temps réel, classements par poule et statistiques détaillées des équipes.",
+      "Consultez tous les résultats du championnat de France de flag football et de la coupe de France. Classements par poule et résultats des matchs.",
     keywords: [
       "flag football france",
       "championnat flag football",
@@ -131,12 +153,12 @@ export const pageMetadata = {
   rankings: generateMetadata({
     title: "Classements",
     description:
-      "Consultez les classements officiels du championnat de France de flag football et de la coupe de France. Classements par poule avec statistiques détaillées des équipes.",
+      "Consultez les classements officiels du championnat de France de flag football et de la coupe de France. Classements par poule avec résultats des équipes.",
     keywords: [
       "classements flag football",
       "classement championnat france",
       "classement coupe france",
-      "statistiques équipes",
+      "résultats équipes",
       "points équipes",
       "victoires défaites",
     ],
@@ -144,28 +166,26 @@ export const pageMetadata = {
   }),
 
   about: generateMetadata({
-    title: "À propos",
+    title: "À Propos",
     description:
-      "Découvrez Flagscore, la plateforme officielle des résultats du flag football en France. Informations sur le championnat, la coupe de France et la FFFA.",
+      "Découvrez Flagscore, une application dédiée au flag football, offrant des résultats, des classements et des informations pour les championnats et coupes de France.",
     keywords: [
-      "à propos flagscore",
+      "flagscore",
+      "à propos",
       "flag football france",
-      "FFFA",
-      "fédération française flag football",
-      "championnat france",
+      "championnat",
       "coupe france",
-      "histoire flag football",
+      "FFFA",
     ],
     canonical: "/a-propos",
   }),
 
   monitoring: generateMetadata({
     title: "Monitoring",
-    description:
-      "Tableau de bord de monitoring et métriques de performance de Flagscore.",
+    description: "Page de monitoring de l'application Flagscore.",
     keywords: ["monitoring", "métriques", "performance", "statistiques"],
     canonical: "/monitoring",
-    noindex: true, // Ne pas indexer les pages de monitoring
+    noindex: true, // Do not index monitoring pages
   }),
 };
 
@@ -177,68 +197,37 @@ export const structuredData = {
     name: "Flagscore",
     description:
       "Plateforme officielle des résultats du flag football en France",
-    url: "https://flagscore.fr",
-    logo: "https://flagscore.fr/flagscore-logo-removebg-preview.png",
+    url: getBaseUrl(),
+    logo: getShareImageUrl(),
     sameAs: ["https://twitter.com/flagscore", "https://facebook.com/flagscore"],
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "customer service",
       email: "contact@flagscore.fr",
+      availableLanguage: "French",
     },
   },
-
   website: {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "Flagscore",
-    description:
-      "Résultats du championnat de France de flag football et de la coupe de France",
-    url: "https://flagscore.fr",
+    url: getBaseUrl(),
     potentialAction: {
       "@type": "SearchAction",
-      target: "https://flagscore.fr/search?q={search_term_string}",
+      target: `${getBaseUrl()}/search?q={search_term_string}`,
       "query-input": "required name=search_term_string",
     },
-    publisher: {
-      "@type": "Organization",
-      name: "Flagscore",
-      url: "https://flagscore.fr",
-    },
   },
-
-  breadcrumb: (items: Array<{ name: string; url: string }>) => ({
+  breadcrumb: {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: items.map((item, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      name: item.name,
-      item: `${baseUrl}${item.url}`,
-    })),
-  }),
-
-  sportsEvent: (event: {
-    name: string;
-    description: string;
-    startDate: string;
-    endDate: string;
-    location: string;
-  }) => ({
-    "@context": "https://schema.org",
-    "@type": "SportsEvent",
-    name: event.name,
-    description: event.description,
-    startDate: event.startDate,
-    endDate: event.endDate,
-    location: {
-      "@type": "Place",
-      name: event.location,
-    },
-    sport: "Flag Football",
-    organizer: {
-      "@type": "Organization",
-      name: "FFFA",
-      url: "https://fffa.fr",
-    },
-  }),
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Accueil",
+        item: getBaseUrl(),
+      },
+    ],
+  },
 };

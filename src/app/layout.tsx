@@ -10,7 +10,7 @@ import { PerformanceMonitor } from "../components/PerformanceMonitor";
 import { PreloadManager } from "../components/PreloadManager";
 import { QueryProvider } from "../components/QueryProvider";
 import { ServiceWorkerManager } from "../components/ServiceWorkerManager";
-import { structuredData } from "../lib/seo";
+import { getBaseUrl, getShareImageUrl, structuredData } from "../lib/seo";
 
 import { Toaster } from "@/components/ui/sonner";
 
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     template: "%s | Flagscore",
   },
   description:
-    "Découvrez tous les résultats du championnat de France de flag football et de la coupe de France. Scores en temps réel, classements et statistiques des équipes.",
+    "Découvrez tous les résultats du championnat de France de flag football et de la coupe de France. Classements et résultats des matchs.",
   keywords: [
     "flag football",
     "championnat france",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     "sport français",
     "compétition sportive",
   ],
-  authors: [{ name: "Flagscore", url: "https://flagscore.fr" }],
+  authors: [{ name: "Flagscore", url: getBaseUrl() }],
   creator: "Flagscore",
   publisher: "Flagscore",
   formatDetection: {
@@ -55,24 +55,24 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL("https://flagscore.fr"),
+  metadataBase: new URL(getBaseUrl()),
   alternates: {
     canonical: "/",
     languages: {
-      "fr-FR": "https://flagscore.fr",
+      "fr-FR": getBaseUrl(),
     },
   },
   openGraph: {
     type: "website",
     locale: "fr_FR",
-    url: "https://flagscore.fr",
+    url: getBaseUrl(),
     siteName: "Flagscore",
     title: "Flagscore - Résultats Flag Football France",
     description:
-      "Découvrez tous les résultats du championnat de France de flag football et de la coupe de France. Scores en temps réel, classements et statistiques des équipes.",
+      "Découvrez tous les résultats du championnat de France de flag football et de la coupe de France. Classements et résultats des matchs.",
     images: [
       {
-        url: "/flagscore-logo-removebg-preview.png",
+        url: getShareImageUrl(),
         width: 1200,
         height: 630,
         alt: "Flagscore - Résultats Flag Football France",
@@ -85,7 +85,7 @@ export const metadata: Metadata = {
     title: "Flagscore - Résultats Flag Football France",
     description:
       "Découvrez tous les résultats du championnat de France de flag football et de la coupe de France.",
-    images: ["/flagscore-logo-removebg-preview.png"],
+    images: [getShareImageUrl()],
     creator: "@flagscore",
     site: "@flagscore",
   },

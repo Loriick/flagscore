@@ -15,8 +15,7 @@ export default function Home() {
           </h1>
           <p className="text-lg text-white/80 mb-6">
             Consultez tous les résultats du championnat de France de flag
-            football et de la coupe de France. Scores en temps réel, classements
-            par poule et statistiques détaillées des équipes.
+            football et de la coupe de France. Classements par poule et résultats des matchs.
           </p>
         </header>
 
