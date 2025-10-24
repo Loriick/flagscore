@@ -18,6 +18,8 @@
     "format:check": "prettier --check .",
     "audit": "pnpm audit --audit-level moderate",
     "audit:fix": "pnpm audit --fix",
+    "analyze": "ANALYZE=true next build",
+    "postbuild": "next-sitemap",
     "clean": "rm -rf .next out node_modules/.cache",
     "prepare": "husky"
   },

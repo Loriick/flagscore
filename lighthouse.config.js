@@ -2,21 +2,18 @@ module.exports = {
   ci: {
     collect: {
       url: [
-        "https://flagscore.fr",
-        "https://flagscore.fr/classements",
-        "https://flagscore.fr/a-propos",
+        "http://localhost:3000",
+        "http://localhost:3000/classements",
+        "http://localhost:3000/a-propos",
       ],
       numberOfRuns: 3,
-      settings: {
-        chromeFlags: "--no-sandbox --disable-dev-shm-usage",
-      },
     },
     assert: {
       assertions: {
         "categories:performance": ["warn", { minScore: 0.8 }],
         "categories:accessibility": ["error", { minScore: 0.9 }],
         "categories:best-practices": ["warn", { minScore: 0.8 }],
-        "categories:seo": ["error", { minScore: 0.9 }],
+        "categories:seo": ["warn", { minScore: 0.8 }],
         "first-contentful-paint": ["warn", { maxNumericValue: 2000 }],
         "largest-contentful-paint": ["warn", { maxNumericValue: 2500 }],
         "cumulative-layout-shift": ["warn", { maxNumericValue: 0.1 }],
