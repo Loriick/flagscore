@@ -3,7 +3,7 @@ import { memo } from "react";
 import { Day } from "../../app/types";
 import { DayButton } from "../molecules/DayButton";
 
-// Import de cn pour éviter l'erreur
+// Import cn to avoid error
 import { cn } from "@/lib/utils";
 
 interface DaysNavigationProps {

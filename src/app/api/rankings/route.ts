@@ -10,16 +10,16 @@ import {
   isRateLimited,
 } from "@/src/lib/rate-limit";
 
-// Cache des classements (5 minutes)
+// Cache for rankings (5 minutes)
 const rankingsCache = new Map<string, { data: any[]; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-// Rate limiting pour les classements
+// Rate limiting for rankings
 const rateLimit = createRateLimit(rateLimitConfigs.dataApi);
 
 async function handleRankings(request: NextRequest) {
   try {
-    // Vérifier le rate limiting
+    // Check rate limiting
     const rateLimitResult = rateLimit(request);
     if (isRateLimited(rateLimitResult)) {
       logger.warn("RANKINGS_API_RATE_LIMITED", {
@@ -61,7 +61,7 @@ async function handleRankings(request: NextRequest) {
       );
     }
 
-    // Vérifier le cache
+    // Check cache
     const cacheKey = `rankings-${poolId}`;
     const cached = rankingsCache.get(cacheKey);
 
@@ -77,7 +77,7 @@ async function handleRankings(request: NextRequest) {
         timestamp: cached.timestamp,
       });
 
-      // Ajouter les headers de rate limiting
+      // Add rate limiting headers
       Object.entries(getRateLimitHeaders(rateLimitResult)).forEach(
         ([key, value]) => {
           response.headers.set(key, value);
@@ -87,7 +87,7 @@ async function handleRankings(request: NextRequest) {
       return response;
     }
 
-    // Récupérer les données fraîches
+    // Get fresh data
     logger.info("RANKINGS_API_FETCH_START", {
       poolId: poolIdNum,
       timestamp: new Date(),
@@ -95,7 +95,7 @@ async function handleRankings(request: NextRequest) {
 
     const rankingsData = await getRankings(poolIdNum);
 
-    // Mettre en cache
+    // Cache the data
     rankingsCache.set(cacheKey, {
       data: rankingsData,
       timestamp: Date.now(),
@@ -113,7 +113,7 @@ async function handleRankings(request: NextRequest) {
       timestamp: Date.now(),
     });
 
-    // Ajouter les headers de rate limiting
+    // Add rate limiting headers
     Object.entries(getRateLimitHeaders(rateLimitResult)).forEach(
       ([key, value]) => {
         response.headers.set(key, value);

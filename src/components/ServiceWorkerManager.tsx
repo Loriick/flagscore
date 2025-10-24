@@ -12,7 +12,7 @@ export function ServiceWorkerManager({ children }: ServiceWorkerManagerProps) {
     useState<ServiceWorkerRegistration | null>(null);
 
   useEffect(() => {
-    // Gérer la connectivité
+    // Handle connectivity
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
@@ -31,7 +31,7 @@ export function ServiceWorkerManager({ children }: ServiceWorkerManagerProps) {
           console.error("Erreur d'enregistrement du Service Worker:", error);
         });
 
-      // Écouter les mises à jour
+      // Listen for updates
       navigator.serviceWorker.addEventListener("controllerchange", () => {
         window.location.reload();
       });
@@ -43,14 +43,14 @@ export function ServiceWorkerManager({ children }: ServiceWorkerManagerProps) {
     };
   }, []);
 
-  // Fonction pour mettre à jour le service worker
+  // Function to update the service worker
   const updateServiceWorker = () => {
     if (swRegistration) {
       swRegistration.update();
     }
   };
 
-  // Fonction pour vider le cache
+  // Function to clear the cache
   const clearCache = () => {
     if (swRegistration && swRegistration.active) {
       swRegistration.active.postMessage({ type: "CLEAR_CACHE" });
@@ -61,7 +61,7 @@ export function ServiceWorkerManager({ children }: ServiceWorkerManagerProps) {
     <>
       {children}
 
-      {/* Indicateur de statut hors ligne */}
+      {/* Offline status indicator */}
       {!isOnline && (
         <div className="fixed top-0 left-0 right-0 bg-red-600 text-white text-center py-2 z-50">
           <span className="text-sm font-medium">
@@ -70,7 +70,7 @@ export function ServiceWorkerManager({ children }: ServiceWorkerManagerProps) {
         </div>
       )}
 
-      {/* Boutons de développement (seulement en développement) */}
+      {/* Development buttons (only in development) */}
       {process.env.NODE_ENV === "development" && (
         <div className="fixed bottom-4 right-4 space-x-2 z-50">
           <button

@@ -94,7 +94,7 @@ export async function getChampionships(season: number) {
     allowedNames.some(name => championship.label.includes(name))
   );
 
-  // Garder la Qualification en priorité, sinon D1, sinon la première occurrence de "Championnat de France mixte"
+  // Keep Qualification as priority, otherwise D1, otherwise first occurrence of "Championnat de France mixte"
   const mixteChampionship =
     filteredChampionships.find(championship =>
       championship.label.includes("Championnat de France mixte - Qualification")
@@ -110,7 +110,7 @@ export async function getChampionships(season: number) {
     championship.label.includes("Coupe de France")
   );
 
-  // Retourner la première occurrence de mixte + toutes les coupes
+  // Return first occurrence of mixte + all cups
   const result = [];
   if (mixteChampionship) result.push(mixteChampionship);
   result.push(...coupeChampionships);

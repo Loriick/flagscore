@@ -9,12 +9,12 @@ export function useAppDataSimple() {
   const [selectedPoolId, setSelectedPoolId] = useState(0);
   const [selectedDayId, setSelectedDayId] = useState(0);
 
-  // États de chargement spécifiques pour chaque changement
+  // Specific loading states for each change
   const [isChangingPool, setIsChangingPool] = useState(false);
   const [isChangingDay, setIsChangingDay] = useState(false);
   const [hasInitialData, setHasInitialData] = useState(false);
 
-  // Données initiales (championnats + poules) avec gestion d'erreur
+  // Initial data (championships + pools) with error handling
   let initialData, initialLoading, initialError;
   try {
     const result = useCompleteData(currentSeason, selectedChampionshipId, 0);
@@ -31,7 +31,7 @@ export function useAppDataSimple() {
   const championships = initialData?.championships || [];
   const pools = initialData?.pools || [];
 
-  // Utiliser les IDs sélectionnés par l'API si pas de sélection manuelle
+  // Use IDs selected by API if no manual selection
   const effectiveChampionshipId =
     selectedChampionshipId > 0
       ? selectedChampionshipId
@@ -39,7 +39,7 @@ export function useAppDataSimple() {
   const effectivePoolId =
     selectedPoolId > 0 ? selectedPoolId : initialData?.selectedPoolId || 0;
 
-  // Données de poule spécifiques (jours + matchs) avec gestion d'erreur
+  // Pool-specific data (days + matches) with error handling
   let poolData, poolLoading, poolError;
   try {
     const result = usePoolData(effectivePoolId, selectedDayId);
@@ -86,14 +86,14 @@ export function useAppDataSimple() {
     setSelectedDayId(id);
   }, []);
 
-  // Marquer qu'on a des données initiales
+  // Mark that we have initial data
   useEffect(() => {
     if (!initialLoading && championships.length > 0 && pools.length > 0) {
       setHasInitialData(true);
     }
   }, [initialLoading, championships.length, pools.length]);
 
-  // Désactiver les états de changement quand les données arrivent
+  // Disable change states when data arrives
   useEffect(() => {
     if (isChangingPool && days.length > 0) {
       setIsChangingPool(false);
@@ -107,20 +107,20 @@ export function useAppDataSimple() {
   }, [isChangingDay, matches.length]);
 
   return {
-    // État
+    // State
     currentSeason,
     selectedChampionshipId: effectiveChampionshipId,
     selectedPoolId: effectivePoolId,
     selectedDayId: effectiveDayId,
 
-    // Données
+    // Data
     championships,
     pools,
     days,
     matches,
-    rankings: [], // Pas encore implémenté
+    rankings: [], // Not implemented yet
 
-    // États de chargement
+    // Loading states
     loading: {
       championships: initialLoading,
       pools: initialLoading,
@@ -129,7 +129,7 @@ export function useAppDataSimple() {
       rankings: false,
     },
     initialLoading: initialLoading && !hasInitialData,
-    poolsAreLoading: false, // Plus nécessaire
+    poolsAreLoading: false, // Not necessary
     poolChangeLoading: isChangingPool || poolLoading,
     dayChangeLoading: isChangingDay || poolLoading,
     hasData:
@@ -139,10 +139,10 @@ export function useAppDataSimple() {
       days.length > 0,
     hasPools: !initialLoading && championships.length > 0 && pools.length > 0,
 
-    // Erreurs
+    // Errors
     errors: {
       championships: (initialError as Error)?.message || null,
-      pools: null, // Pas d'erreur spécifique pour les poules
+      pools: null, // No specific error for pools
       days: (poolError as Error)?.message || null,
       matches: (poolError as Error)?.message || null,
       rankings: null,
@@ -154,10 +154,10 @@ export function useAppDataSimple() {
     handlePoolChange,
     handleDayChange,
 
-    // Utilitaires
+    // Utilities
     refetch: () => {
-      // Refetch des données initiales et de poule
-      // Note: React Query gère automatiquement le refetch
+      // Refetch initial data and pool
+      // Note: React Query automatically handles the refetch
     },
   };
 }

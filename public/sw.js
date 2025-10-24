@@ -1,34 +1,41 @@
-// Service Worker pour la mise en cache des ressources
+// Service Worker for caching resources
 const STATIC_CACHE_NAME = "flagscore-static-v1";
 const DYNAMIC_CACHE_NAME = "flagscore-dynamic-v1";
 
-// Ressources à mettre en cache statiquement
-const STATIC_ASSETS = [
-  "/",
-  "/404.png",
-  "/flagscore-logo-removebg-preview.png",
-  "/manifest.json",
-  "/robots.txt",
-  "/sitemap.xml",
-];
+// Utility function to safely clone a response
+function safeCloneResponse(response) {
+  try {
+    return response.clone();
+  } catch (error) {
+    console.warn("Unable to clone response:", error);
+    return null;
+  }
+}
 
-// Installer le service worker
+// Resources to cache statically
+const STATIC_ASSETS = ["/", "/404.png", "/flagscore-logo-removebg-preview.png"];
+
+// Install service worker
 self.addEventListener("install", event => {
   event.waitUntil(
     Promise.all([
       caches.open(STATIC_CACHE_NAME).then(cache => {
-        return cache.addAll(STATIC_ASSETS);
+        return cache.addAll(STATIC_ASSETS).catch(error => {
+          console.warn("Error during caching:", error);
+          // Continue even if some files cannot be cached
+          return Promise.resolve();
+        });
       }),
       self.skipWaiting(),
     ])
   );
 });
 
-// Activer le service worker
+// Activate service worker
 self.addEventListener("activate", event => {
   event.waitUntil(
     Promise.all([
-      // Nettoyer les anciens caches
+      // Clean up old caches
       caches.keys().then(cacheNames => {
         return Promise.all(
           cacheNames.map(cacheName => {
@@ -46,32 +53,32 @@ self.addEventListener("activate", event => {
   );
 });
 
-// Intercepter les requêtes
+// Intercept requests
 self.addEventListener("fetch", event => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Ignorer les requêtes non-HTTP
+  // Ignore non-HTTP requests
   if (!url.protocol.startsWith("http")) {
     return;
   }
 
-  // Stratégie de cache selon le type de ressource
+  // Cache strategy based on resource type
   if (request.method === "GET") {
     if (isStaticAsset(url.pathname)) {
-      // Cache First pour les assets statiques
+      // Cache First for static assets
       event.respondWith(cacheFirst(request, STATIC_CACHE_NAME));
     } else if (isDynamicAsset(url.pathname)) {
-      // Stale While Revalidate pour les assets dynamiques
+      // Stale While Revalidate for dynamic assets
       event.respondWith(staleWhileRevalidate(request, DYNAMIC_CACHE_NAME));
     } else if (isApiRequest(url.pathname)) {
-      // Network First pour les API
+      // Network First for APIs
       event.respondWith(networkFirst(request, DYNAMIC_CACHE_NAME));
     }
   }
 });
 
-// Stratégie Cache First
+// Cache First strategy
 async function cacheFirst(request, cacheName) {
   const cachedResponse = await caches.match(request);
   if (cachedResponse) {
@@ -82,24 +89,30 @@ async function cacheFirst(request, cacheName) {
     const networkResponse = await fetch(request);
     if (networkResponse.ok) {
       const cache = await caches.open(cacheName);
-      cache.put(request, networkResponse.clone());
+      const clonedResponse = safeCloneResponse(networkResponse);
+      if (clonedResponse) {
+        await cache.put(request, clonedResponse);
+      }
     }
     return networkResponse;
   } catch {
-    // Retourner une page d'erreur si disponible
+    // Return error page if available
     const errorResponse = await caches.match("/404.png");
     return errorResponse || new Response("Offline", { status: 503 });
   }
 }
 
-// Stratégie Stale While Revalidate
+// Stale While Revalidate strategy
 async function staleWhileRevalidate(request, cacheName) {
   const cachedResponse = await caches.match(request);
 
-  const fetchPromise = fetch(request).then(networkResponse => {
+  const fetchPromise = fetch(request).then(async networkResponse => {
     if (networkResponse.ok) {
-      const cache = caches.open(cacheName);
-      cache.then(c => c.put(request, networkResponse.clone()));
+      const cache = await caches.open(cacheName);
+      const clonedResponse = safeCloneResponse(networkResponse);
+      if (clonedResponse) {
+        await cache.put(request, clonedResponse);
+      }
     }
     return networkResponse;
   });
@@ -107,13 +120,16 @@ async function staleWhileRevalidate(request, cacheName) {
   return cachedResponse || fetchPromise;
 }
 
-// Stratégie Network First
+// Network First strategy
 async function networkFirst(request, cacheName) {
   try {
     const networkResponse = await fetch(request);
     if (networkResponse.ok) {
       const cache = await caches.open(cacheName);
-      cache.put(request, networkResponse.clone());
+      const clonedResponse = safeCloneResponse(networkResponse);
+      if (clonedResponse) {
+        await cache.put(request, clonedResponse);
+      }
     }
     return networkResponse;
   } catch {
@@ -122,7 +138,7 @@ async function networkFirst(request, cacheName) {
   }
 }
 
-// Vérifier si c'est un asset statique
+// Check if it's a static asset
 function isStaticAsset(pathname) {
   return (
     pathname.endsWith(".png") ||
@@ -140,17 +156,17 @@ function isStaticAsset(pathname) {
   );
 }
 
-// Vérifier si c'est un asset dynamique
+// Check if it's a dynamic asset
 function isDynamicAsset(pathname) {
   return pathname.startsWith("/_next/");
 }
 
-// Vérifier si c'est une requête API
+// Check if it's an API request
 function isApiRequest(pathname) {
   return pathname.startsWith("/api/");
 }
 
-// Message handler pour la communication avec l'app
+// Message handler for communication with the app
 self.addEventListener("message", event => {
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
@@ -158,11 +174,19 @@ self.addEventListener("message", event => {
 
   if (event.data && event.data.type === "CLEAR_CACHE") {
     event.waitUntil(
-      caches.keys().then(cacheNames => {
-        return Promise.all(
-          cacheNames.map(cacheName => caches.delete(cacheName))
-        );
-      })
+      caches
+        .keys()
+        .then(cacheNames => {
+          return Promise.all(
+            cacheNames.map(cacheName => caches.delete(cacheName))
+          );
+        })
+        .then(() => {
+          console.log("Cache cleared successfully");
+        })
+        .catch(error => {
+          console.error("Error during cache cleanup:", error);
+        })
     );
   }
 });

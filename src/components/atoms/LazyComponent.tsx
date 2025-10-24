@@ -7,7 +7,7 @@ interface LazyComponentProps {
   className?: string;
 }
 
-// Composant de lazy loading générique
+// Generic lazy loading component
 export function createLazyComponent<T extends object>(
   importFunc: () => Promise<{ default: ComponentType<T> }>,
   fallback?: React.ReactNode
@@ -35,13 +35,3 @@ export function createLazyComponent<T extends object>(
     );
   });
 }
-
-// Composants lazy spécifiques - Temporairement désactivés pour éviter les problèmes de types
-// export const LazyMatchesList = lazy(() => import("../organisms/MatchesList"));
-// export const LazyDaysNavigation = lazy(
-//   () => import("../organisms/DaysNavigation")
-// );
-// export const LazyChampionshipSelector = lazy(
-//   () => import("../ChampionshipSelector")
-// );
-// export const LazyPoolSelector = lazy(() => import("../PoolSelector"));

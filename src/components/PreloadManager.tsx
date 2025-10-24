@@ -12,7 +12,7 @@ export function PreloadManager({ children }: PreloadManagerProps) {
   const preloadedRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    // Précharger les routes importantes
+    // Preload important routes
     const importantRoutes = ["/classements", "/a-propos"];
 
     const preloadRoute = (route: string) => {
@@ -22,7 +22,7 @@ export function PreloadManager({ children }: PreloadManagerProps) {
       }
     };
 
-    // Précharger après un délai pour ne pas impacter le chargement initial
+    // Preload after a delay to not impact initial loading
     const timeoutId = setTimeout(() => {
       importantRoutes.forEach(preloadRoute);
     }, 2000);
@@ -30,17 +30,17 @@ export function PreloadManager({ children }: PreloadManagerProps) {
     return () => clearTimeout(timeoutId);
   }, [router]);
 
-  // Précharger les données API importantes
+  // Preload important API data
   useEffect(() => {
     const preloadApiData = async () => {
       try {
-        // Précharger les données de base
+        // Preload basic data
         const apiEndpoints = [
           "/api/rankings?poolId=1",
           "/api/matches?poolId=1",
         ];
 
-        // Utiliser fetch avec cache pour précharger
+        // Use fetch with cache to preload
         await Promise.allSettled(
           apiEndpoints.map(endpoint =>
             fetch(endpoint, {
@@ -54,7 +54,7 @@ export function PreloadManager({ children }: PreloadManagerProps) {
       }
     };
 
-    // Précharger après le chargement initial
+    // Preload after initial loading
     const timeoutId = setTimeout(preloadApiData, 3000);
 
     return () => clearTimeout(timeoutId);
@@ -63,7 +63,7 @@ export function PreloadManager({ children }: PreloadManagerProps) {
   return <>{children}</>;
 }
 
-// Hook pour précharger des données spécifiques
+// Hook to preload specific data
 export function usePreloadData() {
   const preloadedRef = useRef<Set<string>>(new Set());
 

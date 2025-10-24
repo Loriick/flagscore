@@ -106,11 +106,7 @@ export const metadata: Metadata = {
     yahoo: process.env.YAHOO_VERIFICATION_CODE,
   },
   icons: {
-    icon: [
-      { url: "/favicon.ico?v=3", sizes: "any" },
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-    ],
+    icon: [{ url: "/favicon.ico?v=3", sizes: "any" }],
     shortcut: "/favicon.ico?v=3",
     apple: [
       { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
@@ -144,7 +140,7 @@ export default function RootLayout({
   return (
     <html lang="fr" className="dark bg-black">
       <head>
-        {/* Données structurées globales */}
+        {/* Global structured data */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -158,7 +154,7 @@ export default function RootLayout({
           }}
         />
 
-        {/* Preconnect pour les performances */}
+        {/* Preconnect for performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -166,7 +162,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
 
-        {/* DNS prefetch pour les domaines externes */}
+        {/* DNS prefetch for external domains */}
         <link rel="dns-prefetch" href="https://api.example.com" />
         <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
       </head>
@@ -182,8 +178,13 @@ export default function RootLayout({
                   <main className="min-h-screen bg-black">{children}</main>
                   <Footer />
                   <Toaster />
-                  <Analytics />
-                  <SpeedInsights />
+                  {process.env.NODE_ENV === "production" &&
+                    process.env.VERCEL_ANALYTICS_ID && (
+                      <>
+                        <Analytics />
+                        <SpeedInsights />
+                      </>
+                    )}
                 </ErrorBoundary>
               </PerformanceMonitor>
             </PreloadManager>

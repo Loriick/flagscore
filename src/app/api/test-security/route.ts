@@ -12,7 +12,7 @@ const rateLimit = createRateLimit(rateLimitConfigs.strict);
 
 export async function GET(request: NextRequest) {
   try {
-    // Vérifier le rate limiting
+    // Check rate limiting
     const rateLimitResult = rateLimit(request);
     if (isRateLimited(rateLimitResult)) {
       return NextResponse.json(

@@ -10,7 +10,7 @@ interface QueryProviderProps {
 }
 
 export function QueryProvider({ children }: QueryProviderProps) {
-  // Créer le QueryClient côté client
+  // Create QueryClient on client side
   const [client] = useState(() => queryClient);
 
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;

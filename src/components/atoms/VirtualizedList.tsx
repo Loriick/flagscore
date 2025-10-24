@@ -6,7 +6,7 @@ interface VirtualizedListProps<T> {
   containerHeight: number;
   renderItem: (item: T, index: number) => React.ReactNode;
   className?: string;
-  overscan?: number; // Nombre d'éléments à rendre en plus pour le scroll fluide
+  overscan?: number; // Number of elements to render extra for smooth scrolling
 }
 
 export const VirtualizedList = memo(function VirtualizedList<T>({
@@ -20,7 +20,7 @@ export const VirtualizedList = memo(function VirtualizedList<T>({
   const [scrollTop, setScrollTop] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Calculer les éléments visibles
+  // Calculate visible elements
   const visibleItems = useMemo(() => {
     const startIndex = Math.floor(scrollTop / itemHeight);
     const endIndex = Math.min(
@@ -38,12 +38,12 @@ export const VirtualizedList = memo(function VirtualizedList<T>({
     };
   }, [items, itemHeight, containerHeight, scrollTop, overscan]);
 
-  // Gérer le scroll
+  // Handle scroll
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     setScrollTop(e.currentTarget.scrollTop);
   };
 
-  // Calculer la hauteur totale et l'offset
+  // Calculate total height and offset
   const totalHeight = items.length * itemHeight;
   const offsetY = visibleItems.startIndex * itemHeight;
 
@@ -82,7 +82,7 @@ export const VirtualizedList = memo(function VirtualizedList<T>({
   );
 });
 
-// Hook pour calculer automatiquement la hauteur des éléments
+// Hook to automatically calculate element height
 export function useVirtualization(items: any[], itemHeight: number) {
   const [containerHeight, setContainerHeight] = useState(400);
   const containerRef = useRef<HTMLDivElement>(null);

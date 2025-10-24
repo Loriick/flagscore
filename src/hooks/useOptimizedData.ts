@@ -26,10 +26,10 @@ export function useOptimizedData<T>({
     ttl: cacheTtl,
   });
 
-  // Debouncer pour éviter trop de requêtes
+  // Debouncer to avoid too many requests
   const debouncedFetch = useDebounce(fetchFn, { delay: debounceMs });
 
-  // Fonction pour récupérer les données
+  // Function to fetch data
   const loadData = useCallback(
     async (forceRefresh = false) => {
       if (!enabled) return;
@@ -38,7 +38,7 @@ export function useOptimizedData<T>({
       setError(null);
 
       try {
-        // Essayer d'abord le cache
+        // Try cache first
         if (!forceRefresh) {
           const cachedData = getCachedData();
           if (cachedData) {
@@ -48,7 +48,7 @@ export function useOptimizedData<T>({
           }
         }
 
-        // Récupérer les données avec mise en cache
+        // Fetch data with caching
         const result = await fetchData(debouncedFetch, forceRefresh);
         setData(result);
         return result;
@@ -64,24 +64,24 @@ export function useOptimizedData<T>({
     [enabled, fetchData, getCachedData, debouncedFetch]
   );
 
-  // Charger les données au montage
+  // Load data on mount
   useEffect(() => {
     if (enabled) {
       loadData();
     }
   }, [enabled, loadData]);
 
-  // Fonction pour rafraîchir les données
+  // Function to refresh data
   const refresh = useCallback(() => {
     return loadData(true);
   }, [loadData]);
 
-  // Fonction pour invalider le cache
+  // Function to invalidate cache
   const invalidate = useCallback(() => {
     setData(null);
   }, []);
 
-  // État calculé
+  // Calculated state
   const isInitialLoading = isLoading && !data;
   const isRefreshing = isLoading && !!data;
 
@@ -96,7 +96,7 @@ export function useOptimizedData<T>({
   };
 }
 
-// Hook spécialisé pour les données de matchs
+// Hook specialized for matches data
 export function useOptimizedMatches(poolId: number) {
   return useOptimizedData({
     cacheKey: `matches-${poolId}`,
@@ -108,12 +108,12 @@ export function useOptimizedMatches(poolId: number) {
       return response.json();
     },
     debounceMs: 500,
-    cacheTtl: 2 * 60 * 1000, // 2 minutes pour les matchs
+    cacheTtl: 2 * 60 * 1000, // 2 minutes for matches
     enabled: poolId > 0,
   });
 }
 
-// Hook spécialisé pour les classements
+// Hook specialized for rankings
 export function useOptimizedRankings(poolId: number) {
   return useOptimizedData({
     cacheKey: `rankings-${poolId}`,
@@ -125,7 +125,7 @@ export function useOptimizedRankings(poolId: number) {
       return response.json();
     },
     debounceMs: 300,
-    cacheTtl: 5 * 60 * 1000, // 5 minutes pour les classements
+    cacheTtl: 5 * 60 * 1000, // 5 minutes for rankings
     enabled: poolId > 0,
   });
 }

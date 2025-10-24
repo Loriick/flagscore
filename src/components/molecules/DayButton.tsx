@@ -3,7 +3,7 @@ import { memo } from "react";
 import { Badge } from "../atoms/Badge";
 import { Button } from "../atoms/Button";
 
-// Import de cn pour éviter l'erreur
+// Import cn to avoid error
 import { cn } from "@/lib/utils";
 
 interface DayButtonProps {

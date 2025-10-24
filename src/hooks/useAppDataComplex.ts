@@ -28,7 +28,7 @@ export function useAppData() {
     resetAfterChampionshipChange,
   } = useAppActions();
 
-  // Actions des données
+  // Data actions
   const {
     setChampionships,
     setPools,
@@ -69,7 +69,7 @@ export function useAppData() {
 
   const fetchedRankings = rankingsData?.rankings || [];
 
-  // Synchronisation des données avec les stores
+  // Data synchronization with stores
   useEffect(() => {
     if (fetchedChampionships.length > 0) {
       setChampionships(currentSeason, fetchedChampionships);
@@ -100,7 +100,7 @@ export function useAppData() {
     }
   }, [fetchedRankings, selectedPoolId, setRankings]);
 
-  // Synchronisation des états de chargement
+  // Loading states synchronization
   useEffect(() => {
     setLoading("championships", championshipsLoading);
   }, [championshipsLoading, setLoading]);

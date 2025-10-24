@@ -16,7 +16,7 @@ export function StructuredData({ data }: StructuredDataProps) {
     // Ajouter au head
     document.head.appendChild(script);
 
-    // Nettoyer lors du démontage
+    // Clean up on unmount
     return () => {
       const existingScript = document.getElementById(script.id);
       if (existingScript) {
@@ -28,7 +28,7 @@ export function StructuredData({ data }: StructuredDataProps) {
   return null; // Ce composant ne rend rien visuellement
 }
 
-// Composant pour les données structurées de match
+// Component for match structured data
 export function MatchStructuredData({
   match,
   homeTeam,
@@ -67,7 +67,7 @@ export function MatchStructuredData({
   return <StructuredData data={structuredData} />;
 }
 
-// Composant pour les données structurées de classement
+// Component for ranking structured data
 export function RankingStructuredData({
   rankings,
   poolName,
@@ -97,7 +97,7 @@ export function RankingStructuredData({
   return <StructuredData data={structuredData} />;
 }
 
-// Composant pour les données structurées de compétition
+// Component for competition structured data
 export function CompetitionStructuredData({
   competition,
 }: {

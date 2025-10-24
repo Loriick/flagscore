@@ -7,9 +7,9 @@ import { useRankings as useRankingsHook } from "../hooks/useRankings";
 import { useAppStore, useAppActions } from "../store/app-store";
 import { useDataStore, useDataActions } from "../store/data-store";
 
-// Hook principal qui unifie tous les stores et hooks
+// Main hook that unifies all stores and hooks
 export function useAppData() {
-  // État de l'application
+  // Application state
   const {
     currentSeason,
     selectedChampionshipId,
@@ -17,7 +17,7 @@ export function useAppData() {
     selectedDayId,
   } = useAppStore();
 
-  // Actions de l'application
+  // Application actions
   const {
     setSeason,
     setChampionship,
@@ -28,7 +28,7 @@ export function useAppData() {
     resetAfterChampionshipChange,
   } = useAppActions();
 
-  // Actions des données
+  // Data actions
   const {
     setChampionships,
     setPools,
@@ -39,7 +39,7 @@ export function useAppData() {
     setError,
   } = useDataActions();
 
-  // Hooks existants pour la logique de fetching
+  // Existing hooks for fetching logic
   const {
     data: fetchedChampionships = [],
     isLoading: championshipsLoading,
@@ -69,7 +69,7 @@ export function useAppData() {
 
   const fetchedRankings = rankingsData?.rankings || [];
 
-  // Synchronisation des données avec les stores (une seule fois)
+  // Synchronize data with stores (once)
   useEffect(() => {
     if (fetchedChampionships.length > 0) {
       setChampionships(currentSeason, fetchedChampionships);
@@ -100,7 +100,7 @@ export function useAppData() {
     }
   }, [fetchedRankings, selectedPoolId, setRankings]);
 
-  // Synchronisation des états de chargement
+  // Synchronize loading states
   useEffect(() => {
     setLoading("championships", championshipsLoading);
   }, [championshipsLoading, setLoading]);
@@ -118,7 +118,7 @@ export function useAppData() {
     setLoading("rankings", rankingsLoading);
   }, [rankingsLoading, setLoading]);
 
-  // Synchronisation des erreurs
+  // Synchronize errors
   useEffect(() => {
     setError("championships", championshipsError?.message || null);
   }, [championshipsError, setError]);
@@ -136,7 +136,7 @@ export function useAppData() {
     setError("rankings", rankingsError?.message || null);
   }, [rankingsError, setError]);
 
-  // Données depuis les stores
+  // Data from stores
   const championships = useDataStore(
     state => state.championships[currentSeason] || []
   );
@@ -147,11 +147,11 @@ export function useAppData() {
   const matches = useDataStore(state => state.matches[selectedDayId] || []);
   const rankings = useDataStore(state => state.rankings[selectedPoolId] || []);
 
-  // États de chargement depuis les stores
+  // Loading states from stores
   const loading = useDataStore(state => state.loading);
   const errors = useDataStore(state => state.errors);
 
-  // Logique de sélection automatique
+  // Automatic selection logic
   const effectiveChampionshipId = useMemo(() => {
     if (selectedChampionshipId > 0) return selectedChampionshipId;
     return championships.length > 0 ? championships[0].id : 0;
@@ -167,7 +167,7 @@ export function useAppData() {
     return days.length > 0 ? days[0].id : 0;
   }, [selectedDayId, days]);
 
-  // Auto-sélection des valeurs par défaut (une seule fois)
+  // Auto-selection of default values (once)
   useEffect(() => {
     if (championships.length > 0 && selectedChampionshipId === 0) {
       setChampionship(championships[0].id);
@@ -186,7 +186,7 @@ export function useAppData() {
     }
   }, [days.length, selectedDayId, setDay]);
 
-  // Handlers optimisés avec useCallback
+  // Optimized handlers with useCallback
   const handleSeasonChange = useCallback(
     (season: string) => {
       const seasonNum = Number(season);
@@ -221,7 +221,7 @@ export function useAppData() {
     [setDay]
   );
 
-  // États calculés
+  // Calculated states
   const initialLoading = useMemo(() => {
     return championshipsLoading && championships.length === 0;
   }, [championshipsLoading, championships.length]);
@@ -239,27 +239,27 @@ export function useAppData() {
   }, [championships.length, pools.length]);
 
   return {
-    // État
+    // State
     currentSeason,
     selectedChampionshipId: effectiveChampionshipId,
     selectedPoolId: effectivePoolId,
     selectedDayId: effectiveDayId,
 
-    // Données
+    // Data
     championships,
     pools,
     days,
     matches,
     rankings,
 
-    // États de chargement
+    // Loading states
     loading,
     initialLoading,
     poolsAreLoading,
     hasData,
     hasPools,
 
-    // Erreurs
+    // Errors
     errors,
 
     // Handlers
@@ -268,7 +268,7 @@ export function useAppData() {
     handlePoolChange,
     handleDayChange,
 
-    // Actions directes
+    // Direct actions
     setSeason,
     setChampionship,
     setPool,

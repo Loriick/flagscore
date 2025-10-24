@@ -6,16 +6,16 @@ import {
   isRateLimited,
 } from "@/src/lib/rate-limit";
 
-// Rate limiting très strict pour tester
+// Very strict rate limiting for testing
 const rateLimit = createRateLimit({
   windowMs: 10 * 1000, // 10 secondes
-  maxRequests: 3, // 3 requêtes max
+  maxRequests: 3, // 3 requests max
   message: "Rate limit atteint pour le test",
 });
 
 export async function GET(request: NextRequest) {
   try {
-    // Vérifier le rate limiting
+    // Check rate limiting
     const rateLimitResult = rateLimit(request);
     if (isRateLimited(rateLimitResult)) {
       return NextResponse.json(

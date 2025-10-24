@@ -3,7 +3,7 @@ import { memo } from "react";
 import { Card } from "../atoms/Card";
 import { Spinner } from "../atoms/Spinner";
 
-// Import de cn pour éviter l'erreur
+// Import cn to avoid error
 import { cn } from "@/lib/utils";
 
 interface LoadingCardProps {

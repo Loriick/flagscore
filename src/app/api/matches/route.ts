@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getMatches } from "@/src/lib/fffa-api";
 
-// Cache des matchs (3 minutes - plus fréquent que les classements)
+// Match cache (3 minutes - more frequent than rankings)
 const matchesCache = new Map<string, { data: any[]; timestamp: number }>();
 const CACHE_DURATION = 3 * 60 * 1000; // 3 minutes
 
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "poolId est requis" }, { status: 400 });
     }
 
-    // Vérifier le cache
+    // Check cache
     const cacheKey = `matches-${poolId}`;
     const cached = matchesCache.get(cacheKey);
 
@@ -27,10 +27,10 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Récupérer les données fraîches
+    // Get fresh data
     const matchesData = await getMatches(Number(poolId));
 
-    // Mettre en cache
+    // Cache the data
     matchesCache.set(cacheKey, {
       data: matchesData,
       timestamp: Date.now(),
@@ -42,14 +42,14 @@ export async function GET(request: NextRequest) {
       timestamp: Date.now(),
     });
   } catch (error) {
-    console.error("Erreur dans l'API matches:", error);
+    console.error("Error in the matches API:", error);
 
     const errorMessage =
-      error instanceof Error ? error.message : "Erreur inconnue";
+      error instanceof Error ? error.message : "Unknown error";
 
     return NextResponse.json(
       {
-        error: `Erreur lors du chargement des matchs: ${errorMessage}`,
+        error: `Error loading matches: ${errorMessage}`,
         matches: [],
       },
       { status: 500 }

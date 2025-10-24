@@ -1,4 +1,4 @@
-// Logger simplifié pour Next.js (compatible client/server)
+// Simplified logger for Next.js (client/server compatible)
 
 const logColors = {
   error: "🔴",
@@ -7,7 +7,7 @@ const logColors = {
   debug: "🔵",
 };
 
-// Logger côté serveur (Node.js)
+// Server-side logger (Node.js)
 const serverLogger = {
   error: (message: string, meta?: any) => {
     console.error(
@@ -35,7 +35,7 @@ const serverLogger = {
   },
 };
 
-// Logger côté client (Browser)
+// Client-side logger (Browser)
 const clientLogger = {
   error: (message: string, meta?: any) => {
     console.error(
@@ -66,7 +66,7 @@ const clientLogger = {
 // Logger universel
 const logger = typeof window === "undefined" ? serverLogger : clientLogger;
 
-// Interface pour les métriques personnalisées
+// Interface for custom metrics
 interface MetricData {
   name: string;
   value: number;

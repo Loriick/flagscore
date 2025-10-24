@@ -16,8 +16,8 @@ export interface RateLimitResult {
   message?: string;
 }
 
-// Stockage en mémoire pour le rate limiting
-// En production, utiliser Redis ou une base de données
+// In-memory storage for rate limiting
+// In production, use Redis or a database
 class RateLimitStore {
   private store = new Map<string, { count: number; resetTime: number }>();
 
@@ -42,7 +42,7 @@ class RateLimitStore {
     return record.count + 1;
   }
 
-  // Nettoyer les entrées expirées périodiquement
+  // Clean up expired entries periodically
   cleanup(): void {
     const now = Date.now();
     for (const [key, record] of this.store.entries()) {
@@ -67,7 +67,7 @@ export function createRateLimit(config: RateLimitConfig) {
     const record = store.get(key);
 
     if (!record || record.resetTime < windowStart) {
-      // Nouvelle fenêtre ou première requête
+      // New window or first request
       const resetTime = now + config.windowMs;
       store.set(key, 1, resetTime);
 

@@ -3,7 +3,7 @@ import { memo } from "react";
 import { Button } from "../atoms/Button";
 import { Card } from "../atoms/Card";
 
-// Import de cn pour éviter l'erreur
+// Import cn to avoid error
 import { cn } from "@/lib/utils";
 
 interface EmptyStateProps {

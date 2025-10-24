@@ -1,13 +1,13 @@
 import { useCallback } from "react";
 
-// Cache de prefetching
+// Prefetching cache
 const prefetchCache = new Map<string, Promise<any>>();
 
 export function usePrefetch() {
   const prefetchRankings = useCallback(async (poolId: number) => {
     const cacheKey = `rankings-${poolId}`;
 
-    // Éviter les requêtes dupliquées
+    // Avoid duplicate requests
     if (prefetchCache.has(cacheKey)) {
       return prefetchCache.get(cacheKey);
     }
@@ -21,7 +21,7 @@ export function usePrefetch() {
 
     prefetchCache.set(cacheKey, promise);
 
-    // Nettoyer le cache après 10 minutes
+    // Clean cache after 10 minutes
     setTimeout(
       () => {
         prefetchCache.delete(cacheKey);
@@ -63,7 +63,7 @@ export function usePrefetch() {
   const prefetchMatches = useCallback(async (poolId: number) => {
     const cacheKey = `matches-${poolId}`;
 
-    // Éviter les requêtes dupliquées
+    // Avoid duplicate requests
     if (prefetchCache.has(cacheKey)) {
       return prefetchCache.get(cacheKey);
     }
@@ -77,7 +77,7 @@ export function usePrefetch() {
 
     prefetchCache.set(cacheKey, promise);
 
-    // Nettoyer le cache après 10 minutes
+    // Clean cache after 10 minutes
     setTimeout(
       () => {
         prefetchCache.delete(cacheKey);

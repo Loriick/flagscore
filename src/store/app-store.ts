@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
-// Interface pour l'état de l'application
+// Interface for application state
 interface AppState {
   // État actuel
   currentSeason: number;
@@ -15,17 +15,17 @@ interface AppState {
   setPool: (id: number) => void;
   setDay: (id: number) => void;
 
-  // Actions de réinitialisation
+  // Reset actions
   resetSelections: () => void;
   resetAfterSeasonChange: () => void;
   resetAfterChampionshipChange: () => void;
 }
 
-// Store principal avec Zustand
+// Main store with Zustand
 export const useAppStore = create<AppState>()(
   devtools(
     set => ({
-      // État initial
+      // Initial state
       currentSeason: 2026,
       selectedChampionshipId: 0,
       selectedPoolId: 0,
@@ -72,7 +72,7 @@ export const useAppStore = create<AppState>()(
         set({ selectedDayId: id }, false, "setDay");
       },
 
-      // Actions de réinitialisation
+      // Reset actions
       resetSelections: () => {
         set(
           {
@@ -109,12 +109,12 @@ export const useAppStore = create<AppState>()(
       },
     }),
     {
-      name: "app-store", // Nom pour les DevTools
+      name: "app-store", // Name for DevTools
     }
   )
 );
 
-// Sélecteurs optimisés pour éviter les re-renders inutiles
+// Optimized selectors to avoid unnecessary re-renders
 export const useCurrentSeason = () => useAppStore(state => state.currentSeason);
 export const useSelectedChampionshipId = () =>
   useAppStore(state => state.selectedChampionshipId);

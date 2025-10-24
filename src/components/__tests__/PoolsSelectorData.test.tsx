@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { PoolsSelector } from "../PoolsSelector";
 
-// Mock des hooks avec des données réalistes
+// Mock hooks with realistic data
 vi.mock("../../hooks/useChampionships", () => ({
   useChampionships: () => ({
     championships: [{ id: 1, name: "Championnat de France mixte" }],
@@ -45,7 +45,7 @@ vi.mock("../../hooks/useRankings", () => ({
   }),
 }));
 
-// Mock des composants enfants
+// Mock child components
 vi.mock("../SeasonSelector", () => ({
   SeasonSelector: ({ seasons, currentSeason }: any) => (
     <div data-testid="season-selector">
@@ -93,14 +93,14 @@ describe("PoolsSelector - Data Loading", () => {
   it("should load and display data correctly", async () => {
     render(<PoolsSelector />);
 
-    // Vérifier que les composants sont rendus
+    // Check that components are rendered
     expect(screen.getByTestId("season-selector")).toBeInTheDocument();
     expect(screen.getByTestId("championship-selector")).toBeInTheDocument();
     expect(screen.getByTestId("pool-selector")).toBeInTheDocument();
     expect(screen.getByTestId("days-navigation")).toBeInTheDocument();
     expect(screen.getByTestId("matches-list")).toBeInTheDocument();
 
-    // Vérifier le contenu avec les données mockées
+    // Check content with mocked data
     expect(screen.getByText("Season: 2026 (1 seasons)")).toBeInTheDocument();
     expect(
       screen.getByText("Championship: 1 (1 championships)")

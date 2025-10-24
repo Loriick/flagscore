@@ -19,11 +19,11 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Récupérer les jours pour cette poule
+    // Get days for this pool
     const days = await getDays(poolId);
     console.log("✅ Jours récupérés:", days.length);
 
-    // Récupérer les matchs pour le jour spécifié ou le premier jour
+    // Get matches for specified day or first day
     let matchesData: Match[] = [];
     const effectiveDayId = dayId > 0 ? dayId : days[0]?.id || 0;
 

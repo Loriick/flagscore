@@ -16,9 +16,9 @@ export const OptimizedMatchesList = memo(function OptimizedMatchesList({
   loading,
   className = "",
 }: OptimizedMatchesListProps) {
-  // Utiliser la virtualisation seulement pour les listes longues
+  // Use virtualization only for long lists
   const shouldVirtualize = matches.length > 20;
-  const itemHeight = 80; // Hauteur estimée d'un MatchCard
+  const itemHeight = 80; // Estimated height of a MatchCard
 
   const renderMatch = useMemo(
     () => (match: unknown, index: number) => {

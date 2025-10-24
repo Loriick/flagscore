@@ -25,7 +25,7 @@ export function PerformanceMonitor({
   useEffect(() => {
     if (!enabled) return;
 
-    // Observer les métriques Web Vitals
+    // Observe Web Vitals metrics
     const observeWebVitals = () => {
       // First Contentful Paint
       if ("PerformanceObserver" in window) {
@@ -126,11 +126,11 @@ export function PerformanceMonitor({
       }
     };
 
-    // Démarrer l'observation
+    // Start observation
     observeWebVitals();
     measureTTFB();
 
-    // Afficher le panneau après 3 secondes
+    // Show panel after 3 seconds
     const timer = setTimeout(() => {
       setIsVisible(true);
     }, 3000);
@@ -148,7 +148,7 @@ export function PerformanceMonitor({
     <>
       {children}
 
-      {/* Panneau de performance */}
+      {/* Performance panel */}
       <div className="fixed bottom-4 left-4 bg-black/90 text-white p-4 rounded-lg shadow-lg z-50 text-xs font-mono">
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-bold">Performance</h3>

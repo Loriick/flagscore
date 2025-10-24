@@ -4,7 +4,7 @@ import { Match } from "../../app/types";
 import { Badge } from "../atoms/Badge";
 import { Card } from "../atoms/Card";
 
-// Import de cn pour éviter l'erreur
+// Import cn to avoid error
 import { cn } from "@/lib/utils";
 
 interface MatchCardProps {

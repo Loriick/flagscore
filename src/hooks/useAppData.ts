@@ -5,9 +5,9 @@ import { useMatches as useMatchesHook } from "../hooks/useMatches";
 import { usePools as usePoolsHook } from "../hooks/usePools";
 import { useRankings as useRankingsHook } from "../hooks/useRankings";
 
-// Hook simplifié qui utilise directement les hooks React Query
+// Simplified hook that uses React Query hooks directly
 export function useAppData() {
-  // État local pour les sélections
+  // Local state for selections
   const [currentSeason, setCurrentSeason] = useState(2026);
   const [selectedChampionshipId, setSelectedChampionshipId] = useState(0);
   const [selectedPoolId, setSelectedPoolId] = useState(0);
@@ -23,7 +23,7 @@ export function useAppData() {
     error: championshipsError,
   } = useChampionshipsHook(currentSeason);
 
-  // Logique de sélection automatique pour les IDs effectifs
+  // Auto-selection logic for effective IDs
   const effectiveChampionshipId = useMemo(() => {
     if (selectedChampionshipId > 0) return selectedChampionshipId;
     return fetchedChampionships.length > 0 ? fetchedChampionships[0].id : 0;
@@ -62,14 +62,14 @@ export function useAppData() {
 
   const fetchedRankings = rankingsData?.rankings || [];
 
-  // Désactiver l'état de changement de poule quand les données sont chargées
+  // Disable pool change state when data is loaded
   useEffect(() => {
     if (isChangingPool && fetchedDays.length > 0) {
       setIsChangingPool(false);
     }
   }, [isChangingPool, fetchedDays.length]);
 
-  // Handlers optimisés avec useCallback
+  // Optimized handlers with useCallback
   const handleSeasonChange = useCallback((season: string) => {
     const seasonNum = Number(season);
     setCurrentSeason(seasonNum);
@@ -97,9 +97,9 @@ export function useAppData() {
     setSelectedDayId(id);
   }, []);
 
-  // États calculés
+  // Calculated states
   const initialLoading = useMemo(() => {
-    // Le skeleton reste affiché tant qu'on charge les championnats OU qu'on n'a pas encore de championnats
+    // The skeleton remains displayed while loading championships OR when we don't have championships yet
     const shouldShowSkeleton =
       championshipsLoading || fetchedChampionships.length === 0;
 
@@ -130,7 +130,7 @@ export function useAppData() {
     selectedPoolId: effectivePoolId,
     selectedDayId: effectiveDayId,
 
-    // Données
+    // Data
     championships: fetchedChampionships,
     pools: fetchedPools,
     days: fetchedDays,

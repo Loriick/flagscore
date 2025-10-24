@@ -3,16 +3,16 @@ import { devtools } from "zustand/middleware";
 
 import { Championship, Pool, Day, Match, Ranking } from "../app/types";
 
-// Interface pour l'état des données
+// Interface for data state
 interface DataState {
-  // Cache des données
+  // Data cache
   championships: Record<number, Championship[]>;
   pools: Record<number, Pool[]>;
   days: Record<number, Day[]>;
   matches: Record<number, Match[]>;
   rankings: Record<number, Ranking[]>;
 
-  // États de chargement
+  // Loading states
   loading: {
     championships: boolean;
     pools: boolean;
@@ -21,7 +21,7 @@ interface DataState {
     rankings: boolean;
   };
 
-  // États d'erreur
+  // Error states
   errors: {
     championships: string | null;
     pools: string | null;
@@ -30,35 +30,35 @@ interface DataState {
     rankings: string | null;
   };
 
-  // Actions pour les données
+  // Data actions
   setChampionships: (season: number, data: Championship[]) => void;
   setPools: (championshipId: number, data: Pool[]) => void;
   setDays: (poolId: number, data: Day[]) => void;
   setMatches: (dayId: number, data: Match[]) => void;
   setRankings: (poolId: number, data: Ranking[]) => void;
 
-  // Actions pour les états de chargement
+  // Loading actions
   setLoading: (key: keyof DataState["loading"], loading: boolean) => void;
   setError: (key: keyof DataState["errors"], error: string | null) => void;
 
-  // Actions de nettoyage
+  // Cleaning actions
   clearChampionships: (season: number) => void;
   clearPools: (championshipId: number) => void;
   clearDays: (poolId: number) => void;
   clearMatches: (dayId: number) => void;
   clearRankings: (poolId: number) => void;
 
-  // Actions de réinitialisation
+  // Reset actions
   resetAll: () => void;
   resetLoading: () => void;
   resetErrors: () => void;
 }
 
-// Store de données avec Zustand
+// Data store with Zustand
 export const useDataStore = create<DataState>()(
   devtools(
     set => ({
-      // État initial
+      // Initial state
       championships: {},
       pools: {},
       days: {},
@@ -81,7 +81,7 @@ export const useDataStore = create<DataState>()(
         rankings: null,
       },
 
-      // Actions pour les données
+      // Data actions
       setChampionships: (season, data) => {
         set(
           state => ({
@@ -187,7 +187,7 @@ export const useDataStore = create<DataState>()(
         );
       },
 
-      // Actions pour les états de chargement
+      // Loading actions
       setLoading: (key, loading) => {
         set(
           state => ({
@@ -218,7 +218,7 @@ export const useDataStore = create<DataState>()(
         );
       },
 
-      // Actions de nettoyage
+      // Cleaning actions
       clearChampionships: season => {
         set(
           state => {
@@ -279,7 +279,7 @@ export const useDataStore = create<DataState>()(
         );
       },
 
-      // Actions de réinitialisation
+      // Reset actions
       resetAll: () => {
         set(
           {
@@ -341,12 +341,12 @@ export const useDataStore = create<DataState>()(
       },
     }),
     {
-      name: "data-store", // Nom pour les DevTools
+      name: "data-store", // Name for DevTools
     }
   )
 );
 
-// Sélecteurs optimisés pour les données
+// Optimized selectors for data
 export const useChampionships = (season: number) =>
   useDataStore(state => state.championships[season] || []);
 
@@ -362,14 +362,14 @@ export const useMatches = (dayId: number) =>
 export const useRankings = (poolId: number) =>
   useDataStore(state => state.rankings[poolId] || []);
 
-// Sélecteurs pour les états de chargement
+// Selectors for loading states
 export const useLoading = (key: keyof DataState["loading"]) =>
   useDataStore(state => state.loading[key]);
 
 export const useError = (key: keyof DataState["errors"]) =>
   useDataStore(state => state.errors[key]);
 
-// Sélecteurs pour les actions
+// Selectors for actions
 export const useDataActions = () =>
   useDataStore(state => ({
     setChampionships: state.setChampionships,

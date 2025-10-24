@@ -17,7 +17,7 @@ export function SecurityTest() {
 
   const testSecurity = async () => {
     try {
-      // Test 1: Vérifier les headers de sécurité
+      // Test 1: Check security headers
       const response = await fetch("/api/test-security", {
         method: "GET",
       });

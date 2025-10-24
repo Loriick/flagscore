@@ -109,7 +109,7 @@ export function generateMetadata(config: SEOConfig): Metadata {
   };
 }
 
-// Métadonnées spécifiques pour les pages
+// Specific metadata for pages
 export const pageMetadata = {
   home: generateMetadata({
     title: "Accueil",
@@ -169,7 +169,7 @@ export const pageMetadata = {
   }),
 };
 
-// Données structurées communes
+// Common structured data
 export const structuredData = {
   organization: {
     "@context": "https://schema.org",

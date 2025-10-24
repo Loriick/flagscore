@@ -13,27 +13,27 @@ import { PoolSelector } from "./PoolSelector";
 import { SeasonSelector } from "./SeasonSelector";
 
 export function PoolsSelector() {
-  const seasons = [2026]; // Saisons disponibles
+  const seasons = [2026]; // Available seasons
 
   const {
-    // État
+    // State
     currentSeason,
     selectedChampionshipId,
     selectedPoolId,
 
-    // Données
+    // Data
     championships,
     pools,
     days,
     matches,
 
-    // États de chargement
+    // Loading states
     loading,
     initialLoading,
     poolChangeLoading,
     hasPools,
 
-    // Erreurs
+    // Errors
     errors,
 
     // Handlers

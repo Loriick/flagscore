@@ -193,11 +193,9 @@ const Rankings = React.memo(() => {
                         {rankings.map((ranking: Ranking, index: number) => {
                           const position = index + 1;
 
-                          console.log("position", position);
-
                           return (
                             <tr
-                              key={ranking.club.id}
+                              key={`ranking-${ranking.club.id}-${index}`}
                               className="border-b border-white/10 hover:bg-white/5"
                               style={
                                 position <= 2
@@ -205,13 +203,7 @@ const Rankings = React.memo(() => {
                                       backgroundColor: "rgba(34, 197, 94, 0.2)",
                                       borderLeft: "4px solid #22c55e",
                                     }
-                                  : position === 3
-                                    ? {
-                                        backgroundColor:
-                                          "rgba(234, 179, 8, 0.2)",
-                                        borderLeft: "4px solid #eab308",
-                                      }
-                                    : {}
+                                  : {}
                               }
                             >
                               <td className="py-3 px-4 font-medium">
@@ -261,15 +253,9 @@ const Rankings = React.memo(() => {
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="w-3 h-3 bg-yellow-500/20 border border-yellow-500/30 rounded-full"></span>
-                          <span className="text-yellow-300">
-                            3ème : Barrage (chance de qualification)
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
                           <span className="w-3 h-3 bg-gray-500/20 border border-gray-500/30 rounded-full"></span>
                           <span className="text-gray-400">
-                            4ème et suivants : Éliminés
+                            3ème et suivants : Éliminés
                           </span>
                         </div>
                       </div>

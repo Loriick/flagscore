@@ -3,21 +3,21 @@ import { describe, expect, it, vi } from "vitest";
 
 import { PoolsSelector } from "../PoolsSelector";
 
-// Mock des hooks
+// Mock hooks
 vi.mock("../../hooks/useAppData", () => ({
   useAppData: () => ({
-    // État
+    // State
     currentSeason: 2026,
     selectedChampionshipId: 1,
     selectedPoolId: 1,
 
-    // Données
+    // Data
     championships: [{ id: 1, name: "Championnat de France mixte" }],
     pools: [{ id: 1, name: "Poule A" }],
     days: [{ id: 1, name: "Journée 1", date: "2026-01-01" }],
     matches: [],
 
-    // États de chargement
+    // Loading states
     loading: {
       championships: false,
       pools: false,
@@ -30,7 +30,7 @@ vi.mock("../../hooks/useAppData", () => ({
     hasData: true,
     hasPools: true,
 
-    // Erreurs
+    // Errors
     errors: {
       championships: null,
       pools: null,
@@ -47,7 +47,7 @@ vi.mock("../../hooks/useAppData", () => ({
   }),
 }));
 
-// Mock des composants enfants
+// Mock child components
 vi.mock("../SeasonSelector", () => ({
   SeasonSelector: ({ seasons, currentSeason }: any) => (
     <div data-testid="season-selector">
@@ -95,14 +95,14 @@ describe("PoolsSelectorRefactored", () => {
   it("should render with Zustand state management", () => {
     render(<PoolsSelector />);
 
-    // Vérifier que les composants sont rendus
+    // Check that components are rendered
     expect(screen.getByTestId("season-selector")).toBeInTheDocument();
     expect(screen.getByTestId("championship-selector")).toBeInTheDocument();
     expect(screen.getByTestId("pool-selector")).toBeInTheDocument();
     expect(screen.getByTestId("days-navigation")).toBeInTheDocument();
     expect(screen.getByTestId("matches-list")).toBeInTheDocument();
 
-    // Vérifier le contenu
+    // Check content
     expect(screen.getByText("Season: 2026 (1 seasons)")).toBeInTheDocument();
     expect(
       screen.getByText("Championship: 1 (1 championships)")
@@ -121,10 +121,10 @@ describe("PoolsSelectorRefactored", () => {
   });
 
   it("should handle empty states correctly", () => {
-    // Test simplifié - vérifier que le composant se rend sans erreur
+    // Test simplified - check that the component renders without error
     render(<PoolsSelector />);
 
-    // Vérifier que le composant principal est rendu
+    // Check that the main component is rendered
     expect(screen.getByTestId("season-selector")).toBeInTheDocument();
   });
 });

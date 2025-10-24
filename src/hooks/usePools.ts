@@ -9,22 +9,20 @@ export function usePools(championshipId: number) {
     queryFn: async () => {
       if (!championshipId) return [];
 
-      // 1. Récupérer les phases de la compétition
+      // 1. Get competition phases
       const phases = await getPhases(championshipId);
-      console.log("Phases récupérées:", phases);
 
-      // 2. Récupérer toutes les pools
+      // 2. Get all pools
       const allPools: Pool[] = [];
       for (const phase of phases) {
         try {
           const phasePools = await getPools(phase.id);
           allPools.push(...phasePools);
         } catch (error) {
-          console.error(`Erreur pools pour phase ${phase.id}:`, error);
+          console.error(`Error pools for phase ${phase.id}:`, error);
         }
       }
 
-      console.log("Pools récupérées:", allPools);
       return allPools;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

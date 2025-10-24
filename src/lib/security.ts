@@ -1,4 +1,4 @@
-// Configuration de sécurité pour l'application Flagscore
+// Security configuration for Flagscore application
 
 export const securityConfig = {
   // Content Security Policy
@@ -6,14 +6,14 @@ export const securityConfig = {
     "default-src": ["'self'"],
     "script-src": [
       "'self'",
-      "'unsafe-eval'", // Nécessaire pour Next.js en développement
-      "'unsafe-inline'", // Nécessaire pour certains composants
+      "'unsafe-eval'", // Required for Next.js in development
+      "'unsafe-inline'", // Required for some components
       "https://vercel.live",
       "https://va.vercel-scripts.com",
     ],
     "style-src": [
       "'self'",
-      "'unsafe-inline'", // Nécessaire pour Tailwind CSS
+      "'unsafe-inline'", // Required for Tailwind CSS
       "https://fonts.googleapis.com",
     ],
     "font-src": ["'self'", "https://fonts.gstatic.com"],

@@ -26,7 +26,7 @@ export class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: any) {
     console.error("ErrorBoundary caught an error:", error, errorInfo);
 
-    // Ici on pourrait envoyer l'erreur à un service de monitoring comme Sentry
+    // Here we could send the error to a monitoring service like Sentry
     // Sentry.captureException(error, { extra: errorInfo });
   }
 

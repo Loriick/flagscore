@@ -18,10 +18,10 @@ interface MetricPayload {
   url?: string;
 }
 
-// Cache pour les métriques (en production, utiliser Redis ou une base de données)
+// Cache for metrics (in production, use Redis or database)
 const metricsCache = new Map<string, any>();
 
-// Rate limiting pour les métriques (plus strict)
+// Rate limiting for metrics (stricter)
 const rateLimit = createRateLimit(rateLimitConfigs.strict);
 
 async function handleMetrics(req: NextRequest) {
@@ -30,7 +30,7 @@ async function handleMetrics(req: NextRequest) {
   }
 
   try {
-    // Vérifier le rate limiting
+    // Check rate limiting
     const rateLimitResult = rateLimit(req);
     if (isRateLimited(rateLimitResult)) {
       logger.warn("METRICS_API_RATE_LIMITED", {
@@ -50,7 +50,7 @@ async function handleMetrics(req: NextRequest) {
 
     const payload: MetricPayload = await req.json();
 
-    // Valider les données
+    // Validate data
     if (!payload.metric || typeof payload.value !== "number") {
       return NextResponse.json(
         { error: "Invalid metric data" },
@@ -58,7 +58,7 @@ async function handleMetrics(req: NextRequest) {
       );
     }
 
-    // Logger la métrique
+    // Log the metric
     logMetric({
       name: payload.metric,
       value: payload.value,
@@ -70,14 +70,14 @@ async function handleMetrics(req: NextRequest) {
       timestamp: payload.timestamp,
     });
 
-    // Stocker dans le cache (en production, utiliser une base de données)
+    // Store in cache (in production, use a database)
     const cacheKey = `${payload.metric}_${Date.now()}`;
     metricsCache.set(cacheKey, {
       ...payload,
       receivedAt: new Date(),
     });
 
-    // Nettoyer le cache si il devient trop grand
+    // Clean cache if it becomes too large
     if (metricsCache.size > 1000) {
       const keys = Array.from(metricsCache.keys());
       keys.slice(0, 100).forEach(key => metricsCache.delete(key));
@@ -89,7 +89,7 @@ async function handleMetrics(req: NextRequest) {
       requestId: generateRequestId(),
     });
 
-    // Ajouter les headers de rate limiting
+    // Add rate limiting headers
     Object.entries(getRateLimitHeaders(rateLimitResult)).forEach(
       ([key, value]) => {
         response.headers.set(key, value);
@@ -111,15 +111,15 @@ async function handleMetrics(req: NextRequest) {
   }
 }
 
-// Fonction pour générer un ID de requête
+// Function to generate a request ID
 function generateRequestId(): string {
   return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
-// Endpoint pour récupérer les métriques (pour le dashboard)
+// Endpoint to retrieve metrics (for the dashboard)
 async function getMetrics(req: NextRequest) {
   try {
-    // Vérifier le rate limiting
+    // Check rate limiting
     const rateLimitResult = rateLimit(req);
     if (isRateLimited(rateLimitResult)) {
       logger.warn("GET_METRICS_RATE_LIMITED", {
@@ -143,15 +143,15 @@ async function getMetrics(req: NextRequest) {
 
     let metrics = Array.from(metricsCache.values());
 
-    // Filtrer par nom de métrique si spécifié
+    // Filter by metric name if specified
     if (metricName) {
       metrics = metrics.filter(m => m.metric === metricName);
     }
 
-    // Limiter le nombre de résultats
+    // Limit the number of results
     metrics = metrics.slice(-limit);
 
-    // Calculer les statistiques
+    // Calculate statistics
     const stats = calculateMetricsStats(metrics);
 
     const response = NextResponse.json({
@@ -161,7 +161,7 @@ async function getMetrics(req: NextRequest) {
       timestamp: new Date(),
     });
 
-    // Ajouter les headers de rate limiting
+    // Add rate limiting headers
     Object.entries(getRateLimitHeaders(rateLimitResult)).forEach(
       ([key, value]) => {
         response.headers.set(key, value);
@@ -182,7 +182,7 @@ async function getMetrics(req: NextRequest) {
   }
 }
 
-// Fonction pour calculer les statistiques des métriques
+// Function to calculate metrics statistics
 function calculateMetricsStats(metrics: any[]) {
   if (metrics.length === 0) {
     return {
@@ -209,6 +209,6 @@ function calculateMetricsStats(metrics: any[]) {
   };
 }
 
-// Exporter les handlers avec monitoring
+// Export handlers with monitoring
 export const POST = withMonitoring(handleMetrics as any);
 export const GET = withMonitoring(getMetrics as any);

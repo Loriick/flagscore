@@ -15,12 +15,12 @@ export function useClientCache<T>(
   key: string,
   options: UseClientCacheOptions = {}
 ) {
-  const { ttl = 5 * 60 * 1000, maxSize = 100 } = options; // 5 minutes par défaut
+  const { ttl = 5 * 60 * 1000, maxSize = 100 } = options; // 5 minutes by default
   const cacheRef = useRef<Map<string, CacheEntry<T>>>(new Map());
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Nettoyer le cache expiré
+  // Clean expired cache
   const cleanExpiredCache = useCallback(() => {
     const now = Date.now();
     const cache = cacheRef.current;
@@ -44,7 +44,7 @@ export function useClientCache<T>(
     }
   }, [maxSize]);
 
-  // Obtenir les données du cache
+  // Get data from cache
   const getCachedData = useCallback((): T | null => {
     cleanExpiredCache();
 
@@ -60,7 +60,7 @@ export function useClientCache<T>(
     return null;
   }, [key, cleanExpiredCache]);
 
-  // Mettre en cache les données
+  // Cache data
   const setCachedData = useCallback(
     (data: T, customTtl?: number) => {
       const cache = cacheRef.current;

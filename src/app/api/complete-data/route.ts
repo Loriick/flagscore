@@ -9,6 +9,8 @@ import {
 } from "../../../lib/fffa-api";
 import { Match } from "../../types";
 
+import logger from "@/src/lib/logger";
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -22,11 +24,11 @@ export async function GET(request: NextRequest) {
       poolId,
     });
 
-    // 1. Récupérer les championnats
+    // 1. Get championships
     const championships = await getChampionships(season);
     console.log("✅ Championnats récupérés:", championships.length);
 
-    // 2. Si pas de championshipId spécifique, prendre le premier
+    // 2. If no specific championshipId, take the first one
     const effectiveChampionshipId =
       championshipId > 0 ? championshipId : championships[0]?.id || 0;
 
@@ -40,7 +42,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // 3. Récupérer les phases et poules
+    // 3. Get phases and pools
     const phases = await getPhases(effectiveChampionshipId);
     console.log("✅ Phases récupérées:", phases.length);
 
@@ -50,12 +52,11 @@ export async function GET(request: NextRequest) {
         const phasePools = await getPools(phase.id);
         allPools.push(...phasePools);
       } catch (error) {
-        console.error(`❌ Erreur pools pour phase ${phase.id}:`, error);
+        logger.error(`ERROR pools for phase ${phase.id}:`, error);
       }
     }
-    console.log("✅ Pools récupérées:", allPools.length);
 
-    // 4. Si pas de poolId spécifique, prendre le premier
+    // 4. If no specific poolId, take the first one
     const effectivePoolId = poolId > 0 ? poolId : allPools[0]?.id || 0;
 
     if (effectivePoolId === 0) {
@@ -68,21 +69,19 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // 5. Récupérer les jours et matchs
+    // 5. Get days and matches
     const days = await getDays(effectivePoolId);
-    console.log("✅ Jours récupérés:", days.length);
 
     let matchesData: Match[] = [];
     if (days.length > 0) {
-      // Prendre le premier jour par défaut
+      // Take the first day by default
       const firstDayId = poolId > 0 ? days[0]?.id || 0 : days[0]?.id || 0;
       if (firstDayId > 0) {
         matchesData = await getMatches(firstDayId);
-        console.log("✅ Matchs récupérés:", matchesData.length);
       }
     }
 
-    // 6. Retourner toutes les données
+    // 6. Return all data
     const response = {
       championships,
       pools: allPools,
@@ -94,16 +93,9 @@ export async function GET(request: NextRequest) {
       cached: false,
     };
 
-    console.log("🎉 Données complètes envoyées:", {
-      championships: championships.length,
-      pools: allPools.length,
-      days: days.length,
-      matches: matchesData.length,
-    });
-
     return NextResponse.json(response);
   } catch (error) {
-    console.error("❌ Erreur API complete-data:", error);
+    logger.error("ERROR API complete-data:", error);
 
     if (error instanceof Error) {
       if (

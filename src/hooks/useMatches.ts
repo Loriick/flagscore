@@ -9,10 +9,10 @@ export function useMatches(poolId: number) {
     queryFn: async () => {
       if (!poolId) return { days: [], matches: [] };
 
-      // Récupérer les journées de la pool sélectionnée
+      // Get days from selected pool
       const poolDays = await getDays(poolId);
 
-      // Récupérer les matchs de la première journée
+      // Get matches from first day
       let firstDayMatches: Match[] = [];
       if (poolDays.length > 0) {
         firstDayMatches = await getMatches(poolDays[0].id);

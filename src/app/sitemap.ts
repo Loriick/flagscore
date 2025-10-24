@@ -25,7 +25,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     // Ajouter des pages dynamiques pour les saisons
     ...generateSeasonPages(baseUrl, currentDate),
-    // Ajouter des pages dynamiques pour les compétitions
+    // Add dynamic pages for competitions
     ...generateCompetitionPages(baseUrl, currentDate),
   ];
 }

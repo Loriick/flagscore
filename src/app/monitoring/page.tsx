@@ -59,7 +59,7 @@ function MonitoringDashboard() {
   useEffect(() => {
     fetchMetrics(selectedMetric);
 
-    // Rafraîchir les métriques toutes les 30 secondes
+    // Refresh metrics every 30 seconds
     const interval = setInterval(() => {
       fetchMetrics(selectedMetric);
     }, 30000);
@@ -146,7 +146,7 @@ function MonitoringDashboard() {
 
       {metrics && (
         <>
-          {/* Statistiques générales */}
+          {/* General statistics */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <Card>
               <CardHeader>
@@ -199,7 +199,7 @@ function MonitoringDashboard() {
             </Card>
           </div>
 
-          {/* Liste des métriques récentes */}
+          {/* Recent metrics list */}
           <Card>
             <CardHeader>
               <CardTitle>Métriques récentes</CardTitle>
