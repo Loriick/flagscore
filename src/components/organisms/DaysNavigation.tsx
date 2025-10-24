@@ -11,6 +11,7 @@ interface DaysNavigationProps {
   selectedDayId: number;
   onDaySelect: (day: Day) => void;
   className?: string;
+  "data-testid"?: string;
 }
 
 export const DaysNavigation = memo(function DaysNavigation({
@@ -18,11 +19,12 @@ export const DaysNavigation = memo(function DaysNavigation({
   selectedDayId,
   onDaySelect,
   className,
+  "data-testid": dataTestId,
 }: DaysNavigationProps) {
   if (days.length === 0) return null;
 
   return (
-    <div className={cn("mb-4", className)}>
+    <div className={cn("mb-4", className)} data-testid={dataTestId}>
       <div className="overflow-x-auto">
         <div className="flex gap-2 pb-2">
           {days.map(day => (

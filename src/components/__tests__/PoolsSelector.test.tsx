@@ -66,11 +66,14 @@ vi.mock("../ChampionshipSelector", () => ({
 }));
 
 vi.mock("../PoolSelector", () => ({
-  PoolSelector: ({ pools, selectedPoolId }: any) => (
-    <div data-testid="pool-selector">
-      Pool: {selectedPoolId} ({pools.length} pools)
-    </div>
-  ),
+  PoolSelector: ({ pools, selectedPoolId }: any) => {
+    if (pools.length === 0) return null;
+    return (
+      <div data-testid="pool-selector">
+        Pool: {selectedPoolId} ({pools.length} pools)
+      </div>
+    );
+  },
 }));
 
 vi.mock("../DaysNavigation", () => ({
@@ -79,10 +82,11 @@ vi.mock("../DaysNavigation", () => ({
   ),
 }));
 
-vi.mock("../MatchesList", () => ({
-  MatchesList: ({ matches, loading }: any) => (
+vi.mock("../organisms/OptimizedMatchesList", () => ({
+  OptimizedMatchesList: ({ matches, loading }: any) => (
     <div data-testid="matches-list">
-      Matches: {matches.length} matches (loading: {loading.toString()})
+      Matches: {matches.length} matches (loading:{" "}
+      {loading?.toString() ?? "false"})
     </div>
   ),
 }));
@@ -95,11 +99,17 @@ describe("PoolsSelectorRefactored", () => {
   it("should render with Zustand state management", () => {
     render(<PoolsSelector />);
 
-    // Check that components are rendered
+    // Check that basic components are rendered
     expect(screen.getByTestId("season-selector")).toBeInTheDocument();
     expect(screen.getByTestId("championship-selector")).toBeInTheDocument();
+
+    // Pool selector should be present when hasPools is true
     expect(screen.getByTestId("pool-selector")).toBeInTheDocument();
+
+    // Days navigation should be present when days are available
     expect(screen.getByTestId("days-navigation")).toBeInTheDocument();
+
+    // Matches list should be present when all conditions are met
     expect(screen.getByTestId("matches-list")).toBeInTheDocument();
 
     // Check content

@@ -29,7 +29,7 @@ export const PoolSelector = memo(function PoolSelector({
   if (pools.length === 0) return null;
 
   return (
-    <div className="mb-6 w-full sm:w-64">
+    <div className="mb-6 w-full sm:w-64" data-testid="pool-selector">
       <Label htmlFor="pool-select" className="text-white/80 mb-2 block">
         Poule
       </Label>

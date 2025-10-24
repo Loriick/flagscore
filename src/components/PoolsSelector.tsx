@@ -143,9 +143,14 @@ export function PoolsSelector() {
           <DaysNavigation
             days={days}
             onDaySelect={day => handleDayChange(day.id.toString())}
+            data-testid="days-navigation"
           />
 
-          <OptimizedMatchesList matches={matches} loading={poolChangeLoading} />
+          <OptimizedMatchesList
+            matches={matches}
+            loading={poolChangeLoading}
+            data-testid="matches-list"
+          />
         </div>
       )}
     </div>

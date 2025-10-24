@@ -9,12 +9,14 @@ interface OptimizedMatchesListProps {
   matches: Match[];
   loading: boolean;
   className?: string;
+  "data-testid"?: string;
 }
 
 export const OptimizedMatchesList = memo(function OptimizedMatchesList({
   matches,
   loading,
   className = "",
+  "data-testid": dataTestId,
 }: OptimizedMatchesListProps) {
   // Use virtualization only for long lists
   const shouldVirtualize = matches.length > 20;
@@ -32,7 +34,7 @@ export const OptimizedMatchesList = memo(function OptimizedMatchesList({
 
   if (loading) {
     return (
-      <div className={`space-y-3 ${className}`}>
+      <div className={`space-y-3 ${className}`} data-testid={dataTestId}>
         {[...Array(5)].map((_, i) => (
           <div
             key={`loading-${i}`}
@@ -52,7 +54,7 @@ export const OptimizedMatchesList = memo(function OptimizedMatchesList({
 
   if (shouldVirtualize) {
     return (
-      <div className={className}>
+      <div className={className} data-testid={dataTestId}>
         <VirtualizedList
           items={matches}
           itemHeight={itemHeight}
@@ -65,7 +67,7 @@ export const OptimizedMatchesList = memo(function OptimizedMatchesList({
   }
 
   return (
-    <div className={`space-y-3 ${className}`}>
+    <div className={`space-y-3 ${className}`} data-testid={dataTestId}>
       {matches.map((match, index) => (
         <MatchCard key={`match-${match.id}-${index}`} match={match} />
       ))}

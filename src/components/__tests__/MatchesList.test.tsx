@@ -40,11 +40,12 @@ describe("MatchesList", () => {
     expect(screen.getByText("Équipe D")).toBeInTheDocument();
   });
 
-  it("shows loading skeleton when loading is true", () => {
+  it("shows loading when loading is true", () => {
     render(<MatchesList matches={[]} loading={true} />);
 
-    const skeletons = document.querySelectorAll(".animate-pulse");
-    expect(skeletons.length).toBeGreaterThan(0);
+    // Check for DeflagLoader (loading spinner)
+    const loadingElement = screen.getByRole("status");
+    expect(loadingElement).toBeInTheDocument();
   });
 
   it("returns null when no matches and not loading", () => {

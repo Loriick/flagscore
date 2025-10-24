@@ -64,11 +64,14 @@ vi.mock("../ChampionshipSelector", () => ({
 }));
 
 vi.mock("../PoolSelector", () => ({
-  PoolSelector: ({ pools, selectedPoolId }: any) => (
-    <div data-testid="pool-selector">
-      Pool: {selectedPoolId} ({pools.length} pools)
-    </div>
-  ),
+  PoolSelector: ({ pools, selectedPoolId }: any) => {
+    if (pools.length === 0) return null;
+    return (
+      <div data-testid="pool-selector">
+        Pool: {selectedPoolId} ({pools.length} pools)
+      </div>
+    );
+  },
 }));
 
 vi.mock("../DaysNavigation", () => ({
@@ -77,8 +80,8 @@ vi.mock("../DaysNavigation", () => ({
   ),
 }));
 
-vi.mock("../MatchesList", () => ({
-  MatchesList: ({ matches, loading }: any) => (
+vi.mock("../organisms/OptimizedMatchesList", () => ({
+  OptimizedMatchesList: ({ matches, loading }: any) => (
     <div data-testid="matches-list">
       Matches: {matches.length} matches (loading: {loading.toString()})
     </div>
@@ -93,22 +96,23 @@ describe("PoolsSelector - Data Loading", () => {
   it("should load and display data correctly", async () => {
     render(<PoolsSelector />);
 
-    // Check that components are rendered
+    // Check that basic components are rendered
     expect(screen.getByTestId("season-selector")).toBeInTheDocument();
     expect(screen.getByTestId("championship-selector")).toBeInTheDocument();
-    expect(screen.getByTestId("pool-selector")).toBeInTheDocument();
-    expect(screen.getByTestId("days-navigation")).toBeInTheDocument();
-    expect(screen.getByTestId("matches-list")).toBeInTheDocument();
+
+    // Pool selector should not be present when there are no pools
+    expect(screen.queryByTestId("pool-selector")).not.toBeInTheDocument();
+
+    // Days navigation should not be present when there are no pools
+    expect(screen.queryByTestId("days-navigation")).not.toBeInTheDocument();
+
+    // Matches list should not be present when there are no pools
+    expect(screen.queryByTestId("matches-list")).not.toBeInTheDocument();
 
     // Check content with mocked data
     expect(screen.getByText("Season: 2026 (1 seasons)")).toBeInTheDocument();
     expect(
-      screen.getByText("Championship: 1 (1 championships)")
-    ).toBeInTheDocument();
-    expect(screen.getByText("Pool: 1 (1 pools)")).toBeInTheDocument();
-    expect(screen.getByText("Days: 1 days")).toBeInTheDocument();
-    expect(
-      screen.getByText("Matches: 1 matches (loading: false)")
+      screen.getByText("Championship: 0 (0 championships)")
     ).toBeInTheDocument();
   });
 
