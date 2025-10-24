@@ -3,7 +3,6 @@
   "devCommand": "pnpm dev",
   "installCommand": "pnpm install",
   "framework": "nextjs",
-  "nodeVersion": "18.x",
   "functions": {
     "src/app/api/**/*.ts": {
       "runtime": "nodejs18.x"
