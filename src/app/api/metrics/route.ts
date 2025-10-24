@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import logger, { logMetric } from "@/src/lib/logger";
 import { withMonitoring } from "@/src/lib/monitoring";
+import {
+  createRateLimit,
+  rateLimitConfigs,
+  getRateLimitHeaders,
+  isRateLimited,
+} from "@/src/lib/rate-limit";
 
 interface MetricPayload {
   metric: string;
@@ -14,12 +20,33 @@ interface MetricPayload {
 // Cache pour les métriques (en production, utiliser Redis ou une base de données)
 const metricsCache = new Map<string, any>();
 
+// Rate limiting pour les métriques (plus strict)
+const rateLimit = createRateLimit(rateLimitConfigs.strict);
+
 async function handleMetrics(req: NextRequest) {
   if (req.method !== "POST") {
     return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
   }
 
   try {
+    // Vérifier le rate limiting
+    const rateLimitResult = rateLimit(req);
+    if (isRateLimited(rateLimitResult)) {
+      logger.warn("METRICS_API_RATE_LIMITED", {
+        ip: req.headers.get("x-forwarded-for") || "unknown",
+        userAgent: req.headers.get("user-agent") || "unknown",
+        timestamp: new Date(),
+      });
+
+      return NextResponse.json(
+        { error: rateLimitResult.message },
+        {
+          status: 429,
+          headers: getRateLimitHeaders(rateLimitResult),
+        }
+      );
+    }
+
     const payload: MetricPayload = await req.json();
 
     // Valider les données
@@ -55,11 +82,20 @@ async function handleMetrics(req: NextRequest) {
       keys.slice(0, 100).forEach((key) => metricsCache.delete(key));
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: "Metric recorded successfully",
       requestId: generateRequestId(),
     });
+
+    // Ajouter les headers de rate limiting
+    Object.entries(getRateLimitHeaders(rateLimitResult)).forEach(
+      ([key, value]) => {
+        response.headers.set(key, value);
+      }
+    );
+
+    return response;
   } catch (error) {
     logger.error("METRICS_API_ERROR", {
       error: error instanceof Error ? error.message : "Unknown error",
@@ -81,11 +117,29 @@ function generateRequestId(): string {
 
 // Endpoint pour récupérer les métriques (pour le dashboard)
 async function getMetrics(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const metricName = searchParams.get("metric");
-  const limit = parseInt(searchParams.get("limit") || "100");
-
   try {
+    // Vérifier le rate limiting
+    const rateLimitResult = rateLimit(req);
+    if (isRateLimited(rateLimitResult)) {
+      logger.warn("GET_METRICS_RATE_LIMITED", {
+        ip: req.headers.get("x-forwarded-for") || "unknown",
+        userAgent: req.headers.get("user-agent") || "unknown",
+        timestamp: new Date(),
+      });
+
+      return NextResponse.json(
+        { error: rateLimitResult.message },
+        {
+          status: 429,
+          headers: getRateLimitHeaders(rateLimitResult),
+        }
+      );
+    }
+
+    const { searchParams } = new URL(req.url);
+    const metricName = searchParams.get("metric");
+    const limit = parseInt(searchParams.get("limit") || "100");
+
     let metrics = Array.from(metricsCache.values());
 
     // Filtrer par nom de métrique si spécifié
@@ -99,12 +153,21 @@ async function getMetrics(req: NextRequest) {
     // Calculer les statistiques
     const stats = calculateMetricsStats(metrics);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       metrics,
       stats,
       total: metrics.length,
       timestamp: new Date(),
     });
+
+    // Ajouter les headers de rate limiting
+    Object.entries(getRateLimitHeaders(rateLimitResult)).forEach(
+      ([key, value]) => {
+        response.headers.set(key, value);
+      }
+    );
+
+    return response;
   } catch (error) {
     logger.error("GET_METRICS_ERROR", {
       error: error instanceof Error ? error.message : "Unknown error",

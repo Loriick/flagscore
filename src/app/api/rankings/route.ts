@@ -3,13 +3,40 @@ import { NextRequest, NextResponse } from "next/server";
 import { getRankings } from "@/src/lib/fffa-api";
 import logger from "@/src/lib/logger";
 import { withMonitoring } from "@/src/lib/monitoring";
+import {
+  createRateLimit,
+  rateLimitConfigs,
+  getRateLimitHeaders,
+  isRateLimited,
+} from "@/src/lib/rate-limit";
 
 // Cache des classements (5 minutes)
 const rankingsCache = new Map<string, { data: any[]; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
+// Rate limiting pour les classements
+const rateLimit = createRateLimit(rateLimitConfigs.dataApi);
+
 async function handleRankings(request: NextRequest) {
   try {
+    // Vérifier le rate limiting
+    const rateLimitResult = rateLimit(request);
+    if (isRateLimited(rateLimitResult)) {
+      logger.warn("RANKINGS_API_RATE_LIMITED", {
+        ip: request.headers.get("x-forwarded-for") || "unknown",
+        userAgent: request.headers.get("user-agent") || "unknown",
+        timestamp: new Date(),
+      });
+
+      return NextResponse.json(
+        { error: rateLimitResult.message },
+        {
+          status: 429,
+          headers: getRateLimitHeaders(rateLimitResult),
+        }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const poolId = searchParams.get("poolId");
 
@@ -44,11 +71,20 @@ async function handleRankings(request: NextRequest) {
         timestamp: new Date(),
       });
 
-      return NextResponse.json({
+      const response = NextResponse.json({
         rankings: cached.data,
         cached: true,
         timestamp: cached.timestamp,
       });
+
+      // Ajouter les headers de rate limiting
+      Object.entries(getRateLimitHeaders(rateLimitResult)).forEach(
+        ([key, value]) => {
+          response.headers.set(key, value);
+        }
+      );
+
+      return response;
     }
 
     // Récupérer les données fraîches
@@ -71,11 +107,20 @@ async function handleRankings(request: NextRequest) {
       timestamp: new Date(),
     });
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       rankings: rankingsData,
       cached: false,
       timestamp: Date.now(),
     });
+
+    // Ajouter les headers de rate limiting
+    Object.entries(getRateLimitHeaders(rateLimitResult)).forEach(
+      ([key, value]) => {
+        response.headers.set(key, value);
+      }
+    );
+
+    return response;
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Erreur inconnue";
