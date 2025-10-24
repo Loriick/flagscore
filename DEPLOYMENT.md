@@ -1,46 +1,76 @@
-# Déploiement Automatique
+# 🚀 Flagscore Monorepo - Déploiement Vercel
 
-Ce projet utilise **Vercel** pour le déploiement automatique.
+## 📋 Configuration Vercel
 
-## 🚀 Déploiement
+### Paramètres requis dans Vercel Dashboard :
 
-- **Push sur `main`** → Déploiement automatique sur `https://flagscore.vercel.app`
-- **Pull Request** → Preview automatique avec URL temporaire
+1. **Root Directory** : `apps/web`
+2. **Build Command** : `pnpm vercel:build`
+3. **Install Command** : `pnpm install --frozen-lockfile`
+4. **Output Directory** : `.next`
 
-## 🔧 Configuration
+### Variables d'environnement :
 
-Le déploiement est configuré via :
-
-- `vercel.json` (si présent)
-- Configuration Vercel dans le dashboard
-- Variables d'environnement dans Vercel
-
-## 📊 Monitoring
-
-- **Analytics** : Vercel Analytics (production uniquement)
-- **Performance** : Speed Insights automatiques
-- **Logs** : Disponibles dans le dashboard Vercel
-
-## 🛠️ Développement Local
-
-```bash
-# Installation
-pnpm install
-
-# Développement
-pnpm dev
-
-# Tests
-pnpm test:run
-
-# Build
-pnpm build
+```
+FFFA_BASE=https://www.fffa.org/wp-admin/admin-ajax.php
+FFFA_ACTION=fffa_calendar_api_proxy
 ```
 
-## ✅ Avantages
+## 🏗️ Structure du monorepo
 
-- ✅ Déploiement automatique
-- ✅ Preview des PR
-- ✅ Rollback facile
-- ✅ Monitoring intégré
-- ✅ Pas de CI/CD complexe à maintenir
+```
+flagscore-monorepo/
+├── apps/
+│   ├── web/              # 🌐 Site public (Vercel)
+│   └── admin/            # 🔧 Interface admin (futur)
+├── packages/
+│   ├── shared/           # 📦 Types et utils partagés
+│   └── ui/              # 🎨 Design system (futur)
+├── scripts/
+│   └── deploy.sh         # 🚀 Script de déploiement
+└── vercel.json          # ⚙️ Configuration Vercel
+```
+
+## 🚀 Commandes utiles
+
+```bash
+# Développement
+pnpm dev                 # Toutes les apps
+pnpm web:dev            # Seulement l'app web
+
+# Build
+pnpm build              # Tout le monorepo
+pnpm web:build          # Seulement l'app web
+
+# Déploiement
+pnpm deploy             # Script complet
+pnpm vercel:build       # Build pour Vercel
+
+# Qualité
+pnpm type-check         # Vérification TypeScript
+pnpm lint              # Linting
+pnpm test              # Tests
+```
+
+## 🔧 Configuration automatique
+
+Le fichier `vercel.json` configure automatiquement :
+
+- ✅ Build depuis la racine du monorepo
+- ✅ Installation des dépendances avec pnpm
+- ✅ Routage vers `apps/web`
+- ✅ Variables d'environnement
+
+## 📝 Notes importantes
+
+- **Backend** : Supabase (PostgreSQL + API auto)
+- **Frontend** : Next.js dans `apps/web/`
+- **Admin** : Futur dans `apps/admin/`
+- **Partage** : Types et utils dans `packages/shared/`
+
+## 🎯 Prochaines étapes
+
+1. ✅ Monorepo configuré
+2. 🔄 Intégration Supabase
+3. 🔄 Interface admin
+4. 🔄 App mobile (futur)
