@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import { PoolsSelector } from "../PoolsSelector";
+
 import { Day, Match, Pool } from "@/src/app/types";
 
 vi.mock("../../hooks/useChampionships", () => ({

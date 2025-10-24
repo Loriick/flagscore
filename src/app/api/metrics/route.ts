@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import logger, { logMetric } from "@/src/lib/logger";
 import { withMonitoring } from "@/src/lib/monitoring";
 import {
@@ -79,7 +80,7 @@ async function handleMetrics(req: NextRequest) {
     // Nettoyer le cache si il devient trop grand
     if (metricsCache.size > 1000) {
       const keys = Array.from(metricsCache.keys());
-      keys.slice(0, 100).forEach((key) => metricsCache.delete(key));
+      keys.slice(0, 100).forEach(key => metricsCache.delete(key));
     }
 
     const response = NextResponse.json({
@@ -144,7 +145,7 @@ async function getMetrics(req: NextRequest) {
 
     // Filtrer par nom de métrique si spécifié
     if (metricName) {
-      metrics = metrics.filter((m) => m.metric === metricName);
+      metrics = metrics.filter(m => m.metric === metricName);
     }
 
     // Limiter le nombre de résultats
@@ -193,7 +194,7 @@ function calculateMetricsStats(metrics: any[]) {
     };
   }
 
-  const values = metrics.map((m) => m.value);
+  const values = metrics.map(m => m.value);
   const sum = values.reduce((a, b) => a + b, 0);
   const average = sum / values.length;
   const min = Math.min(...values);

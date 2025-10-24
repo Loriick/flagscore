@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { securityConfig, generateCSPString } from "@/src/lib/security";
 
 // Headers de sécurité avec CSP dynamique

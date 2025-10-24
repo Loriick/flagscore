@@ -2,7 +2,7 @@
 
 import Head from "next/head";
 
-interface SEOProps {
+interface SeoProps {
   title?: string;
   description?: string;
   keywords?: string[];
@@ -18,7 +18,7 @@ interface SEOProps {
   structuredData?: any;
 }
 
-export function SEO({
+export function Seo({
   title,
   description,
   keywords = [],
@@ -27,7 +27,7 @@ export function SEO({
   nofollow = false,
   image,
   structuredData,
-}: SEOProps) {
+}: SeoProps) {
   const siteName = "Flagscore";
   const baseUrl = "https://flagscore.fr";
   const fullTitle = title ? `${title} | ${siteName}` : siteName;

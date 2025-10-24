@@ -1,5 +1,7 @@
 import { memo } from "react";
 
+import { Championship } from "../app/types";
+
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -8,8 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import { Championship } from "../app/types";
 
 interface ChampionshipSelectorProps {
   championships: Championship[];
@@ -47,7 +47,7 @@ export const ChampionshipSelector = memo(function ChampionshipSelector({
           />
         </SelectTrigger>
         <SelectContent className="bg-gray-800 border-gray-600">
-          {championships.map((championship) => (
+          {championships.map(championship => (
             <SelectItem
               key={`championship-${championship.id}`}
               value={championship.id.toString()}

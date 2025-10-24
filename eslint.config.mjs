@@ -1,4 +1,6 @@
 import importPlugin from "eslint-plugin-import";
+import typescriptEslint from "@typescript-eslint/eslint-plugin";
+import typescriptParser from "@typescript-eslint/parser";
 
 export default [
   {
@@ -6,11 +8,16 @@ export default [
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
+      parser: typescriptParser,
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
     },
-  },
-  {
     plugins: {
       import: importPlugin,
+      "@typescript-eslint": typescriptEslint,
     },
     rules: {
       "import/order": [
@@ -31,18 +38,22 @@ export default [
           },
         },
       ],
-      "import/no-unresolved": "error",
+      "import/no-unresolved": "off", // TypeScript handles this
       "import/no-duplicates": "error",
       "import/first": "error",
       "import/newline-after-import": "error",
+      "@typescript-eslint/no-unused-vars": "error",
+      "@typescript-eslint/no-explicit-any": "warn",
     },
   },
   // Override default ignores of eslint-config-next.
-  globalIgnores([
-    // Default ignores of eslint-config-next:
-    ".next/**",
-    "out/**",
-    "build/**",
-    "next-env.d.ts",
-  ]),
-]);
+  {
+    ignores: [
+      // Default ignores of eslint-config-next:
+      ".next/**",
+      "out/**",
+      "build/**",
+      "next-env.d.ts",
+    ],
+  },
+];

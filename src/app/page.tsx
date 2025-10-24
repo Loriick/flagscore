@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 import { PoolsSelector } from "../components/PoolsSelector";
-import { pageMetadata, structuredData } from "../lib/seo";
+import { pageMetadata } from "../lib/seo";
 
 export const metadata: Metadata = pageMetadata.home;
 

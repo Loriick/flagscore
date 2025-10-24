@@ -1,17 +1,4 @@
 // Logger simplifié pour Next.js (compatible client/server)
-interface LogLevel {
-  error: 0;
-  warn: 1;
-  info: 2;
-  debug: 3;
-}
-
-const logLevels: LogLevel = {
-  error: 0,
-  warn: 1,
-  info: 2,
-  debug: 3,
-};
 
 const logColors = {
   error: "🔴",
@@ -23,32 +10,56 @@ const logColors = {
 // Logger côté serveur (Node.js)
 const serverLogger = {
   error: (message: string, meta?: any) => {
-    console.error(`${logColors.error} [ERROR] ${new Date().toISOString()}: ${message}`, meta || "");
+    console.error(
+      `${logColors.error} [ERROR] ${new Date().toISOString()}: ${message}`,
+      meta || ""
+    );
   },
   warn: (message: string, meta?: any) => {
-    console.warn(`${logColors.warn} [WARN] ${new Date().toISOString()}: ${message}`, meta || "");
+    console.warn(
+      `${logColors.warn} [WARN] ${new Date().toISOString()}: ${message}`,
+      meta || ""
+    );
   },
   info: (message: string, meta?: any) => {
-    console.info(`${logColors.info} [INFO] ${new Date().toISOString()}: ${message}`, meta || "");
+    console.info(
+      `${logColors.info} [INFO] ${new Date().toISOString()}: ${message}`,
+      meta || ""
+    );
   },
   debug: (message: string, meta?: any) => {
-    console.debug(`${logColors.debug} [DEBUG] ${new Date().toISOString()}: ${message}`, meta || "");
+    console.debug(
+      `${logColors.debug} [DEBUG] ${new Date().toISOString()}: ${message}`,
+      meta || ""
+    );
   },
 };
 
 // Logger côté client (Browser)
 const clientLogger = {
   error: (message: string, meta?: any) => {
-    console.error(`${logColors.error} [ERROR] ${new Date().toISOString()}: ${message}`, meta || "");
+    console.error(
+      `${logColors.error} [ERROR] ${new Date().toISOString()}: ${message}`,
+      meta || ""
+    );
   },
   warn: (message: string, meta?: any) => {
-    console.warn(`${logColors.warn} [WARN] ${new Date().toISOString()}: ${message}`, meta || "");
+    console.warn(
+      `${logColors.warn} [WARN] ${new Date().toISOString()}: ${message}`,
+      meta || ""
+    );
   },
   info: (message: string, meta?: any) => {
-    console.info(`${logColors.info} [INFO] ${new Date().toISOString()}: ${message}`, meta || "");
+    console.info(
+      `${logColors.info} [INFO] ${new Date().toISOString()}: ${message}`,
+      meta || ""
+    );
   },
   debug: (message: string, meta?: any) => {
-    console.debug(`${logColors.debug} [DEBUG] ${new Date().toISOString()}: ${message}`, meta || "");
+    console.debug(
+      `${logColors.debug} [DEBUG] ${new Date().toISOString()}: ${message}`,
+      meta || ""
+    );
   },
 };
 
@@ -74,7 +85,11 @@ export const logMetric = (data: MetricData) => {
 };
 
 // Fonction pour logger les événements utilisateur
-export const logUserEvent = (event: string, userId?: string, metadata?: Record<string, any>) => {
+export const logUserEvent = (
+  event: string,
+  userId?: string,
+  metadata?: Record<string, any>
+) => {
   logger.info("USER_EVENT", {
     event,
     userId,
@@ -84,7 +99,11 @@ export const logUserEvent = (event: string, userId?: string, metadata?: Record<s
 };
 
 // Fonction pour logger les performances
-export const logPerformance = (operation: string, duration: number, metadata?: Record<string, any>) => {
+export const logPerformance = (
+  operation: string,
+  duration: number,
+  metadata?: Record<string, any>
+) => {
   logger.info("PERFORMANCE", {
     operation,
     duration,
@@ -94,7 +113,11 @@ export const logPerformance = (operation: string, duration: number, metadata?: R
 };
 
 // Fonction pour logger les erreurs API
-export const logApiError = (endpoint: string, error: Error, statusCode?: number) => {
+export const logApiError = (
+  endpoint: string,
+  error: Error,
+  statusCode?: number
+) => {
   logger.error("API_ERROR", {
     endpoint,
     error: error.message,
@@ -105,7 +128,12 @@ export const logApiError = (endpoint: string, error: Error, statusCode?: number)
 };
 
 // Fonction pour logger les requêtes HTTP
-export const logHttpRequest = (method: string, url: string, statusCode: number, responseTime: number) => {
+export const logHttpRequest = (
+  method: string,
+  url: string,
+  statusCode: number,
+  responseTime: number
+) => {
   logger.info("HTTP_REQUEST", {
     method,
     url,

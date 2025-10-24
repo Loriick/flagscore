@@ -1,5 +1,6 @@
-import React from "react";
 import { NextRequest, NextResponse } from "next/server";
+import React from "react";
+
 import logger, { logHttpRequest, logApiError } from "./logger";
 
 export function withMonitoring<T = any>(
@@ -110,7 +111,7 @@ export const logClientPerformance = (
         userAgent: navigator.userAgent,
         url: window.location.href,
       }),
-    }).catch((error) => {
+    }).catch(error => {
       console.error("Failed to send performance metrics:", error);
     });
   }

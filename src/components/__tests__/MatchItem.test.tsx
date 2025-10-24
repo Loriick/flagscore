@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
 
 import { MatchItem } from "../MatchItem";
+
 import { Match } from "@/src/app/types";
 
 const mockMatch: Match = {

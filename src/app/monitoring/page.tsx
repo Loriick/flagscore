@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface MetricData {
@@ -125,7 +126,7 @@ function MonitoringDashboard() {
         <div className="flex gap-4">
           <select
             value={selectedMetric}
-            onChange={(e) => setSelectedMetric(e.target.value)}
+            onChange={e => setSelectedMetric(e.target.value)}
             className="px-3 py-2 border rounded-md"
           >
             <option value="">Toutes les métriques</option>

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import {
   createRateLimit,
   rateLimitConfigs,
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
         headers: getRateLimitHeaders(rateLimitResult),
       }
     );
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Erreur lors du test de sécurité" },
       { status: 500 }

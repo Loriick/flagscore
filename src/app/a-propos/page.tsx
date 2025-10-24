@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 
-import { pageMetadata, structuredData } from "../../lib/seo";
+import { pageMetadata } from "../../lib/seo";
 
 export const metadata: Metadata = pageMetadata.about;
 

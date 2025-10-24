@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function SecurityTest() {
@@ -27,7 +28,7 @@ export function SecurityTest() {
       const hasContentTypeOptions =
         headers.get("x-content-type-options") === "nosniff";
 
-      setTestResults((prev) => ({
+      setTestResults(prev => ({
         ...prev,
         csp: hasCSP,
         headers: hasFrameOptions && hasContentTypeOptions,
@@ -39,9 +40,9 @@ export function SecurityTest() {
       );
 
       const responses = await Promise.all(promises);
-      const rateLimited = responses.some((r) => r.status === 429);
+      const rateLimited = responses.some(r => r.status === 429);
 
-      setTestResults((prev) => ({
+      setTestResults(prev => ({
         ...prev,
         rateLimit: rateLimited,
       }));

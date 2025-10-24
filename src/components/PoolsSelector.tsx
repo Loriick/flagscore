@@ -53,7 +53,6 @@ export function PoolsSelector() {
     matches,
     loading: matchesLoading,
     error: matchesError,
-    cached: matchesCached,
   } = useMatches(effectivePoolId);
 
   useEffect(() => {
@@ -95,7 +94,7 @@ export function PoolsSelector() {
 
   useEffect(() => {
     if (pools.length > 0) {
-      pools.slice(0, 3).forEach((pool) => {
+      pools.slice(0, 3).forEach(pool => {
         prefetchRankings(pool.id);
         prefetchMatches(pool.id);
       });

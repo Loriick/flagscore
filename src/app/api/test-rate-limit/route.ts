@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import {
   createRateLimit,
-  rateLimitConfigs,
   getRateLimitHeaders,
   isRateLimited,
 } from "@/src/lib/rate-limit";
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
         headers: getRateLimitHeaders(rateLimitResult),
       }
     );
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Erreur lors du test de rate limiting" },
       { status: 500 }

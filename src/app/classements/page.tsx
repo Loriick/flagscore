@@ -4,15 +4,15 @@ import Image from "next/image";
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { toast } from "sonner";
 
-import { useRankings } from "@/src/hooks/useRankings";
-import { Ranking } from "@/src/lib/fffa-api";
-
 import { ChampionshipSelector } from "../../components/ChampionshipSelector";
 import { PoolSelector } from "../../components/PoolSelector";
 import { SeasonSelector } from "../../components/SeasonSelector";
 import { useChampionships } from "../../hooks/useChampionships";
 import { useMatches } from "../../hooks/useMatches";
 import { usePools } from "../../hooks/usePools";
+
+import { useRankings } from "@/src/hooks/useRankings";
+import { Ranking } from "@/src/lib/fffa-api";
 
 export default function Rankings() {
   const [seasons] = useState<number[]>([2026]);
@@ -49,7 +49,6 @@ export default function Rankings() {
     rankings,
     loading: rankingsLoading,
     error: rankingsError,
-    cached: rankingsCached,
   } = useRankings(effectivePoolId);
 
   useEffect(() => {

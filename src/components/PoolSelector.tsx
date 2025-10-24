@@ -1,5 +1,7 @@
 import { memo } from "react";
 
+import { Pool } from "../app/types";
+
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -8,8 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import { Pool } from "../app/types";
 
 interface PoolSelectorProps {
   pools: Pool[];
@@ -44,7 +44,7 @@ export const PoolSelector = memo(function PoolSelector({
           <SelectValue placeholder="Sélectionner une pool" />
         </SelectTrigger>
         <SelectContent className="bg-gray-800 border-gray-600">
-          {pools.map((pool) => (
+          {pools.map(pool => (
             <SelectItem
               key={`pool-${pool.id}`}
               value={pool.id.toString()}
