@@ -98,43 +98,4 @@ jobs:
           git commit -m "chore: bump version to $VERSION" || exit 0
           git push
 
-  # Job de déploiement automatique après release
-  deploy-release:
-    name: Deploy Release
-    runs-on: ubuntu-latest
-    needs: release
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build application
-        run: pnpm build
-
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: "--prod"
-          working-directory: ./
-
-      - name: Notify deployment
-        run: |
-          echo "🎉 Release ${{ github.ref_name }} deployed successfully!"
-          echo "URL: https://flagscore.fr"
+  # Déploiement manuel uniquement - pas de déploiement automatique

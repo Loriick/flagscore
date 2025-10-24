@@ -1,104 +1,111 @@
-# GitHub Secrets Configuration
+## 🔐 Secrets GitHub Requis
 
 Pour que les workflows GitHub Actions fonctionnent correctement, vous devez configurer les secrets
 suivants dans votre repository GitHub :
 
-## 🔐 Secrets Requis
+### Secrets Vercel (pour le déploiement manuel)
 
-### Vercel Secrets
+Ces secrets sont nécessaires pour le déploiement manuel vers Vercel :
 
-- `VERCEL_TOKEN` : Token d'authentification Vercel
-- `VERCEL_ORG_ID` : ID de l'organisation Vercel
-- `VERCEL_PROJECT_ID` : ID du projet Vercel
+#### `VERCEL_TOKEN`
 
-### Comment obtenir ces secrets :
+- **Description** : Token d'authentification Vercel
+- **Comment l'obtenir** :
+  1. Allez sur [Vercel Dashboard](https://vercel.com/dashboard)
+  2. Cliquez sur votre profil → Settings
+  3. Onglet "Tokens"
+  4. Créez un nouveau token avec les permissions appropriées
+- **Permissions requises** : Lecture/Écriture des projets
 
-1. **VERCEL_TOKEN** :
-   - Allez sur [Vercel Dashboard](https://vercel.com/account/tokens)
-   - Créez un nouveau token avec les permissions appropriées
-   - Copiez le token
+#### `VERCEL_ORG_ID`
 
-2. **VERCEL_ORG_ID** et **VERCEL_PROJECT_ID** :
-   - Allez sur votre projet Vercel
-   - Dans les paramètres du projet, vous trouverez ces IDs
-   - Ou utilisez la CLI Vercel : `vercel link` puis `vercel env pull .env.local`
+- **Description** : ID de votre organisation Vercel
+- **Comment l'obtenir** :
+  1. Allez sur [Vercel Dashboard](https://vercel.com/dashboard)
+  2. Sélectionnez votre équipe/organisation
+  3. Allez dans Settings → General
+  4. Copiez l'ID de l'équipe
+- **Format** : `team_xxxxxxxxxxxxxxxx`
 
-## 📝 Configuration dans GitHub
+#### `VERCEL_PROJECT_ID`
 
-1. Allez dans votre repository GitHub
-2. Cliquez sur **Settings** → **Secrets and variables** → **Actions**
-3. Cliquez sur **New repository secret**
-4. Ajoutez chaque secret avec son nom et sa valeur
+- **Description** : ID de votre projet Vercel
+- **Comment l'obtenir** :
+  1. Allez sur votre projet dans [Vercel Dashboard](https://vercel.com/dashboard)
+  2. Allez dans Settings → General
+  3. Copiez l'ID du projet
+- **Format** : `prj_xxxxxxxxxxxxxxxx`
 
-## 🚀 Workflows Disponibles
+### Secret GitHub (pour les releases)
 
-### CI Pipeline (`.github/workflows/ci.yml`)
+#### `GITHUB_TOKEN`
 
-- **Déclenchement** : Push sur `main`/`develop` ou Pull Request
-- **Jobs** :
-  - Code Quality (ESLint, TypeScript, Prettier)
-  - Tests (Vitest avec coverage)
-  - Build (Next.js build)
-  - Security Audit (pnpm audit)
-  - Deploy (seulement sur `main`)
+- **Description** : Token GitHub pour créer des releases
+- **Comment l'obtenir** : Automatiquement fourni par GitHub Actions
+- **Permissions** : Automatiquement configurées
+- **Note** : Ce secret est automatiquement disponible dans tous les workflows
 
-### Deploy Pipeline (`.github/workflows/deploy.yml`)
+## 🚀 Configuration des Workflows
 
-- **Déclenchement** : Push sur `main` ou workflow_dispatch
-- **Jobs** :
-  - Deploy to Vercel
-  - Lighthouse CI (tests de performance)
-  - Post-deploy tests (smoke tests)
-  - Notifications
+### Workflow CI (`ci.yml`)
 
-### Release Pipeline (`.github/workflows/release.yml`)
+- ✅ **Aucun secret requis**
+- ✅ Fonctionne immédiatement après activation
+- ✅ Se déclenche sur push vers `main` et pull requests
 
-- **Déclenchement** : Push de tag `v*`
-- **Jobs** :
-  - Create GitHub Release
-  - Deploy Release
-  - Notifications
+### Workflow Manual Deploy (`manual-deploy.yml`)
 
-## 🔧 Scripts Disponibles
+- ✅ **Secrets Vercel requis** : `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`
+- ✅ **Déclenchement manuel uniquement** via GitHub Actions UI
+- ✅ Choix de l'environnement (production/staging)
+- ✅ Tests et Lighthouse CI inclus
 
-```bash
-# Développement
-pnpm dev              # Serveur de développement
-pnpm build            # Build de production
-pnpm start            # Serveur de production
+### Workflow Release (`release.yml`)
 
-# Qualité du code
-pnpm lint             # ESLint
-pnpm lint:fix         # ESLint avec correction automatique
-pnpm type-check       # Vérification TypeScript
-pnpm format           # Prettier
-pnpm format:check     # Vérification Prettier
+- ✅ **Secrets GitHub requis** : `GITHUB_TOKEN` (automatique)
+- ✅ Se déclenche sur push de tags `v*`
+- ✅ Création automatique de releases GitHub
+- ✅ **Pas de déploiement automatique**
 
-# Tests
-pnpm test             # Tests en mode watch
-pnpm test:run         # Tests une seule fois
-pnpm test:coverage    # Tests avec coverage
-pnpm test:ui          # Interface graphique des tests
+## 📋 Checklist de Configuration
 
-# Sécurité
-pnpm audit            # Audit de sécurité
-pnpm audit:fix        # Correction automatique
+### 1. Secrets Vercel (optionnel pour l'instant)
 
-# Maintenance
-pnpm clean            # Nettoyage des caches
-```
+- [ ] `VERCEL_TOKEN` configuré (quand vous serez prêt pour le déploiement)
+- [ ] `VERCEL_ORG_ID` configuré (quand vous serez prêt pour le déploiement)
+- [ ] `VERCEL_PROJECT_ID` configuré (quand vous serez prêt pour le déploiement)
 
-## 📊 Monitoring
+### 2. Vérification des Workflows
 
-- **Lighthouse CI** : Tests de performance automatiques
-- **Codecov** : Couverture de code (optionnel)
-- **Vercel Analytics** : Analytics de production
-- **GitHub Actions** : Logs et métriques des workflows
+- [x] Workflow CI activé et fonctionnel
+- [x] Workflow Manual Deploy configuré (déploiement manuel uniquement)
+- [x] Workflow Release activé et fonctionnel (sans déploiement automatique)
 
-## 🎯 Prochaines Étapes
+### 3. Test de Déploiement (quand vous serez prêt)
 
-1. Configurez les secrets GitHub
-2. Poussez le code sur GitHub
-3. Vérifiez que les workflows s'exécutent correctement
-4. Configurez les environnements Vercel si nécessaire
-5. Testez le déploiement automatique
+- [ ] Déploiement manuel via GitHub Actions UI
+- [ ] Création de tag `v1.0.0` déclenche la release
+- [ ] Vérification que l'application est accessible
+
+## 🔧 Dépannage
+
+### Erreur : "Secret not found"
+
+- Vérifiez que tous les secrets sont configurés dans Settings → Secrets and variables → Actions
+- Vérifiez l'orthographe exacte des noms de secrets
+
+### Erreur : "Invalid Vercel credentials"
+
+- Vérifiez que le `VERCEL_TOKEN` a les bonnes permissions
+- Vérifiez que les IDs d'organisation et de projet sont corrects
+
+### Erreur : "Deployment failed"
+
+- Vérifiez les logs du workflow dans l'onglet Actions
+- Vérifiez que le projet Vercel existe et est configuré correctement
+
+## 📚 Ressources Utiles
+
+- [Documentation GitHub Secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
+- [Documentation Vercel CLI](https://vercel.com/docs/cli)
+- [Documentation GitHub Actions](https://docs.github.com/en/actions)

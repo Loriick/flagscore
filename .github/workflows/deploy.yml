@@ -1,9 +1,10 @@
 name: Deploy to Production
 
 on:
+  # Déploiement automatique seulement sur les tags de release
   push:
-    branches: [main]
     tags: ["v*"]
+  # Déploiement manuel uniquement
   workflow_dispatch:
     inputs:
       environment:
