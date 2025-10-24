@@ -118,9 +118,9 @@ export function generateCSPString(): string {
     .join("; ");
 }
 
-// Fonction pour valider les entrées utilisateur
+// Function to validate user inputs
 export function validateInput(
-  input: any,
+  input: unknown,
   type: "string" | "number" | "array"
 ): boolean {
   switch (type) {

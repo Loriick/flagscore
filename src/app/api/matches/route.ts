@@ -1,9 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
+import { Match } from "../../types";
+
+import {
+  createOptimizedResponse,
+  createErrorResponse,
+} from "@/src/lib/compression";
 import { getMatches } from "@/src/lib/fffa-api";
 
 // Match cache (3 minutes - more frequent than rankings)
-const matchesCache = new Map<string, { data: any[]; timestamp: number }>();
+const matchesCache = new Map<string, { data: Match[]; timestamp: number }>();
 const CACHE_DURATION = 3 * 60 * 1000; // 3 minutes
 
 export async function GET(request: NextRequest) {
@@ -12,7 +18,7 @@ export async function GET(request: NextRequest) {
     const poolId = searchParams.get("poolId");
 
     if (!poolId) {
-      return NextResponse.json({ error: "poolId est requis" }, { status: 400 });
+      return createErrorResponse("poolId est requis", 400);
     }
 
     // Check cache
@@ -20,11 +26,14 @@ export async function GET(request: NextRequest) {
     const cached = matchesCache.get(cacheKey);
 
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-      return NextResponse.json({
-        matches: cached.data,
-        cached: true,
-        timestamp: cached.timestamp,
-      });
+      return createOptimizedResponse(
+        {
+          matches: cached.data,
+          cached: true,
+          timestamp: cached.timestamp,
+        },
+        { cacheMaxAge: 180 } // 3 minutes
+      );
     }
 
     // Get fresh data
@@ -36,23 +45,20 @@ export async function GET(request: NextRequest) {
       timestamp: Date.now(),
     });
 
-    return NextResponse.json({
-      matches: matchesData,
-      cached: false,
-      timestamp: Date.now(),
-    });
+    return createOptimizedResponse(
+      {
+        matches: matchesData,
+        cached: false,
+        timestamp: Date.now(),
+      },
+      { cacheMaxAge: 180 } // 3 minutes
+    );
   } catch (error) {
     console.error("Error in the matches API:", error);
 
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
 
-    return NextResponse.json(
-      {
-        error: `Error loading matches: ${errorMessage}`,
-        matches: [],
-      },
-      { status: 500 }
-    );
+    return createErrorResponse(`Error loading matches: ${errorMessage}`, 500);
   }
 }

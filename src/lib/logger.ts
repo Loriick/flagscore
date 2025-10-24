@@ -9,25 +9,25 @@ const logColors = {
 
 // Server-side logger (Node.js)
 const serverLogger = {
-  error: (message: string, meta?: any) => {
+  error: (message: string, meta?: Record<string, unknown>) => {
     console.error(
       `${logColors.error} [ERROR] ${new Date().toISOString()}: ${message}`,
       meta || ""
     );
   },
-  warn: (message: string, meta?: any) => {
+  warn: (message: string, meta?: Record<string, unknown>) => {
     console.warn(
       `${logColors.warn} [WARN] ${new Date().toISOString()}: ${message}`,
       meta || ""
     );
   },
-  info: (message: string, meta?: any) => {
+  info: (message: string, meta?: Record<string, unknown>) => {
     console.info(
       `${logColors.info} [INFO] ${new Date().toISOString()}: ${message}`,
       meta || ""
     );
   },
-  debug: (message: string, meta?: any) => {
+  debug: (message: string, meta?: Record<string, unknown>) => {
     console.debug(
       `${logColors.debug} [DEBUG] ${new Date().toISOString()}: ${message}`,
       meta || ""
@@ -37,25 +37,25 @@ const serverLogger = {
 
 // Client-side logger (Browser)
 const clientLogger = {
-  error: (message: string, meta?: any) => {
+  error: (message: string, meta?: Record<string, unknown>) => {
     console.error(
       `${logColors.error} [ERROR] ${new Date().toISOString()}: ${message}`,
       meta || ""
     );
   },
-  warn: (message: string, meta?: any) => {
+  warn: (message: string, meta?: Record<string, unknown>) => {
     console.warn(
       `${logColors.warn} [WARN] ${new Date().toISOString()}: ${message}`,
       meta || ""
     );
   },
-  info: (message: string, meta?: any) => {
+  info: (message: string, meta?: Record<string, unknown>) => {
     console.info(
       `${logColors.info} [INFO] ${new Date().toISOString()}: ${message}`,
       meta || ""
     );
   },
-  debug: (message: string, meta?: any) => {
+  debug: (message: string, meta?: Record<string, unknown>) => {
     console.debug(
       `${logColors.debug} [DEBUG] ${new Date().toISOString()}: ${message}`,
       meta || ""
@@ -88,7 +88,7 @@ export const logMetric = (data: MetricData) => {
 export const logUserEvent = (
   event: string,
   userId?: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ) => {
   logger.info("USER_EVENT", {
     event,
@@ -98,11 +98,11 @@ export const logUserEvent = (
   });
 };
 
-// Fonction pour logger les performances
+// Function to log performance
 export const logPerformance = (
   operation: string,
   duration: number,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ) => {
   logger.info("PERFORMANCE", {
     operation,

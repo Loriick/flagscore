@@ -52,7 +52,13 @@ export async function GET(request: NextRequest) {
         const phasePools = await getPools(phase.id);
         allPools.push(...phasePools);
       } catch (error) {
-        logger.error(`ERROR pools for phase ${phase.id}:`, error);
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        const errorStack = error instanceof Error ? error.stack : undefined;
+        logger.error(`ERROR pools for phase ${phase.id}:`, {
+          error: errorMessage,
+          stack: errorStack,
+        });
       }
     }
 
@@ -95,7 +101,13 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response);
   } catch (error) {
-    logger.error("ERROR API complete-data:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    logger.error("ERROR API complete-data:", {
+      error: errorMessage,
+      stack: errorStack,
+    });
 
     if (error instanceof Error) {
       if (

@@ -13,7 +13,7 @@ export interface SEOConfig {
     height: number;
     alt: string;
   };
-  structuredData?: any;
+  structuredData?: Record<string, unknown>;
 }
 
 const baseUrl = "https://flagscore.fr";

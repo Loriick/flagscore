@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 
 // Prefetching cache
-const prefetchCache = new Map<string, Promise<any>>();
+const prefetchCache = new Map<string, Promise<unknown>>();
 
 export function usePrefetch() {
   const prefetchRankings = useCallback(async (poolId: number) => {

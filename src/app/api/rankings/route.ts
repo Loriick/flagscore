@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { Ranking } from "../../types";
+
+import {
+  createOptimizedResponse,
+  createErrorResponse,
+} from "@/src/lib/compression";
 import { getRankings } from "@/src/lib/fffa-api";
 import logger from "@/src/lib/logger";
 import { withMonitoring } from "@/src/lib/monitoring";
@@ -11,7 +17,7 @@ import {
 } from "@/src/lib/rate-limit";
 
 // Cache for rankings (5 minutes)
-const rankingsCache = new Map<string, { data: any[]; timestamp: number }>();
+const rankingsCache = new Map<string, { data: Ranking[]; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // Rate limiting for rankings
@@ -45,7 +51,7 @@ async function handleRankings(request: NextRequest) {
         url: request.url,
         timestamp: new Date(),
       });
-      return NextResponse.json({ error: "poolId est requis" }, { status: 400 });
+      return createErrorResponse("poolId est requis", 400);
     }
 
     const poolIdNum = Number(poolId);
@@ -55,10 +61,7 @@ async function handleRankings(request: NextRequest) {
         url: request.url,
         timestamp: new Date(),
       });
-      return NextResponse.json(
-        { error: "poolId doit être un nombre valide" },
-        { status: 400 }
-      );
+      return createErrorResponse("poolId doit être un nombre valide", 400);
     }
 
     // Check cache
@@ -71,11 +74,14 @@ async function handleRankings(request: NextRequest) {
         timestamp: new Date(),
       });
 
-      const response = NextResponse.json({
-        rankings: cached.data,
-        cached: true,
-        timestamp: cached.timestamp,
-      });
+      const response = createOptimizedResponse(
+        {
+          rankings: cached.data,
+          cached: true,
+          timestamp: cached.timestamp,
+        },
+        { cacheMaxAge: 300 }
+      );
 
       // Add rate limiting headers
       Object.entries(getRateLimitHeaders(rateLimitResult)).forEach(
@@ -107,11 +113,14 @@ async function handleRankings(request: NextRequest) {
       timestamp: new Date(),
     });
 
-    const response = NextResponse.json({
-      rankings: rankingsData,
-      cached: false,
-      timestamp: Date.now(),
-    });
+    const response = createOptimizedResponse(
+      {
+        rankings: rankingsData,
+        cached: false,
+        timestamp: Date.now(),
+      },
+      { cacheMaxAge: 300 }
+    );
 
     // Add rate limiting headers
     Object.entries(getRateLimitHeaders(rateLimitResult)).forEach(
@@ -141,4 +150,6 @@ async function handleRankings(request: NextRequest) {
   }
 }
 
-export const GET = withMonitoring(handleRankings as any);
+export const GET = withMonitoring(
+  handleRankings as (req: NextRequest) => Promise<NextResponse>
+);

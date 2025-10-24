@@ -12,14 +12,18 @@ import {
 interface MetricPayload {
   metric: string;
   value: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, string>;
   timestamp: Date;
   userAgent?: string;
   url?: string;
 }
 
+interface CachedMetric extends MetricPayload {
+  receivedAt: Date;
+}
+
 // Cache for metrics (in production, use Redis or database)
-const metricsCache = new Map<string, any>();
+const metricsCache = new Map<string, CachedMetric>();
 
 // Rate limiting for metrics (stricter)
 const rateLimit = createRateLimit(rateLimitConfigs.strict);
@@ -183,7 +187,7 @@ async function getMetrics(req: NextRequest) {
 }
 
 // Function to calculate metrics statistics
-function calculateMetricsStats(metrics: any[]) {
+function calculateMetricsStats(metrics: CachedMetric[]) {
   if (metrics.length === 0) {
     return {
       count: 0,
@@ -210,5 +214,9 @@ function calculateMetricsStats(metrics: any[]) {
 }
 
 // Export handlers with monitoring
-export const POST = withMonitoring(handleMetrics as any);
-export const GET = withMonitoring(getMetrics as any);
+export const POST = withMonitoring(
+  handleMetrics as (req: NextRequest) => Promise<NextResponse>
+);
+export const GET = withMonitoring(
+  getMetrics as (req: NextRequest) => Promise<NextResponse>
+);

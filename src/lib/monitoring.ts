@@ -3,10 +3,13 @@ import React from "react";
 
 import logger, { logHttpRequest, logApiError } from "./logger";
 
-export function withMonitoring<T = any>(
-  handler: (req: NextRequest, ...args: any[]) => Promise<NextResponse<T>>
+export function withMonitoring<T = unknown>(
+  handler: (req: NextRequest, ...args: unknown[]) => Promise<NextResponse<T>>
 ) {
-  return async (req: NextRequest, ...args: any[]): Promise<NextResponse<T>> => {
+  return async (
+    req: NextRequest,
+    ...args: unknown[]
+  ): Promise<NextResponse<T>> => {
     const startTime = Date.now();
     const method = req.method;
     const url = req.url;
@@ -95,7 +98,7 @@ export function usePerformanceMonitor(componentName: string) {
 export const logClientPerformance = (
   metricName: string,
   value: number,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ) => {
   if (typeof window !== "undefined") {
     fetch("/api/metrics", {

@@ -2,6 +2,8 @@ import { memo } from "react";
 
 import { Pool } from "../app/types";
 
+import { NoSSR } from "./NoSSR";
+
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -31,30 +33,38 @@ export const PoolSelector = memo(function PoolSelector({
       <Label htmlFor="pool-select" className="text-white/80 mb-2 block">
         Poule
       </Label>
-      <Select
-        onValueChange={onPoolChange}
-        value={selectedPoolId.toString()}
-        disabled={loading}
+      <NoSSR
+        fallback={
+          <div className="w-full h-10 bg-gray-800 border border-gray-600 rounded-md flex items-center px-3 text-white">
+            Chargement...
+          </div>
+        }
       >
-        <SelectTrigger
-          id="pool-select"
-          name="pool"
-          className="w-full bg-gray-800 border-gray-600 text-white hover:bg-gray-700 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+        <Select
+          onValueChange={onPoolChange}
+          value={selectedPoolId.toString()}
+          disabled={loading}
         >
-          <SelectValue placeholder="Sélectionner une pool" />
-        </SelectTrigger>
-        <SelectContent className="bg-gray-800 border-gray-600">
-          {pools.map(pool => (
-            <SelectItem
-              key={`pool-${pool.id}`}
-              value={pool.id.toString()}
-              className="text-white hover:bg-gray-700 truncate"
-            >
-              {pool.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+          <SelectTrigger
+            id="pool-select"
+            name="pool"
+            className="w-full bg-gray-800 border-gray-600 text-white hover:bg-gray-700 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+          >
+            <SelectValue placeholder="Sélectionner une pool" />
+          </SelectTrigger>
+          <SelectContent className="bg-gray-800 border-gray-600">
+            {pools.map(pool => (
+              <SelectItem
+                key={`pool-${pool.id}`}
+                value={pool.id.toString()}
+                className="text-white hover:bg-gray-700 truncate"
+              >
+                {pool.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </NoSSR>
     </div>
   );
 });

@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 
 interface StructuredDataProps {
-  data: any;
+  data: Record<string, unknown>;
 }
 
 export function StructuredData({ data }: StructuredDataProps) {
@@ -34,7 +34,7 @@ export function MatchStructuredData({
   homeTeam,
   awayTeam,
 }: {
-  match: any;
+  match: Record<string, unknown>;
   homeTeam: string;
   awayTeam: string;
 }) {
@@ -72,7 +72,7 @@ export function RankingStructuredData({
   rankings,
   poolName,
 }: {
-  rankings: any[];
+  rankings: Array<Record<string, unknown>>;
   poolName: string;
 }) {
   const structuredData = {
@@ -86,7 +86,7 @@ export function RankingStructuredData({
       position: index + 1,
       item: {
         "@type": "SportsTeam",
-        name: ranking.club.label,
+        name: (ranking.club as { label: string }).label,
         description: `Équipe classée ${index + 1} avec ${
           ranking.points
         } points`,

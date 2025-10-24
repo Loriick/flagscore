@@ -15,7 +15,7 @@ interface SeoProps {
     height: number;
     alt: string;
   };
-  structuredData?: any;
+  structuredData?: Record<string, unknown>;
 }
 
 export function Seo({

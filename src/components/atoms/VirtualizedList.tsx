@@ -83,7 +83,7 @@ export const VirtualizedList = memo(function VirtualizedList<T>({
 });
 
 // Hook to automatically calculate element height
-export function useVirtualization(items: any[], itemHeight: number) {
+export function useVirtualization<T>(items: T[], itemHeight: number) {
   const [containerHeight, setContainerHeight] = useState(400);
   const containerRef = useRef<HTMLDivElement>(null);
 

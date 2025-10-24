@@ -30,8 +30,12 @@ export function PreloadManager({ children }: PreloadManagerProps) {
     return () => clearTimeout(timeoutId);
   }, [router]);
 
-  // Preload important API data
+  // Preload important API data (only in production)
   useEffect(() => {
+    if (process.env.NODE_ENV !== "production") {
+      return; // Skip API preloading in development
+    }
+
     const preloadApiData = async () => {
       try {
         // Preload basic data
