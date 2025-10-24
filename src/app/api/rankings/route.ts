@@ -100,9 +100,12 @@ async function handleRankings(request: NextRequest) {
 
     let rankingsData: Ranking[] = [];
     try {
-      // Call FFFA API directly instead of using getRankings to avoid internal API calls
+      // Call FFFA API directly using the request URL to avoid environment variable issues
+      const requestUrl = new URL(request.url);
+      const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
+
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_FLAGSCORE_ORIGIN || "http://localhost:3000"}/api/fffa/flag?resource=rankings&args[]=${poolIdNum}`,
+        `${baseUrl}/api/fffa/flag?resource=rankings&args[]=${poolIdNum}`,
         {
           cache: "no-store",
           headers: {
