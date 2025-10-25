@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 
 interface DaysNavigationProps {
   days: Day[];
-  selectedDayId: number;
   onDaySelect: (day: Day) => void;
   className?: string;
   "data-testid"?: string;
@@ -16,7 +15,6 @@ interface DaysNavigationProps {
 
 export const DaysNavigation = memo(function DaysNavigation({
   days,
-  selectedDayId,
   onDaySelect,
   className,
   "data-testid": dataTestId,
@@ -31,7 +29,6 @@ export const DaysNavigation = memo(function DaysNavigation({
             <DayButton
               key={day.id}
               day={day}
-              isSelected={selectedDayId === day.id}
               onClick={() => onDaySelect(day)}
             />
           ))}

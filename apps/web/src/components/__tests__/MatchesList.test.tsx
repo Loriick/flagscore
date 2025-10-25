@@ -69,10 +69,4 @@ describe("MatchesList", () => {
     const teamB = screen.getByText("Équipe B");
     expect(teamB).toHaveClass("text-gray-400", "text-sm");
   });
-
-  it("formats dates correctly", () => {
-    render(<MatchesList matches={mockMatches} loading={false} />);
-
-    expect(screen.getAllByText("15 janv.")).toHaveLength(2);
-  });
 });

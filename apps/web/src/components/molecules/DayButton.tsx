@@ -1,10 +1,8 @@
 import { memo } from "react";
 
-import { Badge } from "../atoms/Badge";
 import { Button } from "../atoms/Button";
 
-// Import cn to avoid error
-import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger-advanced";
 
 interface DayButtonProps {
   day: {
@@ -12,33 +10,28 @@ interface DayButtonProps {
     label: string;
     date: string;
   };
-  isSelected: boolean;
   onClick: () => void;
   className?: string;
 }
 
 export const DayButton = memo(function DayButton({
   day,
-  isSelected,
   onClick,
-  className,
 }: DayButtonProps) {
+  const handleClick = () => {
+    logger.logUserAction("day_selected", {
+      dayId: day.id,
+      dayLabel: day.label,
+      dayDate: day.date,
+      source: "supabase",
+    });
+
+    onClick();
+  };
+
   return (
-    <Button
-      variant={isSelected ? "primary" : "outline"}
-      onClick={onClick}
-      className={cn(
-        "flex flex-col items-center space-y-1 min-w-[80px]",
-        className
-      )}
-    >
-      <span className="text-sm font-medium">{day.label}</span>
-      <Badge variant="info" size="sm">
-        {new Date(day.date).toLocaleDateString("fr-FR", {
-          day: "2-digit",
-          month: "2-digit",
-        })}
-      </Badge>
+    <Button variant="outline" onClick={handleClick}>
+      {day.label}
     </Button>
   );
 });

@@ -6,7 +6,7 @@ export const metadata: Metadata = pageMetadata.about;
 
 export default function About() {
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen text-white">
       <div className="max-w-4xl mx-auto p-4">
         <header className="mb-8">
           <h1 className="text-4xl font-bold mb-4">À propos de Flagscore</h1>

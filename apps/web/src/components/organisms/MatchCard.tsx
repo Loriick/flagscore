@@ -28,7 +28,7 @@ export const MatchCard = memo(function MatchCard({
             <div className="flex-1">
               <div
                 className={cn(
-                  "text-sm font-medium",
+                  "text-xs font-medium",
                   isFinished && !teamAWon ? "text-white/60" : "text-white"
                 )}
               >
@@ -47,7 +47,7 @@ export const MatchCard = memo(function MatchCard({
             <div className="flex-1 text-right">
               <div
                 className={cn(
-                  "text-sm font-medium",
+                  "text-xs font-medium",
                   isFinished && !teamBWon ? "text-white/60" : "text-white"
                 )}
               >
@@ -55,15 +55,6 @@ export const MatchCard = memo(function MatchCard({
               </div>
             </div>
           </div>
-          {match.date && (
-            <div className="mt-2 text-xs text-white/40">
-              {new Date(match.date).toLocaleDateString("fr-FR", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-              })}
-            </div>
-          )}
         </div>
       </div>
     </Card>

@@ -167,7 +167,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased relative bg-black`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased relative bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900`}
       >
         <QueryProvider>
           <ServiceWorkerManager>
@@ -175,7 +175,7 @@ export default function RootLayout({
               <PerformanceMonitor>
                 <ErrorBoundary>
                   <Header />
-                  <main className="min-h-screen bg-black">{children}</main>
+                  <main className="min-h-screen">{children}</main>
                   <Footer />
                   <Toaster />
                   {process.env.NODE_ENV === "production" &&

@@ -3,11 +3,11 @@
 import { useEffect } from "react";
 import { toast } from "sonner";
 
-import { useAppData } from "../hooks/useAppData";
+import { useAppDataSupabase } from "../hooks/useAppDataSupabase";
 
 import { ChampionshipSelector } from "./ChampionshipSelector";
-import { DaysNavigation } from "./DaysNavigation";
 import { DeflagLoader } from "./DeflagLoader";
+import { DaysNavigation } from "./organisms/DaysNavigation";
 import { OptimizedMatchesList } from "./organisms/OptimizedMatchesList";
 import { PoolSelector } from "./PoolSelector";
 import { SeasonSelector } from "./SeasonSelector";
@@ -20,6 +20,7 @@ export function PoolsSelector() {
     currentSeason,
     selectedChampionshipId,
     selectedPoolId,
+    selectedDayId,
 
     // Data
     championships,
@@ -41,7 +42,7 @@ export function PoolsSelector() {
     handleChampionshipChange,
     handlePoolChange,
     handleDayChange,
-  } = useAppData();
+  } = useAppDataSupabase();
 
   // Gestion des erreurs avec notifications - seulement pour les vraies erreurs
   useEffect(() => {
@@ -121,22 +122,20 @@ export function PoolsSelector() {
         </div>
       )}
 
-      {!initialLoading &&
-        ((!hasPools && championships.length > 0) ||
-          (hasPools && days.length === 0)) && (
-          <div className="text-center py-8">
-            <DeflagLoader />
-            <div className="text-white/60 text-sm mt-2">
-              {!hasPools && championships.length > 0
-                ? "Chargement des poules..."
-                : hasPools && days.length === 0
-                  ? poolChangeLoading
-                    ? "Chargement des données de la poule..."
-                    : "Chargement des journées..."
-                  : null}
-            </div>
+      {!initialLoading && (!hasPools || (hasPools && days.length === 0)) && (
+        <div className="text-center py-8">
+          <DeflagLoader />
+          <div className="text-white/60 text-sm mt-2">
+            {!hasPools
+              ? "Chargement des poules..."
+              : hasPools && days.length === 0
+                ? poolChangeLoading
+                  ? "Chargement des données de la poule..."
+                  : "Chargement des journées..."
+                : null}
           </div>
-        )}
+        </div>
+      )}
 
       {!initialLoading && hasPools && days.length > 0 && (
         <div>
@@ -145,6 +144,31 @@ export function PoolsSelector() {
             onDaySelect={day => handleDayChange(day.id.toString())}
             data-testid="days-navigation"
           />
+
+          {/* Date réelle du jour sélectionné */}
+          {selectedDayId > 0 && (
+            <div className="mt-4 mb-2">
+              <h3 className="text-lg font-medium text-white">
+                {(() => {
+                  const selectedDay = days.find(
+                    day => day.id === selectedDayId
+                  );
+                  if (selectedDay && selectedDay.date) {
+                    return new Date(selectedDay.date).toLocaleDateString(
+                      "fr-FR",
+                      {
+                        weekday: "long",
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      }
+                    );
+                  }
+                  return "";
+                })()}
+              </h3>
+            </div>
+          )}
 
           <OptimizedMatchesList
             matches={matches}

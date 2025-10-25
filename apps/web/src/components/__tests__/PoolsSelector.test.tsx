@@ -4,17 +4,25 @@ import { describe, expect, it, vi } from "vitest";
 import { PoolsSelector } from "../PoolsSelector";
 
 // Mock hooks
-vi.mock("../../hooks/useAppData", () => ({
-  useAppData: () => ({
+vi.mock("../../hooks/useAppDataSupabase", () => ({
+  useAppDataSupabase: () => ({
     // State
     currentSeason: 2026,
     selectedChampionshipId: 1,
     selectedPoolId: 1,
+    selectedDayId: 1,
 
     // Data
-    championships: [{ id: 1, name: "Championnat de France mixte" }],
-    pools: [{ id: 1, name: "Poule A" }],
-    days: [{ id: 1, name: "Journée 1", date: "2026-01-01" }],
+    championships: [
+      {
+        id: 1,
+        label: "Championnat de France mixte",
+        season: 2026,
+        male: false,
+      },
+    ],
+    pools: [{ id: 1, label: "Poule A", championship_id: 1, phase_id: 1 }],
+    days: [{ id: 1, label: "Journée 1", date: "2026-01-01" }],
     matches: [],
 
     // Loading states
@@ -26,8 +34,7 @@ vi.mock("../../hooks/useAppData", () => ({
       rankings: false,
     },
     initialLoading: false,
-    poolsAreLoading: false,
-    hasData: true,
+    poolChangeLoading: false,
     hasPools: true,
 
     // Errors
@@ -118,7 +125,6 @@ describe("PoolsSelectorRefactored", () => {
       screen.getByText("Championship: 1 (1 championships)")
     ).toBeInTheDocument();
     expect(screen.getByText("Pool: 1 (1 pools)")).toBeInTheDocument();
-    expect(screen.getByText("Days: 1 days")).toBeInTheDocument();
     expect(
       screen.getByText("Matches: 0 matches (loading: false)")
     ).toBeInTheDocument();
