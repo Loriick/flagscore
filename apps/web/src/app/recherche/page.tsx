@@ -149,7 +149,7 @@ function RechercheContent() {
                       <div className="text-white font-semibold">
                         {team.total_goals_for}
                       </div>
-                      <div className="text-gray-400">Touchdowns</div>
+                      <div className="text-gray-400">Points</div>
                     </div>
                   </div>
                 </div>

@@ -130,19 +130,19 @@ export default function EquipePage() {
 
             <div className="space-y-4">
               <div className="flex justify-between items-center p-3 bg-gray-900 rounded-lg">
-                <span className="text-gray-400">Touchdowns marqués</span>
+                <span className="text-gray-400">Points marqués</span>
                 <span className="text-xl font-bold text-white">
                   {team.total_goals_for}
                 </span>
               </div>
               <div className="flex justify-between items-center p-3 bg-gray-900 rounded-lg">
-                <span className="text-gray-400">Touchdowns encaissés</span>
+                <span className="text-gray-400">Points encaissés</span>
                 <span className="text-xl font-bold text-white">
                   {team.total_goals_against}
                 </span>
               </div>
               <div className="flex justify-between items-center p-3 bg-gray-900 rounded-lg">
-                <span className="text-gray-400">Différence de touchdowns</span>
+                <span className="text-gray-400">Différence de points</span>
                 <span
                   className={`text-xl font-bold ${team.total_goal_difference > 0 ? "text-green-400" : team.total_goal_difference < 0 ? "text-red-400" : "text-gray-400"}`}
                 >
