@@ -2,8 +2,8 @@ import { memo } from "react";
 
 import { Match } from "../app/types";
 
-import { DeflagLoader } from "./DeflagLoader";
 import { MatchItem } from "./MatchItem";
+import { SkeletonLoader } from "./SkeletonLoader";
 
 interface MatchesListProps {
   matches: Match[];
@@ -14,13 +14,11 @@ export const MatchesList = memo(function MatchesList({
   matches,
   loading,
 }: MatchesListProps) {
-  if (loading) {
+  // Afficher le skeleton seulement si on n'a pas encore de données ET qu'on charge
+  if (loading && matches.length === 0) {
     return (
       <div className="text-center py-8">
-        <DeflagLoader />
-        <div className="text-white/60 text-sm mt-2">
-          Chargement des matchs...
-        </div>
+        <SkeletonLoader />
       </div>
     );
   }

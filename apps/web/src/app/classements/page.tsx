@@ -4,7 +4,6 @@ import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { toast } from "sonner";
 
 import { ChampionshipSelector } from "../../components/ChampionshipSelector";
-import { DeflagLoader } from "../../components/DeflagLoader";
 import { PoolSelector } from "../../components/PoolSelector";
 import { SeasonSelector } from "../../components/SeasonSelector";
 import { useRankingsDirect } from "../../hooks/useRankingsDirect";
@@ -152,17 +151,13 @@ const Rankings = () => {
               </h2>
 
               <div className="space-y-4">
-                {initialLoading ? (
+                {initialLoading && (!rankings || rankings.length === 0) ? (
                   <div className="text-center py-8">
-                    <DeflagLoader />
-                    <div className="text-white/60 text-sm mt-2">
+                    <div className="text-white/60 text-sm">
                       Chargement du classement...
                     </div>
                   </div>
-                ) : !rankingsLoading &&
-                  !initialLoading &&
-                  rankings &&
-                  rankings.length > 0 ? (
+                ) : !rankingsLoading && rankings && rankings.length > 0 ? (
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>

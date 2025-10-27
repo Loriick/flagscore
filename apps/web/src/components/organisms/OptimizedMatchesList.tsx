@@ -32,7 +32,8 @@ export const OptimizedMatchesList = memo(function OptimizedMatchesList({
     []
   );
 
-  if (loading) {
+  // Afficher le skeleton seulement si on n'a pas encore de données ET qu'on charge
+  if (loading && matches.length === 0) {
     return (
       <div className={`space-y-3 ${className}`} data-testid={dataTestId}>
         {[...Array(5)].map((_, i) => (

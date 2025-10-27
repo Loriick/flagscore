@@ -10,6 +10,17 @@ const nextConfig: NextConfig = {
   // Compression
   compress: true,
 
+  // Disable ALL caching in development
+  ...(process.env.NODE_ENV === "development" && {
+    generateEtags: false,
+    poweredByHeader: false,
+    // Force no caching
+    onDemandEntries: {
+      maxInactiveAge: 25 * 1000,
+      pagesBufferLength: 2,
+    },
+  }),
+
   // Image optimization
   images: {
     formats: ["image/webp", "image/avif"],
@@ -71,8 +82,23 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
+            value:
+              process.env.NODE_ENV === "development"
+                ? "no-cache, no-store, must-revalidate, max-age=0"
+                : "public, max-age=31536000, immutable",
           },
+          ...(process.env.NODE_ENV === "development"
+            ? [
+                {
+                  key: "Pragma",
+                  value: "no-cache",
+                },
+                {
+                  key: "Expires",
+                  value: "0",
+                },
+              ]
+            : []),
         ],
       },
     ];

@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { useAppDataSupabase } from "../hooks/useAppDataSupabase";
 
 import { ChampionshipSelector } from "./ChampionshipSelector";
-import { DeflagLoader } from "./DeflagLoader";
 import { DaysNavigation } from "./organisms/DaysNavigation";
 import { OptimizedMatchesList } from "./organisms/OptimizedMatchesList";
 import { PoolSelector } from "./PoolSelector";
@@ -32,7 +31,6 @@ export function PoolsSelector() {
     loading,
     initialLoading,
     poolChangeLoading,
-    hasPools,
 
     // Errors
     errors,
@@ -105,39 +103,17 @@ export function PoolsSelector() {
           />
         </div>
 
-        {hasPools && (
-          <PoolSelector
-            pools={pools}
-            selectedPoolId={selectedPoolId}
-            onPoolChange={handlePoolChange}
-            loading={poolChangeLoading}
-          />
-        )}
+        {/* Pool Selector - toujours affiché avec état de chargement */}
+        <PoolSelector
+          pools={pools}
+          selectedPoolId={selectedPoolId}
+          onPoolChange={handlePoolChange}
+          loading={loading.pools || poolChangeLoading}
+        />
       </div>
 
-      {initialLoading && (
-        <div className="text-center py-8">
-          <DeflagLoader />
-          <div className="text-white/60 text-sm mt-2">Chargement...</div>
-        </div>
-      )}
-
-      {!initialLoading && (!hasPools || (hasPools && days.length === 0)) && (
-        <div className="text-center py-8">
-          <DeflagLoader />
-          <div className="text-white/60 text-sm mt-2">
-            {!hasPools
-              ? "Chargement des poules..."
-              : hasPools && days.length === 0
-                ? poolChangeLoading
-                  ? "Chargement des données de la poule..."
-                  : "Chargement des journées..."
-                : null}
-          </div>
-        </div>
-      )}
-
-      {!initialLoading && hasPools && days.length > 0 && (
+      {/* Days Navigation - affiché seulement si on a des jours */}
+      {selectedPoolId > 0 && days.length > 0 && (
         <div>
           <DaysNavigation
             days={days}
@@ -170,13 +146,45 @@ export function PoolsSelector() {
             </div>
           )}
 
-          <OptimizedMatchesList
-            matches={matches}
-            loading={poolChangeLoading}
-            data-testid="matches-list"
-          />
+          {/* Matchs - affichés seulement si un jour est sélectionné */}
+          {selectedDayId > 0 && (
+            <OptimizedMatchesList
+              matches={matches}
+              loading={loading.matches}
+              data-testid="matches-list"
+            />
+          )}
         </div>
       )}
+
+      {/* États de chargement et messages - logique exclusive stricte */}
+      {initialLoading ? (
+        <div className="text-center py-8">
+          <div className="text-white/60 text-sm">Chargement...</div>
+        </div>
+      ) : championships.length === 0 ? (
+        <div className="text-center py-8">
+          <div className="text-white/60 text-sm">
+            Aucune compétition disponible
+          </div>
+        </div>
+      ) : selectedPoolId === 0 ? (
+        <div className="text-center py-8">
+          <div className="text-white/60 text-sm">
+            Sélectionnez une poule pour voir les journées et matchs
+          </div>
+        </div>
+      ) : selectedPoolId > 0 && days.length === 0 && loading.days ? (
+        <div className="text-center py-8">
+          <div className="text-white/60 text-sm">
+            Chargement des journées...
+          </div>
+        </div>
+      ) : selectedPoolId > 0 && days.length === 0 ? (
+        <div className="text-center py-8">
+          <div className="text-white/60 text-sm">Aucune journée disponible</div>
+        </div>
+      ) : null}
     </div>
   );
 }

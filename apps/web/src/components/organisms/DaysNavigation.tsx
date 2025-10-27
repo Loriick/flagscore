@@ -19,19 +19,23 @@ export const DaysNavigation = memo(function DaysNavigation({
   className,
   "data-testid": dataTestId,
 }: DaysNavigationProps) {
-  if (days.length === 0) return null;
-
   return (
     <div className={cn("mb-4", className)} data-testid={dataTestId}>
       <div className="overflow-x-auto">
         <div className="flex gap-2 pb-2">
-          {days.map(day => (
-            <DayButton
-              key={day.id}
-              day={day}
-              onClick={() => onDaySelect(day)}
-            />
-          ))}
+          {days.length === 0 ? (
+            <div className="text-white/60 text-sm px-4 py-2">
+              Aucune journée disponible
+            </div>
+          ) : (
+            days.map(day => (
+              <DayButton
+                key={day.id}
+                day={day}
+                onClick={() => onDaySelect(day)}
+              />
+            ))
+          )}
         </div>
       </div>
     </div>

@@ -18,23 +18,18 @@ export function useChampionshipsOptimized(season?: number) {
     queryKey: ["championships", "optimized", season],
     queryFn: async () => {
       try {
-        // Récupérer les données Supabase
-        const supabaseData = await SupabaseService.getChampionships();
-
-        // Filtrer par saison si spécifiée
-        const filteredData = season
-          ? supabaseData.filter(c => parseInt(c.season) === season)
-          : supabaseData;
+        // Récupérer les données Supabase avec filtre par saison
+        const supabaseData = await SupabaseService.getChampionships(season);
 
         // Si Supabase a des données, les retourner immédiatement
-        if (filteredData && filteredData.length > 0) {
+        if (supabaseData && supabaseData.length > 0) {
           console.log("📊 Utilisation des données Supabase (immédiat)");
           await logger.logSupabaseSync("championships_loaded", {
-            count: filteredData.length,
+            count: supabaseData.length,
             source: "supabase_cache",
             season: season,
           });
-          return { data: filteredData, source: "supabase" };
+          return { data: supabaseData, source: "supabase" };
         }
 
         // Si pas de données Supabase, synchroniser depuis FFFA

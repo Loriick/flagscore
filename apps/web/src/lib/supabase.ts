@@ -1,6 +1,27 @@
 import { createClient } from "@supabase/supabase-js";
 
-// Types pour les tables Supabase
+// Types pour les tables Supabase   
+export interface Team {
+  id: string;
+  name: string;
+  pool_id: number;
+  championship_id: number;
+  season: string;
+  total_matches: number;
+  total_wins: number;
+  total_draws: number;
+  total_losses: number;
+  total_goals_for: number;
+  total_goals_against: number;
+  total_goal_difference: number;
+  total_points: number;
+  best_position: number;
+  worst_position: number;
+  current_position: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Championship {
   id: number;
   name: string;
@@ -108,13 +129,20 @@ function checkSupabaseConfig() {
 // Utilitaires pour les requêtes
 export class SupabaseService {
   // Championships
-  static async getChampionships() {
+  static async getChampionships(season?: number) {
     checkSupabaseConfig();
 
-    const { data, error } = await supabase
+    let query = supabase
       .from("championships")
       .select("*")
       .order("season", { ascending: false });
+
+    // Filtrer par saison si spécifiée
+    if (season) {
+      query = query.eq("season", season.toString());
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
     return data as Championship[];
@@ -353,5 +381,175 @@ export class SupabaseService {
 
     if (error) throw error;
     return data[0] as Ranking;
+  }
+
+  // Méthodes pour les équipes
+  static async getTeams(
+    searchTerm?: string,
+    poolId?: number,
+    championshipId?: number
+  ) {
+    let query = supabase.from("teams").select(`
+      *,
+      pools:pool_id(name, championship_id),
+      championships:championship_id(name, season)
+    `);
+
+    if (searchTerm) {
+      query = query.ilike("name", `%${searchTerm}%`);
+    }
+
+    if (poolId) {
+      query = query.eq("pool_id", poolId);
+    }
+
+    if (championshipId) {
+      query = query.eq("championship_id", championshipId);
+    }
+
+    query = query.order("name");
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data as (Team & { pools: Pool; championships: Championship })[];
+  }
+
+  static async getTeamById(teamId: string) {
+    const { data, error } = await supabase
+      .from("teams")
+      .select(
+        `
+        *,
+        pools:pool_id(name, championship_id),
+        championships:championship_id(name, season)
+      `
+      )
+      .eq("id", teamId)
+      .single();
+
+    if (error) throw error;
+    return data as Team & { pools: Pool; championships: Championship };
+  }
+
+  static async syncTeamsFromRankings() {
+    console.log("🔄 Synchronisation des équipes depuis les classements...");
+
+    // Récupérer tous les classements
+    const { data: rankings, error: rankingsError } = await supabase.from(
+      "rankings"
+    ).select(`
+        team_name,
+        pool_id,
+        points,
+        played,
+        won,
+        drawn,
+        lost,
+        goals_for,
+        goals_against,
+        goal_difference,
+        position
+      `);
+
+    if (rankingsError) throw rankingsError;
+
+    if (!rankings || rankings.length === 0) {
+      console.log("⚠️ Aucun classement trouvé pour synchroniser les équipes");
+      return [];
+    }
+
+    // Récupérer les infos des pools pour avoir les championship_id
+    const poolIds = [...new Set(rankings.map(r => r.pool_id))];
+    const { data: pools, error: poolsError } = await supabase
+      .from("pools")
+      .select("id, championship_id")
+      .in("id", poolIds);
+
+    if (poolsError) throw poolsError;
+
+    // Créer une map pour accéder rapidement aux championship_id
+    const poolToChampionship = new Map(
+      pools?.map(pool => [pool.id, pool.championship_id]) || []
+    );
+
+    // Grouper par équipe et calculer les statistiques
+    const teamStats = new Map<
+      string,
+      {
+        name: string;
+        pool_id: number;
+        championship_id: number;
+        total_matches: number;
+        total_wins: number;
+        total_draws: number;
+        total_losses: number;
+        total_goals_for: number;
+        total_goals_against: number;
+        total_goal_difference: number;
+        total_points: number;
+        positions: number[];
+      }
+    >();
+
+    for (const ranking of rankings) {
+      const teamKey = `${ranking.team_name}_${ranking.pool_id}`;
+
+      if (!teamStats.has(teamKey)) {
+        teamStats.set(teamKey, {
+          name: ranking.team_name,
+          pool_id: ranking.pool_id,
+          championship_id: poolToChampionship.get(ranking.pool_id) || 0,
+          total_matches: 0,
+          total_wins: 0,
+          total_draws: 0,
+          total_losses: 0,
+          total_goals_for: 0,
+          total_goals_against: 0,
+          total_goal_difference: 0,
+          total_points: 0,
+          positions: [],
+        });
+      }
+
+      const stats = teamStats.get(teamKey)!;
+      stats.total_matches += ranking.played;
+      stats.total_wins += ranking.won;
+      stats.total_draws += ranking.drawn;
+      stats.total_losses += ranking.lost;
+      stats.total_goals_for += ranking.goals_for;
+      stats.total_goals_against += ranking.goals_against;
+      stats.total_goal_difference += ranking.goal_difference;
+      stats.total_points += ranking.points;
+      stats.positions.push(ranking.position);
+    }
+
+    // Insérer/mettre à jour les équipes
+    const teamsToUpsert = Array.from(teamStats.values()).map(stats => ({
+      id: `${stats.name}_${stats.pool_id}`.replace(/\s+/g, "_").toLowerCase(),
+      name: stats.name,
+      pool_id: stats.pool_id,
+      championship_id: stats.championship_id,
+      season: "2026", // TODO: Récupérer depuis le championship
+      total_matches: stats.total_matches,
+      total_wins: stats.total_wins,
+      total_draws: stats.total_draws,
+      total_losses: stats.total_losses,
+      total_goals_for: stats.total_goals_for,
+      total_goals_against: stats.total_goals_against,
+      total_goal_difference: stats.total_goal_difference,
+      total_points: stats.total_points,
+      best_position: Math.min(...stats.positions),
+      worst_position: Math.max(...stats.positions),
+      current_position: stats.positions[stats.positions.length - 1] || 0,
+    }));
+
+    const { error } = await supabase
+      .from("teams")
+      .upsert(teamsToUpsert, { onConflict: "id" });
+
+    if (error) throw error;
+
+    console.log(`✅ ${teamsToUpsert.length} équipes synchronisées`);
+    return teamsToUpsert;
   }
 }

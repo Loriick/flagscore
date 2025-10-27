@@ -30,7 +30,7 @@ export const SeasonSelector = memo(function SeasonSelector({
       <NoSSR
         fallback={
           <div className="w-full h-10 bg-gray-800 border border-gray-600 rounded-md flex items-center px-3 text-white">
-            Chargement...
+            ...
           </div>
         }
       >

@@ -250,11 +250,8 @@ export function useAppDataSupabase() {
 
   // Calculated states
   const initialLoading = useMemo(() => {
-    // The skeleton remains displayed while loading championships OR when we don't have championships yet
-    const shouldShowSkeleton =
-      championshipsLoading || mappedChampionships.length === 0;
-
-    return shouldShowSkeleton;
+    // Show loading only if we don't have championships yet AND we're loading
+    return championshipsLoading && mappedChampionships.length === 0;
   }, [championshipsLoading, mappedChampionships.length]);
 
   const poolsAreLoading = poolsLoading && mappedPools.length === 0;
@@ -288,13 +285,13 @@ export function useAppDataSupabase() {
     matches: mappedMatches,
     rankings: mappedRankings,
 
-    // États de chargement
+    // États de chargement intelligents
     loading: {
-      championships: championshipsLoading,
-      pools: poolsLoading,
-      days: daysLoading,
-      matches: matchesLoading,
-      rankings: rankingsLoading,
+      championships: championshipsLoading && mappedChampionships.length === 0,
+      pools: poolsLoading && mappedPools.length === 0,
+      days: daysLoading && days.length === 0,
+      matches: matchesLoading && mappedMatches.length === 0,
+      rankings: rankingsLoading && mappedRankings.length === 0,
     },
     initialLoading,
     poolsAreLoading,

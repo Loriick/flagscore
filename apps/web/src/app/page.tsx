@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 
+import { ClientOnly } from "../components/ClientOnly";
 import { PoolsSelector } from "../components/PoolsSelector";
 import { pageMetadata } from "../lib/seo";
 
@@ -21,7 +22,15 @@ export default function Home() {
         </header>
 
         <main>
-          <PoolsSelector />
+          <ClientOnly
+            fallback={
+              <div className="text-center py-8">
+                <div className="text-white/60 text-sm">Chargement...</div>
+              </div>
+            }
+          >
+            <PoolsSelector />
+          </ClientOnly>
         </main>
       </div>
     </div>

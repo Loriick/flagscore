@@ -34,7 +34,7 @@ export const ChampionshipSelector = memo(function ChampionshipSelector({
       <NoSSR
         fallback={
           <div className="w-full h-10 bg-gray-800 border border-gray-600 rounded-md flex items-center px-3 text-white">
-            Chargement...
+            ...
           </div>
         }
       >
@@ -49,9 +49,7 @@ export const ChampionshipSelector = memo(function ChampionshipSelector({
             className="w-full bg-gray-800 border-gray-600 text-white hover:bg-gray-700 focus:ring-2 focus:ring-blue-500 cursor-pointer"
           >
             <SelectValue
-              placeholder={
-                loading ? "Chargement..." : "Sélectionner une compétition"
-              }
+              placeholder="Sélectionner une compétition"
               className="truncate"
             />
           </SelectTrigger>

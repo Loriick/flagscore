@@ -26,8 +26,6 @@ export const PoolSelector = memo(function PoolSelector({
   onPoolChange,
   loading,
 }: PoolSelectorProps) {
-  if (pools.length === 0) return null;
-
   return (
     <div className="mb-6 w-full sm:w-64" data-testid="pool-selector">
       <Label htmlFor="pool-select" className="text-white/80 mb-2 block">
@@ -36,7 +34,7 @@ export const PoolSelector = memo(function PoolSelector({
       <NoSSR
         fallback={
           <div className="w-full h-10 bg-gray-800 border border-gray-600 rounded-md flex items-center px-3 text-white">
-            Chargement...
+            ...
           </div>
         }
       >
@@ -50,7 +48,15 @@ export const PoolSelector = memo(function PoolSelector({
             name="pool"
             className="w-full bg-gray-800 border-gray-600 text-white hover:bg-gray-700 focus:ring-2 focus:ring-blue-500 cursor-pointer"
           >
-            <SelectValue placeholder="Sélectionner une pool" />
+            <SelectValue
+              placeholder={
+                loading
+                  ? ""
+                  : pools.length === 0
+                    ? "Aucune poule disponible"
+                    : "Sélectionner une pool"
+              }
+            />
           </SelectTrigger>
           <SelectContent className="bg-gray-800 border-gray-600">
             {pools.map(pool => (
