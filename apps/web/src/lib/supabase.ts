@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
-// Types pour les tables Supabase   
+// Types pour les tables Supabase
 export interface Team {
   id: string;
   name: string;
@@ -96,13 +96,13 @@ console.log("🔍 Debug Supabase Config:", {
   hasKey: !!supabaseAnonKey,
   keyLength: supabaseAnonKey?.length || 0,
   envUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
-  envKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "SET" : "NOT SET",
+  envKey: process.env.NEXT_PUBLIC_SUPABASE_ANON ? "SET" : "NOT SET",
 });
 
 // Mode développement : ne pas lancer d'erreur si les variables ne sont pas définies
 if (
   !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-  !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  !process.env.NEXT_PUBLIC_SUPABASE_ANON
 ) {
   console.warn(
     "⚠️ Variables Supabase non définies - Mode développement activé"
@@ -110,6 +110,9 @@ if (
 }
 
 // Client Supabase
+// ⚠️ NOTE DE SÉCURITÉ: La clé ANON de Supabase est conçue pour être exposée publiquement dans le client.
+// Elle est sécurisée par les Row Level Security (RLS) policies dans Supabase.
+// Ce n'est PAS une clé secrète et peut être visible dans le code JavaScript côté client.
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: false, // Pas d'auth pour cette app
@@ -120,7 +123,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 function checkSupabaseConfig() {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    !process.env.NEXT_PUBLIC_SUPABASE_ANON
   ) {
     throw new Error("Supabase not configured - use FFFA fallback");
   }

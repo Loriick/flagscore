@@ -6,8 +6,7 @@ export const SUPABASE_CONFIG = {
   url: process.env.NEXT_PUBLIC_SUPABASE_URL || "your_supabase_project_url",
 
   // Clé anonyme de votre projet Supabase
-  anonKey:
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "your_supabase_anon_key",
+  anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON || "your_supabase_anon_key",
 
   // Configuration des tables
   tables: {
@@ -23,5 +22,5 @@ export const SUPABASE_CONFIG = {
 // 2. Récupérer l'URL et la clé anonyme
 // 3. Ajouter ces variables dans .env.local :
 //    NEXT_PUBLIC_SUPABASE_URL=your_project_url
-//    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+//    NEXT_PUBLIC_SUPABASE_ANON=your_anon_key  (nom changé de ANON_KEY à ANON pour éviter l'avertissement Vercel)
 // 4. Créer les tables dans Supabase SQL Editor
