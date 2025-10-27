@@ -282,4 +282,6 @@ const Rankings = () => {
   );
 };
 
+export const dynamic = 'force-dynamic';
+
 export default Rankings;
