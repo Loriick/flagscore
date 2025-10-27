@@ -83,13 +83,54 @@ export default function About() {
             </p>
           </section>
 
-          <section className="p-6 bg-white/5 rounded-lg">
+          <section className="p-6 bg-gray-800 border border-gray-700 rounded-lg">
             <h2 className="text-2xl font-semibold mb-4">Contact</h2>
-            <p className="text-white/80">
+            <p className="text-white/80 mb-6">
               Pour toute question ou suggestion concernant Flagscore,
-              n&apos;hésitez pas à nous contacter. Nous sommes toujours à
-              l&apos;écoute pour améliorer votre expérience.
+              contactez-nous. Nous sommes toujours à l&apos;écoute pour
+              améliorer votre expérience.
             </p>
+
+            <form className="space-y-4">
+              <div>
+                <label
+                  htmlFor="contact-title"
+                  className="block text-sm font-medium text-white/80 mb-2"
+                >
+                  Titre
+                </label>
+                <input
+                  type="text"
+                  id="contact-title"
+                  name="title"
+                  className="w-full px-4 py-2 bg-gray-900 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Titre de votre message"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="contact-message"
+                  className="block text-sm font-medium text-white/80 mb-2"
+                >
+                  Message
+                </label>
+                <textarea
+                  id="contact-message"
+                  name="message"
+                  rows={6}
+                  className="w-full px-4 py-2 bg-gray-900 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Votre message..."
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+              >
+                Envoyer
+              </button>
+            </form>
           </section>
         </main>
       </div>
