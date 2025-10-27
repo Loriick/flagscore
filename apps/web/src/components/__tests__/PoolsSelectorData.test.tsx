@@ -3,45 +3,54 @@ import { describe, expect, it, vi } from "vitest";
 
 import { PoolsSelector } from "../PoolsSelector";
 
-// Mock hooks with realistic data
-vi.mock("../../hooks/useChampionships", () => ({
-  useChampionships: () => ({
-    championships: [{ id: 1, name: "Championnat de France mixte" }],
-    loading: false,
-    error: null,
-  }),
-}));
+// Mock hooks
+vi.mock("../../hooks/useAppDataSupabase", () => ({
+  useAppDataSupabase: () => ({
+    // State
+    currentSeason: 2026,
+    selectedChampionshipId: 1,
+    selectedPoolId: 1,
+    selectedDayId: 1,
 
-vi.mock("../../hooks/usePools", () => ({
-  usePools: () => ({
-    pools: [{ id: 1, name: "Poule A" }],
-    loading: false,
-    error: null,
-  }),
-}));
-
-vi.mock("../../hooks/useMatches", () => ({
-  useMatches: () => ({
-    days: [{ id: 1, name: "Journée 1", date: "2026-01-01" }],
-    matches: [
+    // Data
+    championships: [
       {
         id: 1,
-        homeTeam: "Équipe A",
-        awayTeam: "Équipe B",
-        homeScore: 2,
-        awayScore: 1,
+        label: "Championnat de France mixte",
+        season: 2026,
+        male: false,
       },
     ],
-    loading: false,
-    error: null,
-  }),
-}));
+    pools: [], // Pas de pools pour ce test
+    days: [],
+    matches: [],
 
-vi.mock("../../hooks/useRankings", () => ({
-  useRankings: () => ({
-    rankings: [],
-    loading: false,
-    error: null,
+    // Loading states
+    loading: {
+      championships: false,
+      pools: false,
+      days: false,
+      matches: false,
+      rankings: false,
+    },
+    initialLoading: false,
+    poolChangeLoading: false,
+    hasPools: false,
+
+    // Errors
+    errors: {
+      championships: null,
+      pools: null,
+      days: null,
+      matches: null,
+      rankings: null,
+    },
+
+    // Handlers
+    handleSeasonChange: vi.fn(),
+    handleChampionshipChange: vi.fn(),
+    handlePoolChange: vi.fn(),
+    handleDayChange: vi.fn(),
   }),
 }));
 
@@ -112,7 +121,7 @@ describe("PoolsSelector - Data Loading", () => {
     // Check content with mocked data
     expect(screen.getByText("Season: 2026 (1 seasons)")).toBeInTheDocument();
     expect(
-      screen.getByText("Championship: 0 (0 championships)")
+      screen.getByText("Championship: 1 (1 championships)")
     ).toBeInTheDocument();
   });
 

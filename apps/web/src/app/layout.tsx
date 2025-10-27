@@ -3,9 +3,11 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
+import { CacheBuster } from "../components/CacheBuster";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+import { OfflineIndicator } from "../components/OfflineIndicator";
 import { PerformanceMonitor } from "../components/PerformanceMonitor";
 import { PreloadManager } from "../components/PreloadManager";
 import { QueryProvider } from "../components/QueryProvider";
@@ -167,16 +169,18 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased relative bg-black`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased relative bg-linear-to-br from-gray-900 via-blue-900 to-gray-900`}
       >
+        <CacheBuster />
         <QueryProvider>
           <ServiceWorkerManager>
             <PreloadManager>
               <PerformanceMonitor>
                 <ErrorBoundary>
                   <Header />
-                  <main className="min-h-screen bg-black">{children}</main>
+                  <main className="min-h-screen">{children}</main>
                   <Footer />
+                  <OfflineIndicator />
                   <Toaster />
                   {process.env.NODE_ENV === "production" &&
                     process.env.VERCEL_ANALYTICS_ID && (

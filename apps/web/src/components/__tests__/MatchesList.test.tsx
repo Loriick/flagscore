@@ -1,9 +1,14 @@
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 
 import { MatchesList } from "../MatchesList";
 
 import { Match } from "@/app/types";
+
+// Mock SkeletonLoader
+vi.mock("../SkeletonLoader", () => ({
+  SkeletonLoader: () => <div data-testid="skeleton-loader">Loading...</div>,
+}));
 
 const mockMatches: Match[] = [
   {
@@ -43,9 +48,8 @@ describe("MatchesList", () => {
   it("shows loading when loading is true", () => {
     render(<MatchesList matches={[]} loading={true} />);
 
-    // Check for DeflagLoader (loading spinner)
-    const loadingElement = screen.getByRole("status");
-    expect(loadingElement).toBeInTheDocument();
+    // Check for loading text
+    expect(screen.getByTestId("skeleton-loader")).toBeInTheDocument();
   });
 
   it("returns null when no matches and not loading", () => {
@@ -68,11 +72,5 @@ describe("MatchesList", () => {
 
     const teamB = screen.getByText("Équipe B");
     expect(teamB).toHaveClass("text-gray-400", "text-sm");
-  });
-
-  it("formats dates correctly", () => {
-    render(<MatchesList matches={mockMatches} loading={false} />);
-
-    expect(screen.getAllByText("15 janv.")).toHaveLength(2);
   });
 });

@@ -20,6 +20,7 @@ function safeCloneResponse(response) {
 // Resources to cache statically (only essential assets)
 const STATIC_ASSETS = [
   "/",
+  "/offline",
   "/404.png",
   "/flagscore-logo-removebg-preview.png",
   "/favicon.ico",
@@ -84,6 +85,9 @@ self.addEventListener("fetch", event => {
     } else if (isApiRequest(url.pathname)) {
       // Network First for APIs
       event.respondWith(networkFirst(request, DYNAMIC_CACHE_NAME));
+    } else if (isHtmlRequest(request)) {
+      // Network First for HTML pages with offline fallback
+      event.respondWith(htmlWithOfflineFallback(request, DYNAMIC_CACHE_NAME));
     }
   }
 });
@@ -239,6 +243,101 @@ function isDynamicAsset(pathname) {
 // Check if it's an API request
 function isApiRequest(pathname) {
   return pathname.startsWith("/api/");
+}
+
+// Check if it's an HTML request
+function isHtmlRequest(request) {
+  return request.headers.get("accept")?.includes("text/html");
+}
+
+// HTML with offline fallback strategy
+async function htmlWithOfflineFallback(request, cacheName) {
+  try {
+    // Try network first
+    const networkResponse = await fetch(request);
+
+    // Cache successful responses
+    if (networkResponse.ok && networkResponse.status === 200) {
+      try {
+        const cache = await caches.open(cacheName);
+        const clonedResponse = safeCloneResponse(networkResponse);
+
+        if (clonedResponse) {
+          await cache.put(request, clonedResponse);
+        }
+      } catch (cacheError) {
+        console.warn("Failed to cache HTML response:", cacheError);
+      }
+    }
+
+    return networkResponse;
+  } catch (error) {
+    console.warn("Network request failed, trying cache:", error);
+
+    // Try cache first
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
+    // Fallback to offline page
+    const offlineResponse = await caches.match("/offline");
+    if (offlineResponse) {
+      return offlineResponse;
+    }
+
+    // Last resort: return a simple offline message
+    return new Response(
+      `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Hors ligne - Flagscore</title>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <style>
+            body { 
+              font-family: system-ui, sans-serif; 
+              background: linear-gradient(135deg, #1f2937, #1e3a8a, #1f2937);
+              color: white; 
+              margin: 0; 
+              padding: 20px; 
+              min-height: 100vh;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+            .container { text-align: center; max-width: 400px; }
+            h1 { font-size: 2rem; margin-bottom: 1rem; }
+            p { opacity: 0.8; margin-bottom: 2rem; }
+            button { 
+              background: #2563eb; 
+              color: white; 
+              border: none; 
+              padding: 12px 24px; 
+              border-radius: 8px; 
+              cursor: pointer;
+              font-size: 1rem;
+            }
+            button:hover { background: #1d4ed8; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1>Vous êtes hors ligne</h1>
+            <p>Cette page nécessite une connexion internet pour fonctionner.</p>
+            <button onclick="window.location.reload()">Réessayer</button>
+          </div>
+        </body>
+      </html>
+      `,
+      {
+        status: 200,
+        statusText: "OK",
+        headers: { "Content-Type": "text/html" },
+      }
+    );
+  }
 }
 
 // Message handler for communication with the app

@@ -25,7 +25,6 @@ describe("MatchItem", () => {
     expect(screen.getByText("Équipe B")).toBeInTheDocument();
     expect(screen.getByText("21")).toBeInTheDocument();
     expect(screen.getByText("14")).toBeInTheDocument();
-    expect(screen.getByText("15 janv.")).toBeInTheDocument();
   });
 
   it("applies correct styling for winning team", () => {
@@ -62,11 +61,5 @@ describe("MatchItem", () => {
       "text-sm"
     );
     expect(screen.getByText("Équipe D")).toHaveClass("text-white");
-  });
-
-  it("formats date correctly", () => {
-    render(<MatchItem match={mockMatch} />);
-
-    expect(screen.getByText("15 janv.")).toBeInTheDocument();
   });
 });

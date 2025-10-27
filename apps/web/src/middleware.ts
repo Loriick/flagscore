@@ -4,6 +4,22 @@ import { NextRequest, NextResponse } from "next/server";
 export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Block development-only pages in production
+  const developmentOnlyPages = [
+    "/monitoring",
+    "/logs-monitor",
+    "/test-teams-sync",
+    "/create-teams-table",
+    "/quick-setup",
+  ];
+
+  if (
+    process.env.NODE_ENV === "production" &&
+    developmentOnlyPages.includes(pathname)
+  ) {
+    return NextResponse.rewrite(new URL("/not-found", request.url));
+  }
+
   // Create response
   const response = NextResponse.next();
 

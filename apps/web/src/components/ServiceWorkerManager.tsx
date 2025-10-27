@@ -90,6 +90,11 @@ export function ServiceWorkerManager({ children }: ServiceWorkerManagerProps) {
     }
   };
 
+  // Function to force refresh without cache
+  const handleForceRefresh = () => {
+    window.location.reload();
+  };
+
   return (
     <>
       {children}
@@ -143,6 +148,13 @@ export function ServiceWorkerManager({ children }: ServiceWorkerManagerProps) {
             title="Clear all caches"
           >
             Clear Cache
+          </button>
+          <button
+            onClick={handleForceRefresh}
+            className="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700"
+            title="Force refresh page"
+          >
+            Force Refresh
           </button>
         </div>
       )}
