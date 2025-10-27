@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 
+import { ContactForm } from "../../components/ContactForm";
 import { pageMetadata } from "../../lib/seo";
 
 export const metadata: Metadata = pageMetadata.about;
@@ -83,13 +84,15 @@ export default function About() {
             </p>
           </section>
 
-          <section className="p-6 bg-white/5 rounded-lg">
+          <section className="p-6 bg-gray-800 border border-gray-700 rounded-lg">
             <h2 className="text-2xl font-semibold mb-4">Contact</h2>
-            <p className="text-white/80">
+            <p className="text-white/80 mb-6">
               Pour toute question ou suggestion concernant Flagscore,
-              n&apos;hésitez pas à nous contacter. Nous sommes toujours à
-              l&apos;écoute pour améliorer votre expérience.
+              contactez-nous. Nous sommes toujours à l&apos;écoute pour
+              améliorer votre expérience.
             </p>
+
+            <ContactForm />
           </section>
         </main>
       </div>
