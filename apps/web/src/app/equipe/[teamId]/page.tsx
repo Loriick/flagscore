@@ -13,7 +13,7 @@ import { useParams } from "next/navigation";
 
 import { useTeam } from "../../../hooks/useTeams";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default function EquipePage() {
   const params = useParams();
