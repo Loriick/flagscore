@@ -29,7 +29,7 @@ FFFA_ACTION=flag
 
 # Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=https://votre-projet.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=votre-cle-anonyme
+NEXT_PUBLIC_SUPABASE_ANON=votre-cle-anonyme
 
 # Application Configuration
 NEXT_PUBLIC_FLAGSCORE_ORIGIN=https://flagscore.vercel.app
