@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 
+import { ContactForm } from "../../components/ContactForm";
 import { pageMetadata } from "../../lib/seo";
 
 export const metadata: Metadata = pageMetadata.about;
@@ -91,46 +92,7 @@ export default function About() {
               améliorer votre expérience.
             </p>
 
-            <form className="space-y-4">
-              <div>
-                <label
-                  htmlFor="contact-title"
-                  className="block text-sm font-medium text-white/80 mb-2"
-                >
-                  Titre
-                </label>
-                <input
-                  type="text"
-                  id="contact-title"
-                  name="title"
-                  className="w-full px-4 py-2 bg-gray-900 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Titre de votre message"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="contact-message"
-                  className="block text-sm font-medium text-white/80 mb-2"
-                >
-                  Message
-                </label>
-                <textarea
-                  id="contact-message"
-                  name="message"
-                  rows={6}
-                  className="w-full px-4 py-2 bg-gray-900 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Votre message..."
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
-              >
-                Envoyer
-              </button>
-            </form>
+            <ContactForm />
           </section>
         </main>
       </div>
