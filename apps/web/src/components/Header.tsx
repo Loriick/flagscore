@@ -23,18 +23,21 @@ export default function Header() {
     <header className="w-full bg-gray-800 border-b border-gray-600 relative z-10">
       <div className="mx-auto px-4 sm:px-8">
         <div className="flex h-20 sm:h-16 items-center justify-between">
-          {/* Logo centré */}
-          <div className="flex-1 flex justify-center">
-            <Image
-              src="/flagscore-logo-removebg-preview.png"
-              alt="logo FlagScore.fr"
-              width={300}
-              height={150}
-              className="h-20 sm:h-16 w-auto object-contain"
-              priority
-            />
+          {/* Logo centré en mobile, à gauche en desktop */}
+          <div className="flex-1 md:flex-none flex justify-center md:justify-start items-center">
+            <Link href="/" className="hover:opacity-80 transition-opacity">
+              <Image
+                src="/flagscore-logo-removebg-preview.png"
+                alt="logo FlagScore.fr"
+                width={250}
+                height={125}
+                className="h-20 md:h-20 sm:h-16 w-auto object-contain"
+                priority
+              />
+            </Link>
           </div>
 
+          {/* Menu desktop à droite */}
           <div className="hidden md:flex items-center gap-4">
             <Link
               href="/"
@@ -120,6 +123,7 @@ export default function Header() {
             )}
           </div>
 
+          {/* Bouton mobile menu à droite */}
           <button
             className="md:hidden flex flex-col items-center justify-center w-8 h-8 space-y-1"
             onClick={toggleMobileMenu}
