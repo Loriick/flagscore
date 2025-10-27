@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { Team } from "../lib/supabase";
+import { Championship, Pool, Team } from "../lib/supabase";
 
 interface UseTeamsOptions {
   searchTerm?: string;
@@ -32,7 +32,10 @@ export function useTeams({
       }
 
       const result = await response.json();
-      return result.data as (Team & { pools: any; championships: any })[];
+      return result.data as (Team & {
+        pools: Pool;
+        championships: Championship;
+      })[];
     },
     enabled,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -50,7 +53,7 @@ export function useTeam(teamId: string, enabled: boolean = true) {
       }
 
       const result = await response.json();
-      return result.data as Team & { pools: any; championships: any };
+      return result.data as Team & { pools: Pool; championships: Championship };
     },
     enabled: enabled && !!teamId,
     staleTime: 5 * 60 * 1000, // 5 minutes

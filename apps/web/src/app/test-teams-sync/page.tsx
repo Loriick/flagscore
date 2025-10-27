@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 
+import { Team } from "@/lib/supabase";
+
 export default function TestTeamsSync() {
   const [isSyncing, setIsSyncing] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<Team[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleSync = async () => {
@@ -21,7 +23,7 @@ export default function TestTeamsSync() {
         throw new Error(`Erreur HTTP: ${response.status}`);
       }
 
-      const data = await response.json();
+      const { data }: { data: Team[] } = await response.json();
       setResult(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur inconnue");

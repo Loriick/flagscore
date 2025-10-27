@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function OfflinePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 text-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-gray-900 via-blue-900 to-gray-900 text-white flex items-center justify-center p-4">
       <div className="max-w-md mx-auto text-center">
         {/* Image 404 */}
         <div className="mb-8">

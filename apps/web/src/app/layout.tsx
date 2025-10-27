@@ -169,7 +169,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased relative bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased relative bg-linear-to-br from-gray-900 via-blue-900 to-gray-900`}
       >
         <CacheBuster />
         <QueryProvider>
