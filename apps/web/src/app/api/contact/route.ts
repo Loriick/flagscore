@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(request: NextRequest) {
   try {
     // Vérifier que la clé API Resend est configurée
@@ -13,6 +11,9 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Créer le client Resend uniquement si la clé est disponible
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
     console.log("📧 API Contact - Nouvelle requête reçue");
 
