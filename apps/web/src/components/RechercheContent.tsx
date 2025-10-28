@@ -17,7 +17,8 @@ function RechercheContentInner() {
     isLoading,
     error,
   } = useTeams({
-    searchTerm: debouncedSearchTerm.length >= 2 ? debouncedSearchTerm : undefined,
+    searchTerm:
+      debouncedSearchTerm.length >= 2 ? debouncedSearchTerm : undefined,
   });
 
   useEffect(() => {
@@ -47,10 +48,15 @@ function RechercheContentInner() {
   return (
     <>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-4">Rechercher une équipe</h1>
+        <h1 className="text-3xl font-bold text-white mb-4">
+          Rechercher une équipe
+        </h1>
         <form onSubmit={handleSearch} className="max-w-md">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <Search
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              size={20}
+            />
             <input
               type="text"
               value={searchTerm}
@@ -72,7 +78,11 @@ function RechercheContentInner() {
           <TeamsErrorFallback error={error.message} />
         </div>
       ) : teams && teams.length > 0 ? (
-        <div className="space-y-4" role="region" aria-label="Résultats de recherche">
+        <div
+          className="space-y-4"
+          role="region"
+          aria-label="Résultats de recherche"
+        >
           <div className="flex items-center gap-2 text-gray-400 mb-6">
             <Users size={20} />
             <span>
@@ -89,10 +99,14 @@ function RechercheContentInner() {
                 className="bg-gray-800 border border-gray-700 rounded-lg p-6 hover:bg-gray-750 hover:border-gray-600 transition-all cursor-pointer group"
               >
                 <div className="flex items-start justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-white group-hover:text-blue-400 transition-colors">{team.name}</h3>
+                  <h3 className="text-lg font-semibold text-white group-hover:text-blue-400 transition-colors">
+                    {team.name}
+                  </h3>
                   <div className="flex items-center gap-1 text-yellow-400">
                     <Trophy size={16} />
-                    <span className="text-sm font-medium">{team.current_position}</span>
+                    <span className="text-sm font-medium">
+                      {team.current_position}
+                    </span>
                   </div>
                 </div>
 
@@ -110,19 +124,27 @@ function RechercheContentInner() {
                 <div className="mt-4 pt-4 border-t border-gray-700">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div className="text-center">
-                      <div className="text-white font-semibold">{team.total_matches}</div>
+                      <div className="text-white font-semibold">
+                        {team.total_matches}
+                      </div>
                       <div className="text-gray-400">Matchs</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-white font-semibold">{team.total_points}</div>
+                      <div className="text-white font-semibold">
+                        {team.total_points}
+                      </div>
                       <div className="text-gray-400">Points</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-white font-semibold">{team.total_wins}</div>
+                      <div className="text-white font-semibold">
+                        {team.total_wins}
+                      </div>
                       <div className="text-gray-400">Victoires</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-white font-semibold">{team.total_goals_for}</div>
+                      <div className="text-white font-semibold">
+                        {team.total_goals_for}
+                      </div>
                       <div className="text-gray-400">Points</div>
                     </div>
                   </div>
@@ -142,14 +164,22 @@ function RechercheContentInner() {
       ) : debouncedSearchTerm.length >= 2 ? (
         <div className="text-center py-12" role="status" aria-live="polite">
           <Target size={48} className="mx-auto text-gray-600 mb-4" />
-          <h2 className="text-xl font-semibold text-gray-400 mb-2">Aucune équipe trouvée</h2>
-          <p className="text-gray-500">Aucune équipe ne correspond à "{debouncedSearchTerm}"</p>
+          <h2 className="text-xl font-semibold text-gray-400 mb-2">
+            Aucune équipe trouvée
+          </h2>
+          <p className="text-gray-500">
+            Aucune équipe ne correspond à "{debouncedSearchTerm}"
+          </p>
         </div>
       ) : (
         <div className="text-center py-12" role="status" aria-live="polite">
           <Search size={48} className="mx-auto text-gray-600 mb-4" />
-          <h2 className="text-xl font-semibold text-gray-400 mb-2">Recherchez une équipe</h2>
-          <p className="text-gray-500">Tapez au moins 2 caractères pour commencer la recherche</p>
+          <h2 className="text-xl font-semibold text-gray-400 mb-2">
+            Recherchez une équipe
+          </h2>
+          <p className="text-gray-500">
+            Tapez au moins 2 caractères pour commencer la recherche
+          </p>
         </div>
       )}
     </>
@@ -170,5 +200,3 @@ export default function RechercheContent() {
     </Suspense>
   );
 }
-
-

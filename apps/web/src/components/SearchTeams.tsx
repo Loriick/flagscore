@@ -83,7 +83,11 @@ export function SearchTeams({
         </div>
 
         {/* Search Form */}
-        <form onSubmit={handleSearch} className="p-4" aria-labelledby="search-title">
+        <form
+          onSubmit={handleSearch}
+          className="p-4"
+          aria-labelledby="search-title"
+        >
           <div className="relative">
             <Search
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -113,7 +117,11 @@ export function SearchTeams({
 
         {/* Results */}
         {isSearching && (
-          <div className="max-h-64 overflow-y-auto border-t border-gray-700" role="status" aria-live="polite">
+          <div
+            className="max-h-64 overflow-y-auto border-t border-gray-700"
+            role="status"
+            aria-live="polite"
+          >
             {error ? (
               <div className="p-4">
                 <TeamsErrorFallback error={error.message} />

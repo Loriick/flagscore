@@ -16,7 +16,9 @@ export function generateMetadata({ searchParams }: SearchPageProps): Metadata {
     ...pageMetadata.home, // inherit base site metadata
     title: `${title} | Flagscore`,
     alternates: {
-      canonical: q ? `${getBaseUrl()}/recherche?q=${encodeURIComponent(q)}` : `${getBaseUrl()}/recherche`,
+      canonical: q
+        ? `${getBaseUrl()}/recherche?q=${encodeURIComponent(q)}`
+        : `${getBaseUrl()}/recherche`,
     },
   };
 }

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export const metadata = {
   title: "Politique de confidentialité | Flagscore",
   description:
@@ -8,7 +10,9 @@ export default function PolitiqueConfidentialitePage() {
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-900 via-blue-900 to-gray-900 text-white">
       <div className="max-w-3xl mx-auto px-4 py-10">
-        <h1 className="text-3xl font-bold mb-6">Politique de confidentialité</h1>
+        <h1 className="text-3xl font-bold mb-6">
+          Politique de confidentialité
+        </h1>
 
         <section className="space-y-4 text-white/90">
           <p>
@@ -32,13 +36,18 @@ export default function PolitiqueConfidentialitePage() {
 
           <h2 className="text-xl font-semibold mt-6">Contact</h2>
           <p>
-            Pour toute question liée à la confidentialité, contactez-nous à
-            l’adresse suivante : contact@flagscore.fr
+            Pour toute question liée à la confidentialité, contactez-nous via
+            notre
+            <Link
+              href="/a-propos#contact"
+              className="ml-1 text-blue-400 hover:text-blue-300 underline"
+            >
+              formulaire de contact
+            </Link>
+            .
           </p>
         </section>
       </div>
     </div>
   );
 }
-
-

@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
-export const metadata: Metadata = {
-  title: "Monitoring | Flagscore",
-  robots: { index: false, follow: false, googleBot: { index: false, follow: false } },
-};
-"use client";
-
 import { useState, useEffect } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+export const metadata: Metadata = {
+  title: "Monitoring | Flagscore",
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: { index: false, follow: false },
+  },
+};
+("use client");
 
 interface MetricData {
   metric: string;
