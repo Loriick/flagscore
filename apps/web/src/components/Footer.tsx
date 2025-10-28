@@ -36,6 +36,12 @@ export default function Footer() {
               >
                 À propos
               </Link>
+              <Link
+                href="/a-propos#contact"
+                className="text-white/70 hover:text-white text-sm transition-colors"
+              >
+                Contact
+              </Link>
             </nav>
           </div>
 
