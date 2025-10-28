@@ -77,16 +77,16 @@ function RechercheContent() {
 
       {/* Résultats */}
       {isLoading ? (
-        <div className="text-center py-12">
+        <div className="text-center py-12" role="status" aria-live="polite">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <p className="text-gray-400">Recherche en cours...</p>
         </div>
       ) : error ? (
-        <div className="py-8">
+        <div className="py-8" role="status" aria-live="polite">
           <TeamsErrorFallback error={error.message} />
         </div>
       ) : teams && teams.length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-4" role="region" aria-label="Résultats de recherche">
           <div className="flex items-center gap-2 text-gray-400 mb-6">
             <Users size={20} />
             <span>
@@ -166,7 +166,7 @@ function RechercheContent() {
           </div>
         </div>
       ) : debouncedSearchTerm.length >= 2 ? (
-        <div className="text-center py-12">
+        <div className="text-center py-12" role="status" aria-live="polite">
           <Target size={48} className="mx-auto text-gray-600 mb-4" />
           <h2 className="text-xl font-semibold text-gray-400 mb-2">
             Aucune équipe trouvée
@@ -176,7 +176,7 @@ function RechercheContent() {
           </p>
         </div>
       ) : (
-        <div className="text-center py-12">
+        <div className="text-center py-12" role="status" aria-live="polite">
           <Search size={48} className="mx-auto text-gray-600 mb-4" />
           <h2 className="text-xl font-semibold text-gray-400 mb-2">
             Recherchez une équipe

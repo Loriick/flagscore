@@ -20,7 +20,7 @@ export default function Header() {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <header className="w-full bg-gray-800 border-b border-gray-600 relative z-10">
+    <header className="w-full bg-gray-800 border-b border-gray-600 relative z-10" role="banner">
       <div className="mx-auto px-4 sm:px-8">
         <div className="flex h-20 sm:h-16 items-center justify-between">
           {/* Logo centré en mobile, à gauche en desktop */}
@@ -38,7 +38,7 @@ export default function Header() {
           </div>
 
           {/* Menu desktop à droite */}
-          <div className="hidden md:flex items-center gap-4">
+          <nav className="hidden md:flex items-center gap-4" aria-label="Navigation principale">
             <Link
               href="/"
               className={`text-sm transition-colors ${
@@ -121,13 +121,15 @@ export default function Header() {
                 </Link>
               </>
             )}
-          </div>
+          </nav>
 
           {/* Bouton mobile menu à droite */}
           <button
             className="md:hidden flex flex-col items-center justify-center w-8 h-8 space-y-1"
             onClick={toggleMobileMenu}
             aria-label="Ouvrir le menu"
+            aria-controls="mobile-menu"
+            aria-expanded={isMobileMenuOpen}
           >
             <span
               className={`block w-6 h-0.5 bg-white transition-all duration-300 ${
@@ -148,8 +150,8 @@ export default function Header() {
         </div>
 
         {isMobileMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-gray-800 border-t border-gray-600">
-            <nav className="flex flex-col py-4">
+          <div id="mobile-menu" className="md:hidden absolute top-full left-0 right-0 bg-gray-800 border-t border-gray-600">
+            <nav className="flex flex-col py-4" aria-label="Navigation mobile">
               <Link
                 href="/"
                 className={`px-4 py-3 transition-colors ${

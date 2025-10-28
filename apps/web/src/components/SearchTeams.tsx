@@ -70,7 +70,7 @@ export function SearchTeams({
       <div className="bg-gray-900 border border-gray-700 rounded-lg mx-4 mt-20 max-w-md">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
-          <h2 className="text-lg font-semibold text-white">
+          <h2 className="text-lg font-semibold text-white" id="search-title">
             Rechercher une équipe
           </h2>
           <button
@@ -83,7 +83,7 @@ export function SearchTeams({
         </div>
 
         {/* Search Form */}
-        <form onSubmit={handleSearch} className="p-4">
+        <form onSubmit={handleSearch} className="p-4" aria-labelledby="search-title">
           <div className="relative">
             <Search
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -96,6 +96,7 @@ export function SearchTeams({
               placeholder="Nom de l'équipe..."
               className="w-full pl-10 pr-10 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               autoFocus
+              aria-label="Nom de l'équipe"
             />
             {searchTerm && (
               <button
@@ -112,7 +113,7 @@ export function SearchTeams({
 
         {/* Results */}
         {isSearching && (
-          <div className="max-h-64 overflow-y-auto border-t border-gray-700">
+          <div className="max-h-64 overflow-y-auto border-t border-gray-700" role="status" aria-live="polite">
             {error ? (
               <div className="p-4">
                 <TeamsErrorFallback error={error.message} />

@@ -180,6 +180,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased relative bg-linear-to-br from-gray-900 via-blue-900 to-gray-900`}
       >
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:bg-white focus:text-black focus:px-3 focus:py-2 focus:rounded"
+        >
+          Aller au contenu principal
+        </a>
         <CacheBuster />
         <QueryProvider>
           <ServiceWorkerManager>
@@ -187,7 +193,9 @@ export default function RootLayout({
               <PerformanceMonitor>
                 <ErrorBoundary>
                   <Header />
-                  <main className="min-h-screen">{children}</main>
+                  <main id="main-content" role="main" className="min-h-screen">
+                    {children}
+                  </main>
                   <Footer />
                   <OfflineIndicator />
                   <Toaster />
