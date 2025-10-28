@@ -142,6 +142,7 @@ export default function RootLayout({
   return (
     <html lang="fr" className="dark bg-black">
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         {/* Global structured data */}
         <script
           type="application/ld+json"
@@ -165,7 +166,15 @@ export default function RootLayout({
         />
 
         {/* DNS prefetch for external domains */}
-        <link rel="dns-prefetch" href="https://api.example.com" />
+        <link
+          rel="preconnect"
+          href="https://rwpuibfvysbbegtumvlv.supabase.co"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="dns-prefetch"
+          href="https://rwpuibfvysbbegtumvlv.supabase.co"
+        />
         <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
       </head>
       <body

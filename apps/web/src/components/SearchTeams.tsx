@@ -76,6 +76,7 @@ export function SearchTeams({
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-white transition-colors"
+            aria-label="Fermer la recherche"
           >
             <X size={20} />
           </button>
@@ -101,6 +102,7 @@ export function SearchTeams({
                 type="button"
                 onClick={handleClear}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                aria-label="Effacer la recherche"
               >
                 <X size={20} />
               </button>
@@ -127,6 +129,7 @@ export function SearchTeams({
                     key={team.id}
                     onClick={() => handleTeamClick(team.id)}
                     className="w-full text-left p-3 hover:bg-gray-800 rounded-lg transition-colors"
+                    aria-label={`Voir la page de l'équipe ${team.name}`}
                   >
                     <div className="text-white font-medium">{team.name}</div>
                     <div className="text-sm text-gray-400">
