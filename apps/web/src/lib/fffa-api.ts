@@ -1,57 +1,25 @@
-export type Championship = {
-  id: number;
-  label: string;
-  season: number;
-  male: boolean;
-};
+// Import des types de base depuis le package shared
+import type {
+  Championship,
+  Pool,
+  Day,
+  Match,
+  Ranking as BaseRanking,
+} from "@flagscore/shared";
 
+// Type spécifique à l'API FFFA (Phase n'est pas dans les types shared)
 export type Phase = {
   id: number;
   championship_id: number;
   label: string;
 };
 
-export type Pool = {
-  id: number;
-  championship_id: number;
-  phase_id: number;
-  label: string;
-};
+// Ré-export des types de base depuis shared
+export type { Championship, Pool, Day, Match };
 
-export type Day = {
-  id: number;
-  championship_id: number;
-  phase_id: number;
-  pool_id: number;
-  label: string;
-  date: string;
-  number: number;
-};
-
-export type Match = {
-  id: number;
-  championship_id: number;
-  phase_id: number;
-  pool_id: number;
-  day_id: number;
-  date: string;
-  team_a: { name: string; score: number; general_forfeit: boolean };
-  team_b: { name: string; score: number; general_forfeit: boolean };
-  sheet: string | null;
-};
-
-export type Ranking = {
-  position: number;
-  club: { id: number; label: string; general_forfeit: boolean };
+// Type Ranking étendu pour FFFA avec propriétés supplémentaires
+export type Ranking = BaseRanking & {
   cf: number;
-  j: number;
-  g: number;
-  n: number;
-  p: number;
-  points: number;
-  points_won: number;
-  points_loss: number;
-  points_diff: number;
   penalties: number;
   f: number;
 };

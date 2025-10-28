@@ -1,6 +1,6 @@
 import { memo, useMemo } from "react";
 
-import { Match } from "../../app/types";
+import { Match } from "@flagscore/shared";
 import { VirtualizedList } from "../atoms/VirtualizedList";
 
 import { MatchCard } from "./MatchCard";

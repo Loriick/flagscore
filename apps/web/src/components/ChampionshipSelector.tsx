@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import { Championship } from "../app/types";
+import { Championship } from "@flagscore/shared";
 
 import { NoSSR } from "./NoSSR";
 

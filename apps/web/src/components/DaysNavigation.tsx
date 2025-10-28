@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import { Day } from "../app/types";
+import { Day } from "@flagscore/shared";
 
 interface DaysNavigationProps {
   days: Day[];

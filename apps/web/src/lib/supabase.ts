@@ -1,81 +1,26 @@
+import type {
+  SupabaseTeam as Team,
+  SupabaseChampionship as Championship,
+  SupabasePool as Pool,
+  SupabaseDay as Day,
+  SupabaseMatch as Match,
+  SupabaseRanking as Ranking,
+  PoolWithChampionship,
+  TeamWithRelations,
+} from "@flagscore/shared";
 import { createClient } from "@supabase/supabase-js";
 
-// Types pour les tables Supabase
-export interface Team {
-  id: string;
-  name: string;
-  pool_id: number;
-  championship_id: number;
-  season: string;
-  total_matches: number;
-  total_wins: number;
-  total_draws: number;
-  total_losses: number;
-  total_goals_for: number;
-  total_goals_against: number;
-  total_goal_difference: number;
-  total_points: number;
-  best_position: number;
-  worst_position: number;
-  current_position: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Championship {
-  id: number;
-  name: string;
-  season: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Pool {
-  id: number;
-  championship_id: number;
-  name: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Day {
-  id: number;
-  pool_id: number;
-  name: string;
-  date: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Match {
-  id: string;
-  pool_id: number;
-  team_home: string;
-  team_away: string;
-  score_home: number | null;
-  score_away: number | null;
-  match_date: string;
-  status: "scheduled" | "live" | "finished";
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Ranking {
-  id: string;
-  pool_id: number;
-  team_name: string;
-  position: number;
-  points: number;
-  played: number;
-  won: number;
-  drawn: number;
-  lost: number;
-  goals_for: number;
-  goals_against: number;
-  goal_difference: number;
-  created_at: string;
-  updated_at: string;
-}
+// Ré-exporter les types pour maintenir la compatibilité
+export type {
+  Team,
+  Championship,
+  Pool,
+  Day,
+  Match,
+  Ranking,
+  PoolWithChampionship,
+  TeamWithRelations,
+};
 
 // Configuration Supabase - Hardcodé temporairement pour test
 const supabaseUrl = "https://rwpuibfvysbbegtumvlv.supabase.co";

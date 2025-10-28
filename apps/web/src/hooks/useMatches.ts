@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { Match } from "../app/types";
+import { Match } from "@flagscore/shared";
 import { getDays, getMatches } from "../lib/fffa-api";
 
 export function useMatches(poolId: number) {

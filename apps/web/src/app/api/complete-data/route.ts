@@ -7,7 +7,7 @@ import {
   getDays,
   getMatches,
 } from "../../../lib/fffa-api";
-import { Match } from "../../types";
+import { Match } from "@flagscore/shared";
 
 import logger from "@/lib/logger";
 

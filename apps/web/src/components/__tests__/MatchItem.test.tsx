@@ -3,7 +3,7 @@ import { describe, it, expect } from "vitest";
 
 import { MatchItem } from "../MatchItem";
 
-import { Match } from "@/app/types";
+import { Match } from "@flagscore/shared";
 
 const mockMatch: Match = {
   id: 1,

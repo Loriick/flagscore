@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import { Day } from "../../app/types";
+import { Day } from "@flagscore/shared";
 import { DayButton } from "../molecules/DayButton";
 
 // Import cn to avoid error

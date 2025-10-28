@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { Ranking } from "../../types";
+import { Ranking } from "@flagscore/shared";
 
 import {
   createOptimizedResponse,

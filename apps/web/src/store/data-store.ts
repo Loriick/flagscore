@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
-import { Championship, Pool, Day, Match, Ranking } from "../app/types";
+import { Championship, Pool, Day, Match, Ranking } from "@flagscore/shared";
 
 // Interface for data state
 interface DataState {

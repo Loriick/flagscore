@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import { Match } from "../app/types";
+import { Match } from "@flagscore/shared";
 
 import { MatchItem } from "./MatchItem";
 import { SkeletonLoader } from "./SkeletonLoader";

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { Pool } from "../app/types";
+import { Pool } from "@flagscore/shared";
 import { getPhases, getPools } from "../lib/fffa-api";
 
 export function usePools(championshipId: number) {

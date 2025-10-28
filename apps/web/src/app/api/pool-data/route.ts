@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getDays, getMatches } from "../../../lib/fffa-api";
-import { Match } from "../../types";
+import { Match } from "@flagscore/shared";
 
 export async function GET(request: NextRequest) {
   try {

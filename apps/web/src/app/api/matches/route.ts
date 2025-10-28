@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 
-import { Match } from "../../types";
+import { Match } from "@flagscore/shared";
 
 import {
   createOptimizedResponse,
