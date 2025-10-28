@@ -1,17 +1,7 @@
 "use client";
-import type { Metadata } from "next";
 import { useState, useEffect } from "react";
 
 import { logger, useLogger, LogEntry } from "@/lib/logger-advanced";
-
-export const metadata: Metadata = {
-  title: "Monitoring des Logs | Flagscore",
-  robots: {
-    index: false,
-    follow: false,
-    googleBot: { index: false, follow: false },
-  },
-};
 
 export default function LogsMonitor() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
