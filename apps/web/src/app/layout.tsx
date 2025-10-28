@@ -199,13 +199,8 @@ export default function RootLayout({
                   <Footer />
                   <OfflineIndicator />
                   <Toaster />
-                  {process.env.NODE_ENV === "production" &&
-                    process.env.VERCEL_ANALYTICS_ID && (
-                      <>
-                        <Analytics />
-                        <SpeedInsights />
-                      </>
-                    )}
+                  <Analytics />
+                  <SpeedInsights />
                 </ErrorBoundary>
               </PerformanceMonitor>
             </PreloadManager>

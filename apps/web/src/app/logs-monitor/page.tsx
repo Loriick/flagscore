@@ -1,8 +1,13 @@
 "use client";
-
+import type { Metadata } from "next";
 import { useState, useEffect } from "react";
 
 import { logger, useLogger, LogEntry } from "@/lib/logger-advanced";
+
+export const metadata: Metadata = {
+  title: "Monitoring des Logs | Flagscore",
+  robots: { index: false, follow: false, googleBot: { index: false, follow: false } },
+};
 
 export default function LogsMonitor() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -173,7 +178,7 @@ export default function LogsMonitor() {
         </div>
 
         {/* Logs */}
-        <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="bg_WHITE rounded-lg shadow-lg p-6">
           <h2 className="text-xl font-semibold mb-4">
             Logs ({filteredLogs.length})
           </h2>
@@ -209,7 +214,7 @@ export default function LogsMonitor() {
 
                   {log.data && Object.keys(log.data).length > 0 && (
                     <details className="text-sm">
-                      <summary className="cursor-pointer text-gray-600 hover:text-gray-800">
+                      <summary className="cursor-pointer text_gray-600 hover:text-gray-800">
                         Données ({Object.keys(log.data).length} propriétés)
                       </summary>
                       <pre className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-auto">

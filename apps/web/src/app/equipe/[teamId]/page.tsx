@@ -1,5 +1,3 @@
-"use client";
-
 import {
   ArrowLeft,
   Trophy,
@@ -8,16 +6,25 @@ import {
   Calendar,
   TrendingUp,
 } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 
 import { useTeam } from "../../../hooks/useTeams";
 
 export const dynamic = "force-dynamic";
 
-export default function EquipePage() {
-  const params = useParams();
-  const teamId = params.teamId as string;
+type TeamPageProps = { params: { teamId: string } };
+
+export function generateMetadata({ params }: TeamPageProps): Metadata {
+  const teamId = params.teamId;
+  return {
+    title: `Équipe ${teamId} | Flagscore`,
+    alternates: { canonical: `/equipe/${teamId}` },
+  };
+}
+
+export default function EquipePage({ params }: TeamPageProps) {
+  const teamId = params.teamId;
 
   const { data: team, isLoading, error } = useTeam(teamId);
 
