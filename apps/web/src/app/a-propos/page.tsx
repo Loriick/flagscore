@@ -84,7 +84,10 @@ export default function About() {
             </p>
           </section>
 
-          <section className="p-6 bg-gray-800 border border-gray-700 rounded-lg">
+          <section
+            id="contact"
+            className="p-6 bg-gray-800 border border-gray-700 rounded-lg"
+          >
             <h2 className="text-2xl font-semibold mb-4">Contact</h2>
             <p className="text-white/80 mb-6">
               Pour toute question ou suggestion concernant Flagscore,

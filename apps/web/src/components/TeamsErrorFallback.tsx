@@ -46,9 +46,9 @@ export function TeamsErrorFallback({}: TeamsErrorFallbackProps) {
       <div className="flex items-start gap-4">
         <AlertTriangle className="text-red-400 mt-1" size={24} />
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-red-400 mb-2">
+          <h2 className="text-lg font-semibold text-red-400 mb-2">
             Table Teams Manquante
-          </h3>
+          </h2>
           <p className="text-red-300 mb-4">
             La table <code className="bg-red-800 px-2 py-1 rounded">teams</code>{" "}
             n'existe pas dans Supabase. Vous devez la créer avant de pouvoir
@@ -57,7 +57,7 @@ export function TeamsErrorFallback({}: TeamsErrorFallbackProps) {
 
           <div className="space-y-4">
             <div>
-              <h4 className="text-white font-medium mb-2">Solution rapide :</h4>
+              <h3 className="text-white font-medium mb-2">Solution rapide :</h3>
               <ol className="text-red-300 space-y-1 text-sm">
                 <li>
                   1. Aller sur{" "}
@@ -78,7 +78,7 @@ export function TeamsErrorFallback({}: TeamsErrorFallbackProps) {
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <h4 className="text-white font-medium">Script SQL :</h4>
+                <h3 className="text-white font-medium">Script SQL :</h3>
                 <button
                   onClick={handleCopy}
                   className="flex items-center gap-1 px-3 py-1 bg-red-800 hover:bg-red-700 text-white rounded text-sm transition-colors"
