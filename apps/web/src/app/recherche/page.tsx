@@ -168,9 +168,9 @@ function RechercheContent() {
       ) : debouncedSearchTerm.length >= 2 ? (
         <div className="text-center py-12">
           <Target size={48} className="mx-auto text-gray-600 mb-4" />
-          <h3 className="text-xl font-semibold text-gray-400 mb-2">
+          <h2 className="text-xl font-semibold text-gray-400 mb-2">
             Aucune équipe trouvée
-          </h3>
+          </h2>
           <p className="text-gray-500">
             Aucune équipe ne correspond à "{debouncedSearchTerm}"
           </p>
@@ -178,9 +178,9 @@ function RechercheContent() {
       ) : (
         <div className="text-center py-12">
           <Search size={48} className="mx-auto text-gray-600 mb-4" />
-          <h3 className="text-xl font-semibold text-gray-400 mb-2">
+          <h2 className="text-xl font-semibold text-gray-400 mb-2">
             Recherchez une équipe
-          </h3>
+          </h2>
           <p className="text-gray-500">
             Tapez au moins 2 caractères pour commencer la recherche
           </p>
