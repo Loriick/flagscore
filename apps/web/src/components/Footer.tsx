@@ -67,12 +67,12 @@ export default function Footer() {
               © 2025 Flagscore. Tous droits réservés.
             </p>
             <div className="flex space-x-4 mt-4 md:mt-0">
-              <a
-                href="#"
+              <Link
+                href="/mentions-legales"
                 className="text-white/60 hover:text-white text-sm transition-colors"
               >
                 Mentions légales
-              </a>
+              </Link>
               <Link
                 href="/politique-confidentialite"
                 className="text-white/60 hover:text-white text-sm transition-colors"
