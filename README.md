@@ -54,6 +54,19 @@ landscape in France.
 - **Ranking Tables**: Complete standings with detailed statistics
 - **Match History**: Historical results and trends
 
+### 🔍 Team Search & Discovery
+
+- **Team Search**: Real-time team search with suggestions
+- **Team Details**: Comprehensive team statistics pages (`/equipe/[teamId]`)
+- **Team Synchronization**: Automatic team data sync from rankings
+- **URL Search Params**: Persistent search state with `nuqs`
+
+### 📧 Contact & Communication
+
+- **Contact Form**: Email integration with Resend
+- **Toast Notifications**: User feedback system (Sonner)
+- **Legal Pages**: Privacy policy and legal mentions
+
 ### 🎨 User Experience
 
 - **Responsive Design**: Mobile-first approach with desktop optimization
@@ -83,8 +96,17 @@ landscape in France.
 
 - **Next.js API Routes** - Serverless API endpoints
 - **FFFA API Integration** - Official data source
+- **Supabase** - PostgreSQL database and API (PostgREST)
+- **React Query** - Data fetching, caching, and synchronization
 - **Rate Limiting** - Custom rate limiting system
 - **Caching** - Multi-level caching strategy
+- **Resend** - Email service (contact form)
+
+### State Management & Utilities
+
+- **Zustand** - Lightweight state management
+- **nuqs** - URL search parameter state management
+- **Sonner** - Toast notifications
 
 ### Development & Testing
 
@@ -92,6 +114,8 @@ landscape in France.
 - **Testing Library** - React component testing
 - **ESLint** - Code linting and formatting
 - **TypeScript** - Static type checking
+- **Turbo** - Monorepo build system
+- **Husky** - Git hooks for code quality
 
 ### Deployment & Monitoring
 
@@ -113,7 +137,7 @@ landscape in France.
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/your-username/flagscore.git
+   git clone https://github.com/Loriick/flagscore.git
    cd flagscore
    ```
 
@@ -129,13 +153,26 @@ landscape in France.
    cp .env.example .env.local
    ```
 
-   Configure your environment variables:
+   Configure your environment variables in `apps/web/.env.local`:
 
    ```env
-   FFFA_BASE=https://api.example.com
-   FFFA_ACTION=your_action
+   # FFFA API Configuration
+   FFFA_BASE=https://www.fffa.org/wp-admin/admin-ajax.php
+   FFFA_ACTION=fffa_calendar_api_proxy
    GOOGLE_VERIFICATION_CODE=your_code
+
+   # Supabase Configuration (Required)
+   NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON=your_supabase_anon_key
+
+   # Application Configuration
+   NEXT_PUBLIC_FLAGSCORE_ORIGIN=http://localhost:3000
+
+   # Resend (Optional - for contact form)
+   RESEND_API_KEY=re_xxxxx
    ```
+
+   See [SUPABASE-SETUP.md](apps/web/SUPABASE-SETUP.md) for detailed Supabase configuration.
 
 4. **Start Development Server**
 
@@ -149,7 +186,8 @@ landscape in France.
 
 ```bash
 # Development
-pnpm dev          # Start development server
+pnpm dev          # Start development server (all apps)
+pnpm dev:clean    # Clear cache and start dev server
 pnpm build        # Build for production
 pnpm start        # Start production server
 
@@ -162,43 +200,79 @@ pnpm test:coverage # Run tests with coverage
 # Code Quality
 pnpm lint         # Run ESLint
 pnpm lint:fix     # Fix ESLint issues
+pnpm type-check   # TypeScript type checking
+pnpm format       # Format code with Prettier
+pnpm format:check # Check code formatting
+
+# Analysis
+pnpm analyze      # Analyze bundle size
+pnpm audit        # Security audit
 ```
 
 ## 📁 Project Structure
 
+This is a **monorepo** using pnpm workspaces and Turbo:
+
 ```
 flagscore/
-├── src/
-│   ├── app/                    # Next.js App Router
-│   │   ├── api/               # API routes
-│   │   ├── classements/       # Rankings page
-│   │   ├── a-propos/          # About page
-│   │   ├── layout.tsx          # Root layout
-│   │   ├── page.tsx           # Home page
-│   │   ├── robots.ts          # Robots.txt
-│   │   └── sitemap.ts         # Sitemap.xml
-│   ├── components/            # React components
-│   │   ├── ui/                # shadcn/ui components
-│   │   ├── Header.tsx         # Navigation header
-│   │   ├── Footer.tsx         # Site footer
-│   │   ├── PoolsSelector.tsx  # Main selector component
-│   │   └── ...
-│   ├── hooks/                 # Custom React hooks
-│   │   ├── useChampionships.ts
-│   │   ├── useMatches.ts
-│   │   ├── usePools.ts
-│   │   └── useRankings.ts
-│   ├── lib/                   # Utility libraries
-│   │   ├── fffa-api.ts        # FFFA API integration
-│   │   ├── seo.ts             # SEO utilities
-│   │   ├── security.ts        # Security configuration
-│   │   └── rate-limit.ts      # Rate limiting
-│   └── middleware.ts          # Next.js middleware
-├── public/                     # Static assets
-├── vitest.config.ts           # Test configuration
-├── next.config.ts             # Next.js configuration
-└── package.json               # Dependencies
+├── apps/
+│   └── web/                   # 🌐 Main Next.js application
+│       ├── src/
+│       │   ├── app/           # Next.js App Router
+│       │   │   ├── api/       # API routes
+│       │   │   │   ├── teams/ # Team search & management
+│       │   │   │   ├── contact/ # Contact form
+│       │   │   │   ├── sync/  # FFFA data synchronization
+│       │   │   │   ├── rankings/ # Rankings API
+│       │   │   │   ├── matches/ # Matches API
+│       │   │   │   └── ...
+│       │   │   ├── classements/ # Rankings page
+│       │   │   ├── recherche/ # Team search page
+│       │   │   ├── equipe/    # Team detail pages
+│       │   │   ├── a-propos/  # About page
+│       │   │   ├── layout.tsx # Root layout
+│       │   │   ├── page.tsx   # Home page
+│       │   │   ├── robots.ts  # Robots.txt
+│       │   │   └── sitemap.ts # Sitemap.xml
+│       │   ├── components/     # React components
+│       │   │   ├── ui/        # shadcn/ui components
+│       │   │   ├── atoms/     # Atomic components
+│       │   │   ├── molecules/ # Molecular components
+│       │   │   ├── organisms/ # Complex components
+│       │   │   ├── Header.tsx # Navigation header
+│       │   │   ├── Footer.tsx # Site footer
+│       │   │   ├── PoolsSelector.tsx # Main selector
+│       │   │   ├── SearchTeams.tsx # Team search modal
+│       │   │   └── ...
+│       │   ├── hooks/         # Custom React hooks
+│       │   │   ├── useTeams.ts
+│       │   │   ├── useChampionships.ts
+│       │   │   ├── useSupabaseOptimized.ts
+│       │   │   └── ...
+│       │   ├── lib/           # Utility libraries
+│       │   │   ├── fffa-api.ts # FFFA API integration
+│       │   │   ├── supabase.ts # Supabase client
+│       │   │   ├── seo.ts      # SEO utilities
+│       │   │   ├── security.ts # Security configuration
+│       │   │   └── rate-limit.ts # Rate limiting
+│       │   ├── store/         # Zustand stores
+│       │   └── middleware.ts  # Next.js middleware
+│       ├── public/            # Static assets
+│       ├── supabase-migrations/ # Database migrations
+│       └── ...
+├── packages/
+│   └── shared/                # 📦 Shared types and utilities
+│       └── src/
+│           ├── types/         # Shared TypeScript types
+│           ├── constants/     # Shared constants
+│           └── utils/         # Shared utilities
+├── scripts/                   # Build and deployment scripts
+├── turbo.json                 # Turbo configuration
+├── pnpm-workspace.yaml        # pnpm workspace config
+└── package.json               # Root dependencies
 ```
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for monorepo deployment details.
 
 ## 🔌 API Documentation
 
@@ -219,6 +293,67 @@ GET /api/matches?poolId={id}
 ```
 
 Returns matches and days for a specific pool.
+
+#### Teams API
+
+```http
+GET /api/teams?search={term}&poolId={id}&championshipId={id}
+```
+
+Search and filter teams. Returns list of teams matching criteria.
+
+```http
+GET /api/teams/[teamId]
+```
+
+Get detailed information about a specific team.
+
+```http
+POST /api/teams
+```
+
+Synchronize teams from rankings data to Supabase.
+
+#### Contact API
+
+```http
+POST /api/contact
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "message": "Hello..."
+}
+```
+
+Send contact form email via Resend.
+
+#### Sync API
+
+```http
+GET /api/sync?action={action}&championshipId={id}&poolId={id}
+POST /api/sync
+```
+
+Synchronize FFFA data to Supabase. Actions: `championships`, `pools`, `days`, `matches`, `rankings`,
+`complete`, `smart`.
+
+#### Complete Data API
+
+```http
+GET /api/complete-data?season={year}&championshipId={id}&poolId={id}
+```
+
+Get all data for a competition (championships, pools, days, matches).
+
+#### Pool Data API
+
+```http
+GET /api/pool-data?poolId={id}&dayId={id}
+```
+
+Get days and matches for a specific pool.
 
 #### Metrics API (Development)
 
@@ -323,7 +458,7 @@ pnpm test:run
 ### Test Structure
 
 ```
-src/
+apps/web/src/
 ├── components/
 │   └── __tests__/          # Component tests
 ├── hooks/
@@ -344,11 +479,26 @@ src/
 
 2. **Environment Variables**
 
+   Configure in Vercel Dashboard or `.env.local`:
+
    ```env
-   FFFA_BASE=your_api_base_url
-   FFFA_ACTION=your_action
+   # FFFA API
+   FFFA_BASE=https://www.fffa.org/wp-admin/admin-ajax.php
+   FFFA_ACTION=fffa_calendar_api_proxy
    GOOGLE_VERIFICATION_CODE=your_code
+
+   # Supabase (Required)
+   NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON=your_supabase_anon_key
+
+   # Application
+   NEXT_PUBLIC_FLAGSCORE_ORIGIN=https://flagscore.vercel.app
+
+   # Resend (Optional)
+   RESEND_API_KEY=re_xxxxx
    ```
+
+   See [SUPABASE-SETUP.md](apps/web/SUPABASE-SETUP.md) for Supabase configuration.
 
 3. **Deploy**
    ```bash
@@ -363,51 +513,6 @@ The application is optimized for production with:
 - **Edge Runtime**: Optimized API routes
 - **Image Optimization**: Automatic image processing
 - **Bundle Analysis**: Optimized bundle sizes
-
-## 🤝 Contributing
-
-We welcome contributions! Please follow these guidelines:
-
-### Development Workflow
-
-1. **Fork the repository**
-2. **Create a feature branch**
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-3. **Make your changes**
-4. **Run tests**
-   ```bash
-   pnpm test
-   pnpm lint
-   ```
-5. **Commit your changes**
-   ```bash
-   git commit -m "Add amazing feature"
-   ```
-6. **Push to your branch**
-   ```bash
-   git push origin feature/amazing-feature
-   ```
-7. **Open a Pull Request**
-
-### Code Standards
-
-- **TypeScript**: All code must be type-safe
-- **ESLint**: Follow the configured linting rules
-- **Testing**: Add tests for new features
-- **Documentation**: Update documentation as needed
-- **Performance**: Consider performance implications
-
-### Issue Reporting
-
-When reporting issues, please include:
-
-- **Environment**: Node.js version, OS
-- **Steps to reproduce**: Clear reproduction steps
-- **Expected behavior**: What should happen
-- **Actual behavior**: What actually happens
-- **Screenshots**: If applicable
 
 ## 📄 License
 
@@ -426,10 +531,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 For support and questions:
 
 - **Email**: contact@flagscore.fr
-- **Issues**: [GitHub Issues](https://github.com/your-username/flagscore/issues)
-- **Documentation**: [Project Wiki](https://github.com/your-username/flagscore/wiki)
+- **Issues**: [GitHub Issues](https://github.com/Loriick/flagscore/issues)
+- **Documentation**: See [DEPLOYMENT.md](DEPLOYMENT.md),
+  [TEAMS_SEARCH_README.md](apps/web/TEAMS_SEARCH_README.md),
+  [SUPABASE-SETUP.md](apps/web/SUPABASE-SETUP.md)
 
 ---
 
 **Made with ❤️ for the French Flag Football community**
-# Test deployment trigger
