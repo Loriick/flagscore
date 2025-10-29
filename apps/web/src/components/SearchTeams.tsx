@@ -2,7 +2,7 @@
 
 import { Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { useTeams } from "../hooks/useTeams";
 
@@ -22,6 +22,9 @@ export function SearchTeams({
   const [searchTerm, setSearchTerm] = useState(externalSearchTerm);
   const [isSearching, setIsSearching] = useState(false);
   const router = useRouter();
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const firstFocusableRef = useRef<HTMLInputElement | null>(null);
+  const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
 
   // Mettre à jour searchTerm quand externalSearchTerm change
   useEffect(() => {
@@ -63,11 +66,55 @@ export function SearchTeams({
     }
   }, [searchTerm]);
 
+  // Accessibility: focus trap, restore focus, close on ESC
+  useEffect(() => {
+    if (!isOpen) return;
+    previouslyFocusedElementRef.current = document.activeElement as HTMLElement;
+    // Focus the input when opening
+    firstFocusableRef.current?.focus();
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        onClose?.();
+      }
+      if (e.key === "Tab" && dialogRef.current) {
+        const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown, true);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown, true);
+      // Restore focus to the opener when closing
+      previouslyFocusedElementRef.current?.focus?.();
+    };
+  }, [isOpen, onClose]);
+
   return (
     <div
       className={`fixed inset-0 z-50 bg-black/50 backdrop-blur-sm ${isOpen ? "block" : "hidden"}`}
+      aria-hidden={!isOpen}
     >
-      <div className="bg-gray-900 border border-gray-700 rounded-lg mx-4 mt-20 max-w-md">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="search-title"
+        className="bg-gray-900 border border-gray-700 rounded-lg mx-4 mt-20 max-w-md"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <h2 className="text-lg font-semibold text-white" id="search-title">
@@ -99,6 +146,7 @@ export function SearchTeams({
               onChange={e => setSearchTerm(e.target.value)}
               placeholder="Nom de l'équipe..."
               className="w-full pl-10 pr-10 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              ref={firstFocusableRef}
               autoFocus
               aria-label="Nom de l'équipe"
             />
