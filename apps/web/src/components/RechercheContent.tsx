@@ -1,16 +1,16 @@
 "use client";
 
 import { Search, Users, Trophy, Target } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useQueryState } from "nuqs";
 import { useState, useEffect, Suspense } from "react";
 
 import { TeamsErrorFallback } from "../components/TeamsErrorFallback";
 import { useTeams } from "../hooks/useTeams";
 
 function RechercheContentInner() {
-  const searchParams = useSearchParams();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [query, setQuery] = useQueryState("q", { defaultValue: "" });
+  const [searchTerm, setSearchTerm] = useState(query || "");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(query || "");
 
   const {
     data: teams,
@@ -21,6 +21,7 @@ function RechercheContentInner() {
       debouncedSearchTerm.length >= 2 ? debouncedSearchTerm : undefined,
   });
 
+  // Debounce search term
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -28,13 +29,22 @@ function RechercheContentInner() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
+  // Sync URL query param with local state on mount
   useEffect(() => {
-    const q = searchParams.get("q");
-    if (q) {
-      setSearchTerm(q);
-      setDebouncedSearchTerm(q);
+    if (query && query !== searchTerm) {
+      setSearchTerm(query);
+      setDebouncedSearchTerm(query);
     }
-  }, [searchParams]);
+  }, [query]); // Only sync when query changes from URL (e.g., back button)
+
+  // Update URL when debounced search term changes
+  useEffect(() => {
+    if (debouncedSearchTerm.length >= 2 && debouncedSearchTerm !== query) {
+      setQuery(debouncedSearchTerm);
+    } else if (debouncedSearchTerm === "" && query !== "") {
+      setQuery(null);
+    }
+  }, [debouncedSearchTerm, query, setQuery]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -186,7 +196,7 @@ function RechercheContentInner() {
   );
 }
 
-export default function RechercheContent() {
+export function RechercheContent() {
   return (
     <Suspense
       fallback={

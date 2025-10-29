@@ -2,11 +2,12 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import { CacheBuster } from "../components/CacheBuster";
 import { ErrorBoundary } from "../components/ErrorBoundary";
-import Footer from "../components/Footer";
-import Header from "../components/Header";
+import { Footer } from "../components/Footer";
+import { Header } from "../components/Header";
 import { OfflineIndicator } from "../components/OfflineIndicator";
 import { PerformanceMonitor } from "../components/PerformanceMonitor";
 import { PreloadManager } from "../components/PreloadManager";
@@ -194,7 +195,7 @@ export default function RootLayout({
                 <ErrorBoundary>
                   <Header />
                   <main id="main-content" role="main" className="min-h-screen">
-                    {children}
+                    <NuqsAdapter>{children}</NuqsAdapter>
                   </main>
                   <Footer />
                   <OfflineIndicator />

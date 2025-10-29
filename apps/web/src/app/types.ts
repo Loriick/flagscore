@@ -1,18 +1,18 @@
-export type Championship = {
+export interface Championship {
   id: number;
   label: string;
   season: number;
   male: boolean;
-};
+}
 
-export type Pool = {
+export interface Pool {
   id: number;
   championship_id: number;
   phase_id: number;
   label: string;
-};
+}
 
-export type Day = {
+export interface Day {
   id: number;
   championship_id: number;
   phase_id: number;
@@ -20,9 +20,9 @@ export type Day = {
   label: string;
   date: string;
   number: number;
-};
+}
 
-export type Match = {
+export interface Match {
   id: number;
   championship_id: number;
   phase_id: number;
@@ -32,9 +32,9 @@ export type Match = {
   team_a: { name: string; score: number; general_forfeit: boolean };
   team_b: { name: string; score: number; general_forfeit: boolean };
   sheet: string | null;
-};
+}
 
-export type Ranking = {
+export interface Ranking {
   position: number;
   club: { id: number; label: string; general_forfeit: boolean };
   points: number;
@@ -45,4 +45,4 @@ export type Ranking = {
   points_won: number;
   points_loss: number;
   points_diff: number;
-};
+}
