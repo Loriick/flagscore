@@ -1,6 +1,7 @@
 "use client";
 
 import { Search, Users, Trophy, Target } from "lucide-react";
+import Link from "next/link";
 import { useQueryState } from "nuqs";
 import { useState, useEffect, Suspense } from "react";
 
@@ -51,9 +52,7 @@ function RechercheContentInner() {
     setDebouncedSearchTerm(searchTerm);
   };
 
-  const handleTeamClick = (teamId: string) => {
-    window.location.href = `/equipe/${teamId}`;
-  };
+  // Navigation vers la page équipe désormais gérée par <Link>
 
   return (
     <>
@@ -103,10 +102,11 @@ function RechercheContentInner() {
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {teams.map(team => (
-              <div
+              <Link
                 key={team.id}
-                onClick={() => handleTeamClick(team.id)}
-                className="bg-gray-800 border border-gray-700 rounded-lg p-6 hover:bg-gray-750 hover:border-gray-600 transition-all cursor-pointer group"
+                href={`/equipe/${team.id}`}
+                className="bg-gray-800 border border-gray-700 rounded-lg p-6 hover:bg-gray-750 hover:border-gray-600 transition-all group focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label={`Voir la page de l'équipe ${team.name}`}
               >
                 <div className="flex items-start justify-between mb-4">
                   <h3 className="text-lg font-semibold text-white group-hover:text-blue-400 transition-colors">
@@ -167,7 +167,7 @@ function RechercheContentInner() {
                     {team.total_goal_difference}
                   </span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
