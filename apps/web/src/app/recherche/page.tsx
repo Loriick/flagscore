@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 
-import RechercheContent from "../../components/RechercheContent";
+import { RechercheContent } from "../../components/RechercheContent";
 import { getBaseUrl, pageMetadata } from "../../lib/seo";
 
 export const dynamic = "force-dynamic";
 
-type SearchPageProps = {
+interface SearchPageProps {
   searchParams?: { q?: string };
-};
+}
 
 export function generateMetadata({ searchParams }: SearchPageProps): Metadata {
   const q = searchParams?.q?.trim();

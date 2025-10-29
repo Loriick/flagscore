@@ -13,7 +13,9 @@ import { useTeam } from "../../../hooks/useTeams";
 
 export const dynamic = "force-dynamic";
 
-type TeamPageProps = { params: { teamId: string } };
+interface TeamPageProps {
+  params: { teamId: string };
+}
 
 export function generateMetadata({ params }: TeamPageProps): Metadata {
   const teamId = params.teamId;

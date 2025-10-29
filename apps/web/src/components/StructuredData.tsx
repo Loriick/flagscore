@@ -1,31 +1,16 @@
-"use client";
-
-import { useEffect } from "react";
-
 interface StructuredDataProps {
   data: Record<string, unknown>;
 }
 
+// Server Component: Les données structurées peuvent être injectées directement
+// dans le head sans nécessiter de JavaScript côté client
 export function StructuredData({ data }: StructuredDataProps) {
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.type = "application/ld+json";
-    script.textContent = JSON.stringify(data);
-    script.id = `structured-data-${Date.now()}`;
-
-    // Ajouter au head
-    document.head.appendChild(script);
-
-    // Clean up on unmount
-    return () => {
-      const existingScript = document.getElementById(script.id);
-      if (existingScript) {
-        document.head.removeChild(existingScript);
-      }
-    };
-  }, [data]);
-
-  return null; // Ce composant ne rend rien visuellement
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+    />
+  );
 }
 
 // Component for match structured data
