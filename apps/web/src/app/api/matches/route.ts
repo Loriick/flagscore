@@ -6,7 +6,7 @@ import {
   createOptimizedResponse,
   createErrorResponse,
 } from "@/lib/compression";
-import { getMatches } from "@/lib/fffa-api";
+import { getDays, getMatches } from "@/lib/fffa-api";
 
 // Match cache (3 minutes - more frequent than rankings)
 const matchesCache = new Map<string, { data: Match[]; timestamp: number }>();
@@ -16,13 +16,29 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const poolId = searchParams.get("poolId");
+    const dayId = searchParams.get("dayId");
 
-    if (!poolId) {
-      return createErrorResponse("poolId est requis", 400);
+    if (!poolId && !dayId) {
+      return createErrorResponse("poolId ou dayId est requis", 400);
     }
 
-    // Check cache
-    const cacheKey = `matches-${poolId}`;
+    // Resolve effective day id if only poolId is provided
+    let effectiveDayId: number | null = null;
+    if (dayId) {
+      effectiveDayId = Number(dayId);
+    } else if (poolId) {
+      try {
+        const days = await getDays(Number(poolId));
+        effectiveDayId = days[0]?.id || null;
+      } catch {
+        effectiveDayId = null;
+      }
+    }
+
+    // Check cache (key based on day if available)
+    const cacheKey = effectiveDayId
+      ? `matches-day-${effectiveDayId}`
+      : `matches-pool-${poolId}`;
     const cached = matchesCache.get(cacheKey);
 
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
@@ -39,7 +55,12 @@ export async function GET(request: NextRequest) {
     // Get fresh data
     let matchesData: Match[] = [];
     try {
-      matchesData = await getMatches(Number(poolId));
+      if (effectiveDayId) {
+        matchesData = await getMatches(effectiveDayId);
+      } else {
+        // If no day could be resolved, return empty
+        matchesData = [];
+      }
     } catch (error) {
       console.error("Error fetching matches:", error);
 

@@ -7,7 +7,7 @@ import {
   getMatches,
   getRankings,
 } from "./fffa-api";
-import { SupabaseService } from "./supabase";
+import { SupabaseService, supabase } from "./supabase";
 
 // Service de synchronisation FFFA → Supabase
 export class FFASyncService {
@@ -275,4 +275,64 @@ export class FFASyncService {
       throw error;
     }
   }
+}
+
+// Synchroniser la table teams directement depuis la FFFA (à partir des classements)
+export async function syncTeamsFromFFFA() {
+  const teamsToUpsert: Array<{
+    id: string;
+    name: string;
+    pool_id: number;
+    championship_id: number;
+    season: string;
+    total_matches: number;
+    total_wins: number;
+    total_draws: number;
+    total_losses: number;
+    total_goals_for: number;
+    total_goals_against: number;
+    total_goal_difference: number;
+    total_points: number;
+    best_position: number;
+    worst_position: number;
+    current_position: number;
+  }> = [];
+
+  const championships = await SupabaseService.getChampionships();
+  for (const c of championships) {
+    const pools = await SupabaseService.getPoolsByChampionship(c.id);
+    for (const p of pools) {
+      const rankings = await getRankings(p.id);
+      for (const r of Array.isArray(rankings) ? rankings : [rankings]) {
+        const id = `${r.club.label}_${p.id}`.replace(/\s+/g, "_").toLowerCase();
+        teamsToUpsert.push({
+          id,
+          name: r.club.label,
+          pool_id: p.id,
+          championship_id: p.championship_id,
+          season: String(c.season ?? "2026"),
+          total_matches: r.j,
+          total_wins: r.g,
+          total_draws: r.n,
+          total_losses: r.p,
+          total_goals_for: r.points_won,
+          total_goals_against: r.points_loss,
+          total_goal_difference: r.points_diff,
+          total_points: r.points,
+          best_position: r.position,
+          worst_position: r.position,
+          current_position: r.position,
+        });
+      }
+    }
+  }
+
+  if (teamsToUpsert.length === 0) return [];
+
+  const { error } = await supabase
+    .from("teams")
+    .upsert(teamsToUpsert, { onConflict: "id" });
+  if (error) throw error;
+
+  return teamsToUpsert;
 }

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { useOptimizedMatchesByDay } from "./useOptimizedData";
 import {
   useChampionshipsOptimized,
   usePoolsOptimized,
@@ -8,6 +9,7 @@ import {
   useDaysOptimized,
 } from "./useSupabaseOptimized";
 
+import type { Match } from "@/app/types";
 import { logger } from "@/lib/logger-advanced";
 import { Ranking as SupabaseRanking } from "@/lib/supabase";
 
@@ -118,7 +120,7 @@ export function useAppDataSupabase() {
   const matches = matchesData?.data || [];
 
   // Mapper les matchs Supabase vers le format attendu
-  const mappedMatches = matches.map(m => ({
+  const mappedMatches: Match[] = matches.map(m => ({
     id: parseInt(m.id) || 0, // Convertir string vers number
     championship_id: effectiveChampionshipId,
     phase_id: 1,
@@ -174,6 +176,22 @@ export function useAppDataSupabase() {
     if (selectedDayId > 0) return selectedDayId;
     return days.length > 0 ? days[0].id : 0;
   }, [selectedDayId, days]);
+
+  // Filtrer les matchs par journée sélectionnée pour l'affichage (fallback)
+  let displayedMatches = mappedMatches.filter(m => m.day_id === effectiveDayId);
+
+  // Préférer les matchs par journée via l'API (FFFA proxy) quand disponible
+  const {
+    data: apiMatchesData,
+    isLoading: apiMatchesLoading,
+    error: apiMatchesError,
+  } = useOptimizedMatchesByDay(effectiveDayId);
+
+  const apiMatches =
+    (apiMatchesData as { matches?: Match[] } | null)?.matches || [];
+  if (apiMatches.length > 0) {
+    displayedMatches = apiMatches;
+  }
 
   const {
     data: rankingsData,
@@ -282,7 +300,7 @@ export function useAppDataSupabase() {
     championships: mappedChampionships,
     pools: mappedPools,
     days,
-    matches: mappedMatches,
+    matches: displayedMatches,
     rankings: mappedRankings,
 
     // États de chargement intelligents
@@ -290,7 +308,9 @@ export function useAppDataSupabase() {
       championships: championshipsLoading && mappedChampionships.length === 0,
       pools: poolsLoading && mappedPools.length === 0,
       days: daysLoading && days.length === 0,
-      matches: matchesLoading && mappedMatches.length === 0,
+      matches:
+        (apiMatchesLoading && apiMatches.length === 0) ||
+        (matchesLoading && mappedMatches.length === 0),
       rankings: rankingsLoading && mappedRankings.length === 0,
     },
     initialLoading,
@@ -304,7 +324,7 @@ export function useAppDataSupabase() {
       championships: championshipsError?.message || null,
       pools: poolsError?.message || null,
       days: daysError?.message || null,
-      matches: matchesError?.message || null,
+      matches: apiMatchesError || matchesError || null,
       rankings: rankingsError?.message || null,
     },
 
