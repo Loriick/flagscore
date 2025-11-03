@@ -56,14 +56,28 @@ export interface Ranking {
   f: number;
 }
 
+function getServerOrigin(): string {
+  const explicit =
+    process.env.NEXT_PUBLIC_FLAGSCORE_ORIGIN ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_VERCEL_URL;
+  if (explicit) {
+    // Ensure it has protocol
+    if (/^https?:\/\//i.test(explicit)) return explicit;
+    return `https://${explicit}`;
+  }
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return "http://localhost:3000";
+}
+
 async function api<T>(params: Record<string, string | string[]>): Promise<T> {
   try {
     // Use relative URL for same-origin requests
-    const baseUrl = process.env.NEXT_PUBLIC_FLAGSCORE_ORIGIN || "";
-    const url = new URL(
-      "/api/fffa/flag",
-      baseUrl || (typeof window !== "undefined" ? window.location.origin : "")
-    );
+    const baseUrl =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : getServerOrigin();
+    const url = new URL("/api/fffa/flag", baseUrl);
 
     Object.entries(params).forEach(([k, v]) => {
       if (Array.isArray(v)) v.forEach(val => url.searchParams.append(k, val));
