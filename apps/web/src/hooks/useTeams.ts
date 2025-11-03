@@ -38,7 +38,14 @@ export function useTeams({
       })[];
     },
     enabled,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    // Pour la recherche, on veut toujours relire Supabase quand l'input change
+    // donc pas de fenêtre de staleness
+    staleTime: 0,
+    gcTime: 2 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: true,
+    refetchOnMount: "always",
+    retry: 1,
   });
 }
 
@@ -56,7 +63,11 @@ export function useTeam(teamId: string, enabled: boolean = true) {
       return result.data as Team & { pools: Pool; championships: Championship };
     },
     enabled: enabled && !!teamId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    retry: 1,
   });
 }
 

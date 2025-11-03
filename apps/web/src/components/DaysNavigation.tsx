@@ -5,11 +5,13 @@ import { Day } from "../app/types";
 interface DaysNavigationProps {
   days: Day[];
   onDaySelect: (day: Day) => void;
+  selectedDayId?: number;
 }
 
 export const DaysNavigation = memo(function DaysNavigation({
   days,
   onDaySelect,
+  selectedDayId,
 }: DaysNavigationProps) {
   if (days.length === 0) return null;
 
@@ -23,9 +25,11 @@ export const DaysNavigation = memo(function DaysNavigation({
               id={`day-${day.id}`}
               name={`day-${day.id}`}
               aria-label={`Sélectionner la journée ${day.label}`}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gray-800 border-gray-600 text-white hover:bg-gray-700 focus:ring-2 focus:ring-blue-500 cursor-pointer ${
-                index === 0 ? "shadow-sm" : ""
-              }`}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 border focus:ring-2 focus:ring-blue-500 cursor-pointer ${
+                selectedDayId === day.id
+                  ? "bg-blue-600 text-white border-blue-500"
+                  : "bg-gray-800 text-white border-gray-600 hover:bg-gray-700"
+              } ${index === 0 ? "shadow-sm" : ""}`}
               onClick={() => onDaySelect(day)}
             >
               {day.label}

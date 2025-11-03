@@ -9,39 +9,42 @@ import {
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { useTeam } from "../../../hooks/useTeams";
+import logger from "@/lib/logger";
+import { SupabaseService } from "@/lib/supabase";
+import type { Team, Pool, Championship } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
 interface TeamPageProps {
-  params: { teamId: string };
+  params: Promise<{ teamId: string }>;
 }
 
-export function generateMetadata({ params }: TeamPageProps): Metadata {
-  const teamId = params.teamId;
+export async function generateMetadata({
+  params,
+}: TeamPageProps): Promise<Metadata> {
+  const { teamId } = await params;
   return {
     title: `Équipe ${teamId} | Flagscore`,
     alternates: { canonical: `/equipe/${teamId}` },
   };
 }
 
-export default function EquipePage({ params }: TeamPageProps) {
-  const teamId = params.teamId;
+export default async function EquipePage({ params }: TeamPageProps) {
+  const { teamId } = await params;
 
-  const { data: team, isLoading, error } = useTeam(teamId);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-linear-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-400">Chargement de l'équipe...</p>
-        </div>
-      </div>
-    );
+  let team: (Team & { pools: Pool; championships: Championship }) | null = null;
+  try {
+    team = await SupabaseService.getTeamById(teamId);
+  } catch (error) {
+    logger.error("❌ Erreur lors du chargement de l'équipe:", {
+      error: error instanceof Error ? error.message : "Erreur inconnue",
+      stack: error instanceof Error ? error.stack : undefined,
+      teamId,
+    });
+    team = null;
   }
 
-  if (error || !team) {
+  if (!team) {
     return (
       <div className="min-h-screen bg-linear-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center">
         <div className="text-center">

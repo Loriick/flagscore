@@ -12,11 +12,13 @@ interface DayButtonProps {
   };
   onClick: () => void;
   className?: string;
+  selected?: boolean;
 }
 
 export const DayButton = memo(function DayButton({
   day,
   onClick,
+  selected = false,
 }: DayButtonProps) {
   const handleClick = () => {
     logger.logUserAction("day_selected", {
@@ -30,7 +32,12 @@ export const DayButton = memo(function DayButton({
   };
 
   return (
-    <Button variant="outline" onClick={handleClick}>
+    <Button
+      variant={selected ? "primary" : "ghost"}
+      onClick={handleClick}
+      className="focus:ring-0 focus:ring-offset-0 focus:outline-none outline-none"
+      aria-pressed={selected}
+    >
       {day.label}
     </Button>
   );

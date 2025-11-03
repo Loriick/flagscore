@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { useClientCache } from "../hooks/useClientCache";
-import { useDebounce } from "../hooks/useDebounce";
 
 interface UseOptimizedDataOptions<T> {
   cacheKey: string;
@@ -14,6 +13,7 @@ interface UseOptimizedDataOptions<T> {
 export function useOptimizedData<T>({
   cacheKey,
   fetchFn,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   debounceMs = 300,
   cacheTtl = 5 * 60 * 1000, // 5 minutes
   enabled = true,
@@ -26,8 +26,7 @@ export function useOptimizedData<T>({
     ttl: cacheTtl,
   });
 
-  // Debouncer to avoid too many requests
-  const debouncedFetch = useDebounce(fetchFn, { delay: debounceMs });
+  // Note: debounceMs conservé pour compat mais non utilisé ici (déclenchement contrôlé ailleurs)
 
   // Function to fetch data
   const loadData = useCallback(
@@ -49,7 +48,7 @@ export function useOptimizedData<T>({
         }
 
         // Fetch data with caching
-        const result = await fetchData(debouncedFetch, forceRefresh);
+        const result = await fetchData(fetchFn, forceRefresh);
         setData(result);
         return result;
       } catch (err) {
@@ -61,7 +60,7 @@ export function useOptimizedData<T>({
         setIsLoading(false);
       }
     },
-    [enabled, fetchData, getCachedData, debouncedFetch]
+    [enabled, fetchData, getCachedData, fetchFn]
   );
 
   // Load data on mount
@@ -127,5 +126,22 @@ export function useOptimizedRankings(poolId: number) {
     debounceMs: 300,
     cacheTtl: 5 * 60 * 1000, // 5 minutes for rankings
     enabled: poolId > 0,
+  });
+}
+
+// Hook specialized for matches by day
+export function useOptimizedMatchesByDay(dayId: number) {
+  return useOptimizedData({
+    cacheKey: `matches-day-${dayId}`,
+    fetchFn: async () => {
+      const response = await fetch(`/api/matches?dayId=${dayId}`);
+      if (!response.ok) {
+        throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    },
+    debounceMs: 400,
+    cacheTtl: 90 * 1000, // 90s for day-scoped matches
+    enabled: dayId > 0,
   });
 }

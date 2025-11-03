@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { syncTeamsFromFFFA } from "../../../lib/fffa-sync";
 import { SupabaseService } from "../../../lib/supabase";
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
-    console.log("🔄 Synchronisation des équipes depuis les classements...");
+    const { searchParams } = new URL(request.url);
+    const source = searchParams.get("source") || "rankings";
 
-    const teams = await SupabaseService.syncTeamsFromRankings();
+    console.log(
+      `🔄 Synchronisation des équipes depuis ${source === "fffa" ? "la FFFA" : "les classements"}...`
+    );
+
+    const teams =
+      source === "fffa"
+        ? await syncTeamsFromFFFA()
+        : await SupabaseService.syncTeamsFromRankings();
 
     return NextResponse.json({
       success: true,

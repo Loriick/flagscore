@@ -73,7 +73,11 @@ export function PoolsSelector() {
   useEffect(() => {
     if (errors.matches) {
       toast.error("Erreur de chargement des matchs", {
-        description: errors.matches,
+        description:
+          typeof errors.matches === "string"
+            ? errors.matches
+            : ((errors.matches as unknown as Error)?.message ??
+              String(errors.matches)),
       });
     }
   }, [errors.matches]);
@@ -117,6 +121,7 @@ export function PoolsSelector() {
         <div>
           <DaysNavigation
             days={days}
+            selectedDayId={selectedDayId}
             onDaySelect={day => handleDayChange(day.id.toString())}
             data-testid="days-navigation"
           />

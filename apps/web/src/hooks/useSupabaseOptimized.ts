@@ -203,19 +203,45 @@ export function useMatchesOptimized(poolId: number) {
           );
         }
 
-        // Si Supabase a des données, vérifier s'il y a du nouveau
+        // Si Supabase a des données, vérifier s'il y a du nouveau ou des scores modifiés
         if (supabaseData && supabaseData.length > 0) {
-          const supabaseIds = new Set(supabaseData.map(m => m.id));
+          const supabaseById = new Map(supabaseData.map(m => [m.id, m]));
           // const fffaIds = new Set(fffaMatches.map(m => m.id));
 
           // Vérifier s'il y a de nouveaux matchs
-          const hasNewMatches = fffaMatches.some(m => !supabaseIds.has(m.id));
+          const hasNewMatches = fffaMatches.some(m => !supabaseById.has(m.id));
 
-          if (hasNewMatches) {
-            console.log("🔄 Nouveaux matchs détectés, synchronisation...");
-            // Synchroniser les nouveaux matchs
+          // Vérifier des écarts de scores/statuts
+          const changed = fffaMatches.filter(m => {
+            const existing = supabaseById.get(m.id);
+            if (!existing) return false;
+            return (
+              (existing.score_home || 0) !== (m.score_home || 0) ||
+              (existing.score_away || 0) !== (m.score_away || 0) ||
+              (existing.status || "scheduled") !== (m.status || "scheduled")
+            );
+          });
+
+          if (hasNewMatches || changed.length > 0) {
+            if (hasNewMatches) {
+              console.log("🔄 Nouveaux matchs détectés, synchronisation...");
+            }
+            if (changed.length > 0) {
+              console.log(
+                `📝 Scores mis à jour détectés (${changed.length}), synchronisation...`
+              );
+            }
+            // Synchroniser nouveaux matchs et scores modifiés
             for (const match of fffaMatches) {
-              if (!supabaseIds.has(match.id)) {
+              const existing = supabaseById.get(match.id);
+              const isNew = !existing;
+              const hasDiff = existing
+                ? (existing.score_home || 0) !== (match.score_home || 0) ||
+                  (existing.score_away || 0) !== (match.score_away || 0) ||
+                  (existing.status || "scheduled") !==
+                    (match.status || "scheduled")
+                : false;
+              if (isNew || hasDiff) {
                 try {
                   await SupabaseService.syncMatch(match, poolId);
                 } catch (syncError) {
