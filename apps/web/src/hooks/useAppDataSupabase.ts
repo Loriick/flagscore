@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useOptimizedMatchesByDay } from "./useOptimizedData";
+import { useShareableUrl } from "./useShareableUrl";
 import {
   useChampionshipsOptimized,
   usePoolsOptimized,
@@ -15,11 +16,16 @@ import { Ranking as SupabaseRanking } from "@/lib/supabase";
 
 // Hook qui utilise Supabase pour la page de résultats
 export function useAppDataSupabase() {
-  // Local state for selections
-  const [currentSeason, setCurrentSeason] = useState(2026);
-  const [selectedChampionshipId, setSelectedChampionshipId] = useState(0);
-  const [selectedPoolId, setSelectedPoolId] = useState(0);
-  const [selectedDayId, setSelectedDayId] = useState(0);
+  // Hook pour synchroniser avec l'URL
+  const urlState = useShareableUrl();
+
+  // Local state for selections - initialiser depuis l'URL si disponible
+  const [currentSeason, setCurrentSeason] = useState(urlState.season);
+  const [selectedChampionshipId, setSelectedChampionshipId] = useState(
+    urlState.championship
+  );
+  const [selectedPoolId, setSelectedPoolId] = useState(urlState.pool);
+  const [selectedDayId, setSelectedDayId] = useState(urlState.day);
 
   // État pour tracker les changements de poule
   const [isChangingPool, setIsChangingPool] = useState(false);
@@ -238,33 +244,75 @@ export function useAppDataSupabase() {
     }
   }, [isChangingPool, days.length]);
 
-  // Optimized handlers with useCallback
-  const handleSeasonChange = useCallback((season: string) => {
-    const seasonNum = Number(season);
-    setCurrentSeason(seasonNum);
-    setSelectedChampionshipId(0);
-    setSelectedPoolId(0);
-    setSelectedDayId(0);
-  }, []);
+  // Optimized handlers with useCallback - Mettre à jour l'URL après chaque changement utilisateur
+  const handleSeasonChange = useCallback(
+    (season: string) => {
+      const seasonNum = Number(season);
+      setCurrentSeason(seasonNum);
+      setSelectedChampionshipId(0);
+      setSelectedPoolId(0);
+      setSelectedDayId(0);
+      // Mettre à jour l'URL après un court délai pour laisser le state se mettre à jour
+      setTimeout(() => {
+        urlState.updateUrl({
+          season: seasonNum,
+          championship: null,
+          pool: null,
+          day: null,
+        });
+      }, 0);
+    },
+    [urlState]
+  );
 
-  const handleChampionshipChange = useCallback((championshipId: string) => {
-    const id = Number(championshipId);
-    setSelectedChampionshipId(id);
-    setSelectedPoolId(0);
-    setSelectedDayId(0);
-  }, []);
+  const handleChampionshipChange = useCallback(
+    (championshipId: string) => {
+      const id = Number(championshipId);
+      setSelectedChampionshipId(id);
+      setSelectedPoolId(0);
+      setSelectedDayId(0);
+      // Mettre à jour l'URL
+      setTimeout(() => {
+        urlState.updateUrl({
+          championship: id || null,
+          pool: null,
+          day: null,
+        });
+      }, 0);
+    },
+    [urlState]
+  );
 
-  const handlePoolChange = useCallback((poolId: string) => {
-    const id = Number(poolId);
-    setIsChangingPool(true);
-    setSelectedPoolId(id);
-    setSelectedDayId(0);
-  }, []);
+  const handlePoolChange = useCallback(
+    (poolId: string) => {
+      const id = Number(poolId);
+      setIsChangingPool(true);
+      setSelectedPoolId(id);
+      setSelectedDayId(0);
+      // Mettre à jour l'URL
+      setTimeout(() => {
+        urlState.updateUrl({
+          pool: id || null,
+          day: null,
+        });
+      }, 0);
+    },
+    [urlState]
+  );
 
-  const handleDayChange = useCallback((dayId: string) => {
-    const id = Number(dayId);
-    setSelectedDayId(id);
-  }, []);
+  const handleDayChange = useCallback(
+    (dayId: string) => {
+      const id = Number(dayId);
+      setSelectedDayId(id);
+      // Mettre à jour l'URL
+      setTimeout(() => {
+        urlState.updateUrl({
+          day: id || null,
+        });
+      }, 0);
+    },
+    [urlState]
+  );
 
   // Calculated states
   const initialLoading = useMemo(() => {
