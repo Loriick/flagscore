@@ -16,8 +16,10 @@ export interface RateLimitResult {
   message?: string;
 }
 
-// In-memory storage for rate limiting
-// In production, use Redis or a database
+// ⚠️ KNOWN LIMITATION: This store is in-memory.
+// On Vercel (serverless), each function invocation has its own memory space.
+// Rate limiting does not persist across instances and does not effectively protect in production.
+// For real protection, migrate to Upstash Redis (@upstash/ratelimit + @upstash/redis).
 class RateLimitStore {
   private store = new Map<string, { count: number; resetTime: number }>();
 
