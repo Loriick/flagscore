@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { Match } from "../../types";
 
@@ -7,12 +7,39 @@ import {
   createErrorResponse,
 } from "@/lib/compression";
 import { getDays, getMatches } from "@/lib/fffa-api";
+import logger from "@/lib/logger";
+import {
+  createRateLimit,
+  rateLimitConfigs,
+  getRateLimitHeaders,
+  isRateLimited,
+} from "@/lib/rate-limit";
 
 // Match cache (3 minutes - more frequent than rankings)
 const matchesCache = new Map<string, { data: Match[]; timestamp: number }>();
 const CACHE_DURATION = 3 * 60 * 1000; // 3 minutes
 
+// Rate limiting for matches
+const rateLimit = createRateLimit(rateLimitConfigs.dataApi);
+
 export async function GET(request: NextRequest) {
+  // Check rate limiting
+  const rateLimitResult = rateLimit(request);
+  if (isRateLimited(rateLimitResult)) {
+    logger.warn("MATCHES_API_RATE_LIMITED", {
+      ip: request.headers.get("x-forwarded-for") || "unknown",
+      userAgent: request.headers.get("user-agent") || "unknown",
+    });
+
+    return NextResponse.json(
+      { error: rateLimitResult.message },
+      {
+        status: 429,
+        headers: getRateLimitHeaders(rateLimitResult),
+      }
+    );
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const poolId = searchParams.get("poolId");
@@ -62,7 +89,7 @@ export async function GET(request: NextRequest) {
         matchesData = [];
       }
     } catch (error) {
-      console.error("Error fetching matches:", error);
+      logger.error("Error fetching matches", { error: String(error) });
 
       // Return empty array instead of throwing
       return createOptimizedResponse(
@@ -91,7 +118,7 @@ export async function GET(request: NextRequest) {
       { cacheMaxAge: 180 } // 3 minutes
     );
   } catch (error) {
-    console.error("Error in the matches API:", error);
+    logger.error("Error in the matches API", { error: String(error) });
 
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";

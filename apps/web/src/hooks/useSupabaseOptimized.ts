@@ -18,12 +18,10 @@ export function useChampionshipsOptimized(season?: number) {
     queryKey: ["championships", "optimized", season],
     queryFn: async () => {
       try {
-        // Récupérer les données Supabase avec filtre par saison
         const supabaseData = await SupabaseService.getChampionships(season);
 
-        // Si Supabase a des données, les retourner immédiatement
         if (supabaseData && supabaseData.length > 0) {
-          console.log("📊 Utilisation des données Supabase (immédiat)");
+          logger.debug("Championships loaded from Supabase cache", { count: supabaseData.length, season });
           await logger.logSupabaseSync("championships_loaded", {
             count: supabaseData.length,
             source: "supabase_cache",
@@ -32,8 +30,7 @@ export function useChampionshipsOptimized(season?: number) {
           return { data: supabaseData, source: "supabase" };
         }
 
-        // Si pas de données Supabase, synchroniser depuis FFFA
-        console.log("🔄 Première synchronisation des championnats...");
+        logger.debug("No championships in Supabase, syncing from FFFA...", { season });
         await logger.logSupabaseSync("championships_sync_start", {
           reason: "no_supabase_data",
           season: season,
@@ -46,13 +43,11 @@ export function useChampionshipsOptimized(season?: number) {
           season: c.season.toString(),
         }));
 
-        // Si pas de données Supabase, synchroniser tout
-        console.log("🔄 Première synchronisation des championnats...");
         for (const championship of fffaChampionships) {
           try {
             await SupabaseService.syncChampionship(championship);
           } catch (syncError) {
-            console.warn("⚠️ Erreur de synchronisation:", syncError);
+            logger.warn("Championship sync error", { error: String(syncError) });
           }
         }
 
@@ -62,8 +57,7 @@ export function useChampionshipsOptimized(season?: number) {
         });
         return { data: fffaChampionships, source: "fffa" };
       } catch (error) {
-        console.error("❌ Erreur dans useChampionshipsOptimized:", error);
-        await logger.error("useChampionshipsOptimized_error", {
+        await logger.error("useChampionshipsOptimized error", {
           error: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
         });
@@ -82,18 +76,15 @@ export function usePoolsOptimized(championshipId: number) {
     queryKey: ["pools", "optimized", championshipId],
     queryFn: async () => {
       try {
-        // Récupérer les données Supabase
         const supabaseData =
           await SupabaseService.getPoolsByChampionship(championshipId);
 
-        // Si Supabase a des données, les retourner immédiatement
         if (supabaseData && supabaseData.length > 0) {
-          console.log("📊 Utilisation des données Supabase (immédiat)");
+          logger.debug("Pools loaded from Supabase cache", { count: supabaseData.length, championshipId });
           return { data: supabaseData, source: "supabase" };
         }
 
-        // Si pas de données Supabase, synchroniser depuis FFFA
-        console.log("🔄 Première synchronisation des poules...");
+        logger.debug("No pools in Supabase, syncing from FFFA...", { championshipId });
         const phases = await getPhases(championshipId);
         const fffaPools = [];
         for (const phase of phases) {
@@ -107,19 +98,19 @@ export function usePoolsOptimized(championshipId: number) {
           );
         }
 
-        // Si pas de données Supabase, synchroniser tout
-        console.log("🔄 Première synchronisation des poules...");
         for (const pool of fffaPools) {
           try {
             await SupabaseService.syncPool(pool, championshipId);
           } catch (syncError) {
-            console.warn("⚠️ Erreur de synchronisation:", syncError);
+            logger.warn("Pool sync error", { error: String(syncError) });
           }
         }
 
         return { data: fffaPools, source: "fffa" };
       } catch (error) {
-        console.error("❌ Erreur dans usePoolsOptimized:", error);
+        await logger.error("usePoolsOptimized error", {
+          error: error instanceof Error ? error.message : String(error),
+        });
         throw error;
       }
     },
@@ -136,16 +127,14 @@ export function useDaysOptimized(poolId: number) {
     queryKey: ["days", "optimized", poolId],
     queryFn: async () => {
       try {
-        // Essayer Supabase en premier
         const supabaseData = await SupabaseService.getDaysByPool(poolId);
 
         if (supabaseData && supabaseData.length > 0) {
-          console.log("📊 Utilisation des données Supabase");
+          logger.debug("Days loaded from Supabase cache", { count: supabaseData.length, poolId });
           return { data: supabaseData, source: "supabase" };
         }
 
-        // Sinon, utiliser FFFA
-        console.log("🔄 Utilisation des données FFFA...");
+        logger.debug("No days in Supabase, fetching from FFFA...", { poolId });
         const fffaDays = await getDays(poolId);
         const days = fffaDays.map(d => ({
           id: d.id,
@@ -156,7 +145,9 @@ export function useDaysOptimized(poolId: number) {
 
         return { data: days, source: "fffa" };
       } catch (error) {
-        console.error("❌ Erreur dans useDaysOptimized:", error);
+        await logger.error("useDaysOptimized error", {
+          error: error instanceof Error ? error.message : String(error),
+        });
         throw error;
       }
     },
@@ -173,17 +164,14 @@ export function useMatchesOptimized(poolId: number) {
     queryKey: ["matches", "optimized", poolId],
     queryFn: async () => {
       try {
-        // Récupérer les données Supabase
         const supabaseData = await SupabaseService.getMatchesByPool(poolId);
 
-        // Récupérer les données FFFA pour comparaison
         const days = await getDays(poolId);
         const fffaMatches = [];
         for (const day of days) {
           const dayMatches = await getMatches(day.id);
           fffaMatches.push(
             ...dayMatches.map(m => {
-              // Créer un ID unique basé sur le jour + les équipes
               const uniqueId =
                 `${day.id}_${m.team_a.name}_${m.team_b.name}`.replace(
                   /\s+/g,
@@ -203,15 +191,10 @@ export function useMatchesOptimized(poolId: number) {
           );
         }
 
-        // Si Supabase a des données, vérifier s'il y a du nouveau ou des scores modifiés
         if (supabaseData && supabaseData.length > 0) {
           const supabaseById = new Map(supabaseData.map(m => [m.id, m]));
-          // const fffaIds = new Set(fffaMatches.map(m => m.id));
 
-          // Vérifier s'il y a de nouveaux matchs
           const hasNewMatches = fffaMatches.some(m => !supabaseById.has(m.id));
-
-          // Vérifier des écarts de scores/statuts
           const changed = fffaMatches.filter(m => {
             const existing = supabaseById.get(m.id);
             if (!existing) return false;
@@ -223,15 +206,11 @@ export function useMatchesOptimized(poolId: number) {
           });
 
           if (hasNewMatches || changed.length > 0) {
-            if (hasNewMatches) {
-              console.log("🔄 Nouveaux matchs détectés, synchronisation...");
-            }
-            if (changed.length > 0) {
-              console.log(
-                `📝 Scores mis à jour détectés (${changed.length}), synchronisation...`
-              );
-            }
-            // Synchroniser nouveaux matchs et scores modifiés
+            logger.debug("Matches diff detected, syncing...", {
+              poolId,
+              hasNewMatches,
+              changedCount: changed.length,
+            });
             for (const match of fffaMatches) {
               const existing = supabaseById.get(match.id);
               const isNew = !existing;
@@ -245,33 +224,33 @@ export function useMatchesOptimized(poolId: number) {
                 try {
                   await SupabaseService.syncMatch(match, poolId);
                 } catch (syncError) {
-                  console.warn("⚠️ Erreur de synchronisation:", syncError);
+                  logger.warn("Match sync error", { error: String(syncError) });
                 }
               }
             }
-            // Récupérer les données mises à jour
             const updatedSupabaseData =
               await SupabaseService.getMatchesByPool(poolId);
             return { data: updatedSupabaseData, source: "supabase" };
-          } else {
-            console.log("📊 Utilisation des données Supabase (à jour)");
-            return { data: supabaseData, source: "supabase" };
           }
+
+          logger.debug("Matches loaded from Supabase cache (up to date)", { poolId });
+          return { data: supabaseData, source: "supabase" };
         }
 
-        // Si pas de données Supabase, synchroniser tout
-        console.log("🔄 Première synchronisation des matchs...");
+        logger.debug("No matches in Supabase, syncing from FFFA...", { poolId });
         for (const match of fffaMatches) {
           try {
             await SupabaseService.syncMatch(match, poolId);
           } catch (syncError) {
-            console.warn("⚠️ Erreur de synchronisation:", syncError);
+            logger.warn("Match sync error", { error: String(syncError) });
           }
         }
 
         return { data: fffaMatches, source: "fffa" };
       } catch (error) {
-        console.error("❌ Erreur dans useMatchesOptimized:", error);
+        await logger.error("useMatchesOptimized error", {
+          error: error instanceof Error ? error.message : String(error),
+        });
         throw error;
       }
     },
@@ -288,22 +267,17 @@ export function useRankingsOptimized(poolId: number) {
     queryKey: ["rankings", "optimized", poolId],
     queryFn: async () => {
       try {
-        // Récupérer les données Supabase
         const supabaseData = await SupabaseService.getRankingsByPool(poolId);
 
-        // Si Supabase a des données, les retourner immédiatement
         if (supabaseData && supabaseData.length > 0) {
-          console.log("📊 Utilisation des données Supabase (immédiat)");
+          logger.debug("Rankings loaded from Supabase cache", { count: supabaseData.length, poolId });
           return { data: supabaseData, source: "supabase" };
         }
 
-        // Si pas de données Supabase, synchroniser depuis FFFA
-        console.log("🔄 Première synchronisation des classements...");
+        logger.debug("No rankings in Supabase, syncing from FFFA...", { poolId });
         const fffaData = await getRankings(poolId);
         const fffaRankings = Array.isArray(fffaData) ? fffaData : [fffaData];
 
-        // Si pas de données Supabase, synchroniser tout
-        console.log("🔄 Première synchronisation des classements...");
         for (const ranking of fffaRankings) {
           try {
             const uniqueId = `${poolId}_${ranking.club.label}`.replace(
@@ -327,13 +301,15 @@ export function useRankingsOptimized(poolId: number) {
               poolId
             );
           } catch (syncError) {
-            console.warn("⚠️ Erreur de synchronisation:", syncError);
+            logger.warn("Ranking sync error", { error: String(syncError) });
           }
         }
 
         return { data: fffaRankings, source: "fffa" };
       } catch (error) {
-        console.error("❌ Erreur dans useRankingsOptimized:", error);
+        await logger.error("useRankingsOptimized error", {
+          error: error instanceof Error ? error.message : String(error),
+        });
         throw error;
       }
     },

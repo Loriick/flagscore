@@ -77,47 +77,19 @@ export interface Ranking {
   updated_at: string;
 }
 
-// Configuration Supabase - Hardcodé temporairement pour test
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON;
 
-// Fail fast si env vars manquantes
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(
     "Missing Supabase environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON are required."
   );
 }
 
-// Force l'utilisation des bonnes valeurs côté client
-if (typeof window !== "undefined") {
-  console.log("🔧 Force Supabase config côté client:", {
-    url: supabaseUrl,
-    hasKey: !!supabaseAnonKey,
-  });
-}
-
-// Debug: Log des variables d'environnement
-console.log("🔍 Debug Supabase Config:", {
-  url: supabaseUrl,
-  hasKey: !!supabaseAnonKey,
-  keyLength: supabaseAnonKey?.length || 0,
-  envUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
-  envKey: process.env.NEXT_PUBLIC_SUPABASE_ANON ? "SET" : "NOT SET",
-});
-
-// Mode développement : ne pas lancer d'erreur si les variables ne sont pas définies
-if (
-  !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-  !process.env.NEXT_PUBLIC_SUPABASE_ANON
-) {
-  console.warn(
-    "⚠️ Variables Supabase non définies - Mode développement activé"
-  );
-}
-
 // Client Supabase
-// ⚠️ NOTE DE SÉCURITÉ: La clé ANON de Supabase est conçue pour être exposée publiquement dans le client.
-// Elle est sécurisée par les Row Level Security (RLS) policies dans Supabase.
+// ⚠️ SECURITY NOTE: The Supabase ANON key is designed to be publicly exposed on the client.
+// It is secured by Row Level Security (RLS) policies in Supabase.
+// This is NOT a secret key and can be visible in client-side JavaScript.
 // Ce n'est PAS une clé secrète et peut être visible dans le code JavaScript côté client.
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
