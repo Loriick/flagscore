@@ -1,3 +1,7 @@
+// ⚠️ KNOWN LIMITATION: This store is in-memory.
+// On Vercel (serverless), each function invocation has its own memory space.
+// Rate limiting does not persist across instances and does not effectively protect in production.
+// For real protection, migrate to Upstash Redis (@upstash/ratelimit + @upstash/redis).
 import { NextRequest } from "next/server";
 
 export interface RateLimitConfig {

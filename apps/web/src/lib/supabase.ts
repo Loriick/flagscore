@@ -78,9 +78,15 @@ export interface Ranking {
 }
 
 // Configuration Supabase - Hardcodé temporairement pour test
-const supabaseUrl = "https://rwpuibfvysbbegtumvlv.supabase.co";
-const supabaseAnonKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3cHVpYmZ2eXNiYmVndHVtdmx2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEzMjc5NDEsImV4cCI6MjA3NjkwMzk0MX0.UulbnAo0zDGdX5XkkB0lJ-csiyeJ7bNSNb1RQS7c6pM";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON;
+
+// Fail fast si env vars manquantes
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error(
+    "Missing Supabase environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON are required."
+  );
+}
 
 // Force l'utilisation des bonnes valeurs côté client
 if (typeof window !== "undefined") {
