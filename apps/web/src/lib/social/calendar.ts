@@ -78,10 +78,7 @@ export function competitionFromText(
   text: string | null | undefined
 ): Competition | null {
   if (!text) return null;
-  const t = text
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase();
+  const t = text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
   if (/\bcoupe\b|\bcdf\b/.test(t)) return "CDF";
   if (/championnat|\bmixte\b|\bcm\b/.test(t)) return "CM";
   return null;

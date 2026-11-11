@@ -80,9 +80,7 @@ export function reconcile(
     const scoreAway = first.scoreAway!;
     const status: DecisionStatus =
       accounts.length >= 2 ? "confirmed" : "single_source";
-    const maxConfidence = Math.max(
-      ...items.map(i => i.observation.confidence)
-    );
+    const maxConfidence = Math.max(...items.map(i => i.observation.confidence));
 
     const autoApply =
       status === "confirmed" || maxConfidence >= singleSourceThreshold;
