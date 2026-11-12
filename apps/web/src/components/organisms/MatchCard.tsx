@@ -50,7 +50,7 @@ function TeamLine({
     <>
       <span
         className={cn(
-          "font-score min-w-0 text-[1.375rem] leading-[1.05] font-bold break-words sm:text-2xl",
+          "font-score min-w-0 text-[1.5rem] leading-[1.05] font-bold break-words sm:text-[1.75rem]",
           NAME_TONE[outcome]
         )}
       >
@@ -58,7 +58,7 @@ function TeamLine({
       </span>
       <span
         className={cn(
-          "font-score text-right text-[2.5rem] leading-[0.95] font-black sm:text-5xl",
+          "font-score text-right text-[2.875rem] leading-[0.9] font-black sm:text-[3.5rem]",
           SCORE_TONE[outcome]
         )}
       >

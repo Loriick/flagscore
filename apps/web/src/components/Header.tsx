@@ -44,12 +44,14 @@ export function Header() {
           className="-ml-1 flex items-center rounded-sm focus-visible:outline-ink"
           aria-label="Flagscore, accueil"
         >
+          {/* Logo d'origine recadré sur son dessin (public/flagscore-logo.png),
+              sans aucune autre modification. */}
           <Image
-            src="/flagscore-logo-removebg-preview.png"
+            src="/flagscore-logo.png"
             alt="Flagscore"
-            width={250}
-            height={250}
-            className="h-14 w-auto object-contain sm:h-16"
+            width={410}
+            height={281}
+            className="h-10 w-auto sm:h-12"
             priority
           />
         </Link>
@@ -93,7 +95,7 @@ export function Header() {
       {isMobileMenuOpen && (
         <nav
           id="mobile-menu"
-          className="absolute inset-x-0 top-full border-b border-line bg-ink md:hidden"
+          className="fixed inset-x-0 top-14 bottom-0 z-40 overflow-y-auto bg-ink md:hidden"
           aria-label="Navigation mobile"
         >
           <ul className="mx-auto max-w-6xl px-4 py-2">

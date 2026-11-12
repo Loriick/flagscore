@@ -128,6 +128,7 @@ export function PoolsSelector() {
                   <p className="text-sm font-semibold first-letter:uppercase">
                     {[
                       selectedPool?.label,
+                      selectedDay?.label,
                       selectedDay?.date && formatDay(selectedDay.date),
                     ]
                       .filter(Boolean)

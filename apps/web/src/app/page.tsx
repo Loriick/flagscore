@@ -8,15 +8,15 @@ export const metadata: Metadata = pageMetadata.home;
 
 export default function Home() {
   return (
-    <div className="mx-auto max-w-6xl px-4 pt-8 sm:px-6 sm:pt-10">
-      <header className="mb-6 sm:mb-8">
-        <h1 className="font-score text-[clamp(2.5rem,11.5vw,3.75rem)] leading-none font-black text-chalk">
-          Résultats
-        </h1>
-        <p className="mt-2 max-w-xl text-sm text-stone sm:text-base">
-          Championnat de France mixte et Coupe de France de flag football.
-        </p>
-      </header>
+    <div className="mx-auto max-w-6xl px-4 pt-5 sm:px-6 sm:pt-10">
+      <h1 className="font-score mb-4 text-[2rem] leading-none font-black text-chalk sm:mb-6 sm:text-5xl">
+        Résultats
+        <span className="sr-only">
+          {" "}
+          du Championnat de France mixte et de la Coupe de France de flag
+          football
+        </span>
+      </h1>
 
       <ClientOnly
         fallback={

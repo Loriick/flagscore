@@ -120,7 +120,9 @@
 @layer utilities {
   /* Voix « score final » : condensée, capitales, chiffres alignés */
   .font-score {
-    font-family: var(--font-display);
+    /* Variable émise par next/font sur <body> (les variables @theme inline ne
+       sont pas émises en CSS, d'où l'appel direct). */
+    font-family: var(--font-big-shoulders), "Arial Narrow", sans-serif;
     font-variation-settings: "opsz" 72;
     font-variant-numeric: tabular-nums;
     text-transform: uppercase;
