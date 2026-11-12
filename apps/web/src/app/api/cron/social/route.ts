@@ -28,12 +28,16 @@ export const maxDuration = 300;
 export async function GET(request: NextRequest) {
   const secret = process.env.CRON_SECRET;
   if (!secret) {
+    console.error("[cron/social] CRON_SECRET non configuré");
     return NextResponse.json(
       { ok: false, message: "CRON_SECRET non configuré" },
       { status: 500 }
     );
   }
   if (request.headers.get("authorization") !== `Bearer ${secret}`) {
+    console.warn(
+      "[cron/social] appel refusé : CRON_SECRET absent ou différent"
+    );
     return NextResponse.json(
       { ok: false, message: "Unauthorized" },
       { status: 401 }
@@ -64,6 +68,8 @@ export async function GET(request: NextRequest) {
       result.reconcile = await reconcileEvents(db, processed.events);
     }
 
+    // Résumé dans les journaux Vercel, pour suivre chaque exécution.
+    console.log("[cron/social]", JSON.stringify(result));
     return NextResponse.json({ ok: true, ...result });
   } catch (error) {
     console.error("[cron/social]", error);
