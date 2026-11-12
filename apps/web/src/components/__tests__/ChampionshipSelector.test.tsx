@@ -41,9 +41,7 @@ describe("ChampionshipSelector", () => {
   it("is disabled when no championships", () => {
     render(<ChampionshipSelector {...defaultProps} championships={[]} />);
 
-    expect(
-      screen.getByText("Sélectionner une compétition")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Choisir une compétition")).toBeInTheDocument();
   });
 
   it("renders with different championships", () => {

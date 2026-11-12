@@ -1,10 +1,11 @@
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Big_Shoulders, Geist, Geist_Mono } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import { CacheBuster } from "../components/CacheBuster";
+import { DemoBanner } from "../components/DemoBanner";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { Footer } from "../components/Footer";
 import { Header } from "../components/Header";
@@ -27,6 +28,15 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+// Voix « score final » : condensée, pour les équipes, les scores et les titres.
+const bigShoulders = Big_Shoulders({
+  variable: "--font-big-shoulders",
+  subsets: ["latin", "latin-ext"],
+  axes: ["opsz"],
+  // Pas de métriques de repli connues pour cette police : on évite l'avertissement.
+  adjustFontFallback: false,
 });
 
 export const metadata: Metadata = {
@@ -129,8 +139,8 @@ export const metadata: Metadata = {
     "mobile-web-app-capable": "yes",
     "apple-mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "black-translucent",
-    "theme-color": "#000000",
-    "msapplication-TileColor": "#000000",
+    "theme-color": "#ffd02b",
+    "msapplication-TileColor": "#100f0d",
     "msapplication-config": "/browserconfig.xml",
   },
 };
@@ -141,7 +151,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className="dark bg-black">
+    <html lang="fr" className="dark">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         {/* Global structured data */}
@@ -179,11 +189,11 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased relative bg-linear-to-br from-gray-900 via-blue-900 to-gray-900`}
+        className={`${geistSans.variable} ${geistMono.variable} ${bigShoulders.variable} antialiased relative min-h-screen flex flex-col`}
       >
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:bg-white focus:text-black focus:px-3 focus:py-2 focus:rounded"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-flag focus:text-ink focus:px-3 focus:py-2 focus:rounded font-medium"
         >
           Aller au contenu principal
         </a>
@@ -194,7 +204,8 @@ export default function RootLayout({
               <PerformanceMonitor>
                 <ErrorBoundary>
                   <Header />
-                  <main id="main-content" role="main" className="min-h-screen">
+                  <DemoBanner />
+                  <main id="main-content" className="flex-1">
                     <NuqsAdapter>{children}</NuqsAdapter>
                   </main>
                   <Footer />

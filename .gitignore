@@ -116,3 +116,6 @@ temp/
 
 # Turborepo cache
 .turbo/
+
+# Captures de travail Impeccable (non versionnées)
+.impeccable/review/

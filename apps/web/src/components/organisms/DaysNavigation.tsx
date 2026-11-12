@@ -3,7 +3,6 @@ import { memo } from "react";
 import { Day } from "../../app/types";
 import { DayButton } from "../molecules/DayButton";
 
-// Import cn to avoid error
 import { cn } from "@/lib/utils";
 
 interface DaysNavigationProps {
@@ -22,25 +21,28 @@ export const DaysNavigation = memo(function DaysNavigation({
   "data-testid": dataTestId,
 }: DaysNavigationProps) {
   return (
-    <div className={cn("mb-4", className)} data-testid={dataTestId}>
-      <div className="overflow-x-auto">
-        <div className="flex gap-2 pb-2">
-          {days.length === 0 ? (
-            <div className="text-white/60 text-sm px-4 py-2">
-              Aucune journée disponible
-            </div>
-          ) : (
-            days.map(day => (
-              <DayButton
-                key={day.id}
-                day={day}
-                selected={selectedDayId === day.id}
-                onClick={() => onDaySelect(day)}
-              />
-            ))
-          )}
+    <div
+      className={cn("border-b border-line", className)}
+      data-testid={dataTestId}
+    >
+      {days.length === 0 ? (
+        <p className="py-3 text-sm text-stone">Aucune journée disponible</p>
+      ) : (
+        <div
+          className="-mx-3 flex overflow-x-auto [scrollbar-width:none]"
+          role="group"
+          aria-label="Journées"
+        >
+          {days.map(day => (
+            <DayButton
+              key={day.id}
+              day={day}
+              selected={selectedDayId === day.id}
+              onClick={() => onDaySelect(day)}
+            />
+          ))}
         </div>
-      </div>
+      )}
     </div>
   );
 });

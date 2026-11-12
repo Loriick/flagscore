@@ -33,10 +33,10 @@ export const MatchesList = memo(function MatchesList({
   }
 
   return (
-    <div className={cn("space-y-3", className)}>
+    <ul className={cn(className)}>
       {matches.map(match => (
         <MatchCard key={match.id} match={match} />
       ))}
-    </div>
+    </ul>
   );
 });

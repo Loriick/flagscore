@@ -4,6 +4,13 @@ import { Pool } from "../app/types";
 
 import { NoSSR } from "./NoSSR";
 
+import {
+  fieldLabelClass,
+  selectContentClass,
+  selectFallbackClass,
+  selectItemClass,
+  selectTriggerClass,
+} from "@/components/ui/field-styles";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -27,14 +34,14 @@ export const PoolSelector = memo(function PoolSelector({
   loading,
 }: PoolSelectorProps) {
   return (
-    <div className="mb-6 w-full sm:w-64" data-testid="pool-selector">
-      <Label htmlFor="pool-select" className="text-white/80 mb-2 block">
+    <div className="min-w-0" data-testid="pool-selector">
+      <Label htmlFor="pool-select" className={fieldLabelClass}>
         Poule
       </Label>
       <NoSSR
         fallback={
-          <div className="w-full h-10 bg-gray-800 border border-gray-600 rounded-md flex items-center px-3 text-white">
-            ...
+          <div className={selectFallbackClass} aria-hidden="true">
+            Chargement…
           </div>
         }
       >
@@ -46,7 +53,7 @@ export const PoolSelector = memo(function PoolSelector({
           <SelectTrigger
             id="pool-select"
             name="pool"
-            className="w-full bg-gray-800 border-gray-600 text-white hover:bg-gray-700 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+            className={selectTriggerClass}
           >
             <SelectValue
               placeholder={
@@ -54,16 +61,16 @@ export const PoolSelector = memo(function PoolSelector({
                   ? ""
                   : pools.length === 0
                     ? "Aucune poule disponible"
-                    : "Sélectionner une pool"
+                    : "Choisir une poule"
               }
             />
           </SelectTrigger>
-          <SelectContent className="bg-gray-800 border-gray-600">
+          <SelectContent className={selectContentClass}>
             {pools.map(pool => (
               <SelectItem
                 key={`pool-${pool.id}`}
                 value={pool.id.toString()}
-                className="text-white hover:bg-gray-700 truncate"
+                className={selectItemClass}
               >
                 {pool.label}
               </SelectItem>

@@ -1,62 +1,105 @@
-import { memo } from "react";
+import { memo, type CSSProperties } from "react";
 
 import { Match } from "../../app/types";
-import { Badge } from "../atoms/Badge";
-import { Card } from "../atoms/Card";
 
-// Import cn to avoid error
 import { cn } from "@/lib/utils";
 
 interface MatchCardProps {
   match: Match;
   className?: string;
+  /** Rang dans la liste, pour l'apparition en cascade. */
+  index?: number;
+}
+
+type Outcome = "win" | "loss" | "draw" | "upcoming";
+
+function outcomes(match: Match): [Outcome, Outcome] {
+  const a = match.team_a.score;
+  const b = match.team_b.score;
+  if (a === null || b === null || a === undefined || b === undefined) {
+    return ["upcoming", "upcoming"];
+  }
+  if (a === b) return ["draw", "draw"];
+  return a > b ? ["win", "loss"] : ["loss", "win"];
+}
+
+const NAME_TONE: Record<Outcome, string> = {
+  win: "text-chalk",
+  draw: "text-chalk",
+  loss: "text-stone",
+  upcoming: "text-chalk",
+};
+
+const SCORE_TONE: Record<Outcome, string> = {
+  win: "text-flag",
+  draw: "text-chalk",
+  loss: "text-stone",
+  upcoming: "text-stone",
+};
+
+function TeamLine({
+  name,
+  score,
+  outcome,
+}: {
+  name: string;
+  score: number | null;
+  outcome: Outcome;
+}) {
+  return (
+    <>
+      <span
+        className={cn(
+          "font-score min-w-0 text-[1.5rem] leading-[1.05] font-bold break-words sm:text-[1.75rem]",
+          NAME_TONE[outcome]
+        )}
+      >
+        {name}
+      </span>
+      <span
+        className={cn(
+          "font-score text-right text-[2.875rem] leading-[0.9] font-black sm:text-[3.5rem]",
+          SCORE_TONE[outcome]
+        )}
+      >
+        {outcome === "upcoming" ? "" : score}
+      </span>
+    </>
+  );
 }
 
 export const MatchCard = memo(function MatchCard({
   match,
   className,
+  index = 0,
 }: MatchCardProps) {
-  const isFinished = match.team_a.score !== null && match.team_b.score !== null;
-  const teamAWon = isFinished && match.team_a.score! > match.team_b.score!;
-  const teamBWon = isFinished && match.team_b.score! > match.team_a.score!;
+  const [a, b] = outcomes(match);
+  const upcoming = a === "upcoming";
+  const label = upcoming
+    ? `${match.team_a.name} contre ${match.team_b.name}, à venir`
+    : `${match.team_a.name} ${match.team_a.score}, ${match.team_b.name} ${match.team_b.score}`;
 
   return (
-    <Card className={cn("hover:bg-white/10 transition-colors", className)}>
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <div className="flex items-center space-x-3">
-            <div className="flex-1">
-              <div
-                className={cn(
-                  "text-xs font-medium",
-                  isFinished && !teamAWon ? "text-white/60" : "text-white"
-                )}
-              >
-                {match.team_a.name}
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Badge variant={isFinished ? "default" : "info"}>
-                {isFinished ? `${match.team_a.score}` : "VS"}
-              </Badge>
-              <span className="text-white/40 text-xs">-</span>
-              <Badge variant={isFinished ? "default" : "info"}>
-                {isFinished ? `${match.team_b.score}` : "VS"}
-              </Badge>
-            </div>
-            <div className="flex-1 text-right">
-              <div
-                className={cn(
-                  "text-xs font-medium",
-                  isFinished && !teamBWon ? "text-white/60" : "text-white"
-                )}
-              >
-                {match.team_b.name}
-              </div>
-            </div>
-          </div>
-        </div>
+    <li
+      className={cn("score-reveal border-b border-line py-4", className)}
+      style={{ "--i": index } as CSSProperties}
+      aria-label={label}
+    >
+      <div
+        className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 gap-y-1.5"
+        aria-hidden="true"
+      >
+        <TeamLine
+          name={match.team_a.name}
+          score={match.team_a.score}
+          outcome={a}
+        />
+        <TeamLine
+          name={match.team_b.name}
+          score={match.team_b.score}
+          outcome={b}
+        />
       </div>
-    </Card>
+    </li>
   );
 });

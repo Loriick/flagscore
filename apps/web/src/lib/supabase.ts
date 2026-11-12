@@ -1,5 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 
+import { fake, FAKE_DATA } from "./fake-data";
+
 // Types pour les tables Supabase
 export interface Team {
   id: string;
@@ -80,7 +82,7 @@ export interface Ranking {
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON;
 
-if (!supabaseUrl || !supabaseAnonKey) {
+if (!FAKE_DATA && (!supabaseUrl || !supabaseAnonKey)) {
   throw new Error(
     "Missing Supabase environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON are required."
   );
@@ -91,14 +93,21 @@ if (!supabaseUrl || !supabaseAnonKey) {
 // It is secured by Row Level Security (RLS) policies in Supabase.
 // This is NOT a secret key and can be visible in client-side JavaScript.
 // Ce n'est PAS une clé secrète et peut être visible dans le code JavaScript côté client.
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: false, // Pas d'auth pour cette app
-  },
-});
+// En mode démo (NEXT_PUBLIC_FAKE_DATA=1), le client n'est jamais appelé pour
+// les lectures : les données viennent de src/data/fake-data.json.
+export const supabase = createClient(
+  supabaseUrl || "https://demo.invalid",
+  supabaseAnonKey || "demo",
+  {
+    auth: {
+      persistSession: false, // Pas d'auth pour cette app
+    },
+  }
+);
 
 // Fonction utilitaire pour vérifier la configuration Supabase
 function checkSupabaseConfig() {
+  if (FAKE_DATA) return;
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
     !process.env.NEXT_PUBLIC_SUPABASE_ANON
@@ -111,6 +120,7 @@ function checkSupabaseConfig() {
 export class SupabaseService {
   // Championships
   static async getChampionships(season?: number) {
+    if (FAKE_DATA) return (await fake.championships(season)) as never;
     checkSupabaseConfig();
 
     let query = supabase
@@ -130,6 +140,7 @@ export class SupabaseService {
   }
 
   static async getChampionshipById(id: number) {
+    if (FAKE_DATA) return (await fake.championshipById(id)) as never;
     checkSupabaseConfig();
 
     const { data, error } = await supabase
@@ -144,6 +155,8 @@ export class SupabaseService {
 
   // Pools
   static async getPoolsByChampionship(championshipId: number) {
+    if (FAKE_DATA)
+      return (await fake.poolsByChampionship(championshipId)) as never;
     checkSupabaseConfig();
 
     const { data, error } = await supabase
@@ -157,6 +170,7 @@ export class SupabaseService {
   }
 
   static async getPoolById(poolId: number) {
+    if (FAKE_DATA) return (await fake.poolById(poolId)) as never;
     checkSupabaseConfig();
 
     const { data, error } = await supabase
@@ -171,6 +185,7 @@ export class SupabaseService {
 
   // Days
   static async getDaysByPool(poolId: number) {
+    if (FAKE_DATA) return (await fake.daysByPool(poolId)) as never;
     checkSupabaseConfig();
 
     const { data, error } = await supabase
@@ -184,6 +199,7 @@ export class SupabaseService {
   }
 
   static async getDayById(id: number) {
+    if (FAKE_DATA) return (await fake.dayById(id)) as never;
     checkSupabaseConfig();
 
     const { data, error } = await supabase
@@ -198,6 +214,7 @@ export class SupabaseService {
 
   // Matches
   static async getMatchesByPool(poolId: number) {
+    if (FAKE_DATA) return (await fake.matchesByPool(poolId)) as never;
     checkSupabaseConfig();
 
     const { data, error } = await supabase
@@ -211,6 +228,7 @@ export class SupabaseService {
   }
 
   static async getMatchesByDate(date: string) {
+    if (FAKE_DATA) return (await fake.matchesByDate(date)) as never;
     checkSupabaseConfig();
 
     const { data, error } = await supabase
@@ -225,6 +243,7 @@ export class SupabaseService {
 
   // Rankings
   static async getRankingsByPool(poolId: number) {
+    if (FAKE_DATA) return (await fake.rankingsByPool(poolId)) as never;
     checkSupabaseConfig();
 
     const { data, error } = await supabase
@@ -243,6 +262,7 @@ export class SupabaseService {
     name: string;
     season: string;
   }) {
+    if (FAKE_DATA) return undefined as never;
     const { data, error } = await supabase
       .from("championships")
       .upsert({
@@ -261,6 +281,7 @@ export class SupabaseService {
     fffaData: { id: number; name: string; championship_id: number },
     championshipId: number
   ) {
+    if (FAKE_DATA) return undefined as never;
     const { data, error } = await supabase
       .from("pools")
       .upsert({
@@ -279,6 +300,7 @@ export class SupabaseService {
     fffaData: { id: number; name: string; date: string },
     poolId: number
   ) {
+    if (FAKE_DATA) return undefined as never;
     const { data, error } = await supabase
       .from("days")
       .upsert({
@@ -306,6 +328,7 @@ export class SupabaseService {
     },
     poolId: number
   ) {
+    if (FAKE_DATA) return undefined as never;
     // Si la FFFA n'a pas (encore) de score, on n'envoie pas les colonnes de
     // score : l'upsert ne met à jour que les colonnes fournies, donc un score
     // déjà connu (par exemple venu des réseaux sociaux) n'est pas effacé.
@@ -347,6 +370,7 @@ export class SupabaseService {
     },
     poolId: number
   ) {
+    if (FAKE_DATA) return undefined as never;
     const { data, error } = await supabase
       .from("rankings")
       .upsert({
@@ -419,6 +443,7 @@ export class SupabaseService {
   }
 
   static async syncTeamsFromRankings() {
+    if (FAKE_DATA) return undefined as never;
     console.log("🔄 Synchronisation des équipes depuis les classements...");
 
     // Récupérer tous les classements

@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 
 import { useClientCache } from "../hooks/useClientCache";
 
+import { FAKE_DATA } from "@/lib/fake-data";
+
 interface UseOptimizedDataOptions<T> {
   cacheKey: string;
   fetchFn: () => Promise<T>;
@@ -142,6 +144,6 @@ export function useOptimizedMatchesByDay(dayId: number) {
     },
     debounceMs: 400,
     cacheTtl: 90 * 1000, // 90s for day-scoped matches
-    enabled: dayId > 0,
+    enabled: dayId > 0 && !FAKE_DATA,
   });
 }

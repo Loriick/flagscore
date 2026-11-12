@@ -19,13 +19,13 @@ describe("SeasonSelector", () => {
     render(<SeasonSelector {...defaultProps} />);
 
     expect(screen.getByText("Saison")).toBeInTheDocument();
-    expect(screen.getByText("2026")).toBeInTheDocument();
+    expect(screen.getByText("2026–2027")).toBeInTheDocument();
   });
 
   it("renders with different seasons", () => {
     const props = { ...defaultProps, seasons: [2024, 2025, 2026] };
     render(<SeasonSelector {...props} />);
 
-    expect(screen.getByText("2026")).toBeInTheDocument();
+    expect(screen.getByText("2026–2027")).toBeInTheDocument();
   });
 });
