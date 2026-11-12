@@ -4,6 +4,13 @@ import { Championship } from "../app/types";
 
 import { NoSSR } from "./NoSSR";
 
+import {
+  fieldLabelClass,
+  selectContentClass,
+  selectFallbackClass,
+  selectItemClass,
+  selectTriggerClass,
+} from "@/components/ui/field-styles";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -27,14 +34,14 @@ export const ChampionshipSelector = memo(function ChampionshipSelector({
   loading,
 }: ChampionshipSelectorProps) {
   return (
-    <div className="flex-1 space-y-2">
-      <Label htmlFor="championship-select" className="text-white/80">
+    <div className="min-w-0">
+      <Label htmlFor="championship-select" className={fieldLabelClass}>
         Compétition
       </Label>
       <NoSSR
         fallback={
-          <div className="w-full h-10 bg-gray-800 border border-gray-600 rounded-md flex items-center px-3 text-white">
-            ...
+          <div className={selectFallbackClass} aria-hidden="true">
+            Chargement…
           </div>
         }
       >
@@ -46,23 +53,18 @@ export const ChampionshipSelector = memo(function ChampionshipSelector({
           <SelectTrigger
             id="championship-select"
             name="championship"
-            className="w-full bg-gray-800 border-gray-600 text-white hover:bg-gray-700 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+            className={selectTriggerClass}
           >
-            <SelectValue
-              placeholder="Sélectionner une compétition"
-              className="truncate"
-            />
+            <SelectValue placeholder="Choisir une compétition" />
           </SelectTrigger>
-          <SelectContent className="bg-gray-800 border-gray-600">
+          <SelectContent className={selectContentClass}>
             {championships.map(championship => (
               <SelectItem
                 key={`championship-${championship.id}`}
                 value={championship.id.toString()}
-                className="text-white hover:bg-gray-700 truncate"
+                className={selectItemClass}
               >
-                {championship.label.length > 30
-                  ? `${championship.label.substring(0, 30)}...`
-                  : championship.label}
+                {championship.label}
               </SelectItem>
             ))}
           </SelectContent>

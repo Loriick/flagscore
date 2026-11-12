@@ -27,7 +27,7 @@ describe("DayButton", () => {
     );
   });
 
-  it("ne montre pas de ring au focus (classe utilitaire présente)", () => {
+  it("garde un focus visible au clavier (WCAG 2.4.7)", () => {
     const day = {
       id: 1,
       label: "J1",
@@ -39,8 +39,10 @@ describe("DayButton", () => {
     } as any;
     render(<DayButton day={day} onClick={() => {}} selected={false} />);
     const btn = screen.getByRole("button", { name: /J1/i });
-    // Vérifie que les classes anti-ring sont présentes
-    expect(btn.className).toContain("focus:ring-0");
-    expect(btn.className).toContain("focus:outline-none");
+    // Le focus visible est fourni par le style global :focus-visible ;
+    // le bouton ne doit pas le supprimer.
+    expect(btn.className).not.toContain("focus:outline-none");
+    expect(btn.className).not.toContain("outline-none");
+    expect(btn.className).not.toContain("focus:ring-0");
   });
 });

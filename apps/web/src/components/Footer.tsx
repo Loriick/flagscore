@@ -1,86 +1,81 @@
 import Link from "next/link";
 
+const LINKS = [
+  { href: "/", label: "Résultats" },
+  { href: "/classements", label: "Classements" },
+  { href: "/recherche", label: "Recherche" },
+  { href: "/a-propos", label: "À propos" },
+];
+
+const LEGAL = [
+  { href: "/mentions-legales", label: "Mentions légales" },
+  { href: "/politique-confidentialite", label: "Confidentialité" },
+];
+
 export function Footer() {
   return (
-    <footer className="w-full bg-gray-800 border-t border-gray-600">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-white">Flagscore</h3>
-            <p className="text-white/70 text-sm">
-              Votre source d&apos;information pour le flag football français.
-              Résultats officiels du championnat de France et de la coupe de
-              France.
-            </p>
-          </div>
-
-          {/* Navigation */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-white">Navigation</h3>
-            <nav className="flex flex-col space-y-2">
-              <Link
-                href="/"
-                className="text-white/70 hover:text-white text-sm transition-colors"
-              >
-                Résultats
-              </Link>
-              <Link
-                href="/classements"
-                className="text-white/70 hover:text-white text-sm transition-colors"
-              >
-                Classements
-              </Link>
-              <Link
-                href="/a-propos"
-                className="text-white/70 hover:text-white text-sm transition-colors"
-              >
-                À propos
-              </Link>
-            </nav>
-          </div>
-
-          {/* Informations */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-white">Informations</h3>
-            <div className="text-white/70 text-sm space-y-2">
-              <p>
-                Données officielles de la{" "}
-                <a
-                  href="https://www.fffa.org"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-400 hover:text-blue-300 underline"
-                >
-                  FFFA
-                </a>
-              </p>
-              <p>Championnat de France mixte</p>
-              <p>Coupe de France</p>
-            </div>
-          </div>
+    <footer className="mt-16 border-t border-line bg-ink text-stone">
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr]">
+        <div className="space-y-3">
+          <p className="font-score text-3xl font-black text-chalk">Flagscore</p>
+          <p className="max-w-sm text-sm leading-relaxed">
+            Les scores et les classements du Championnat de France de flag
+            football et de la Coupe de France, au plus près des journées.
+          </p>
         </div>
 
-        {/* Copyright */}
-        <div className="border-t border-gray-600 mt-8 pt-6">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-white/60 text-sm">
-              © 2025 Flagscore. Tous droits réservés.
-            </p>
-            <div className="flex space-x-4 mt-4 md:mt-0">
-              <Link
-                href="/mentions-legales"
-                className="text-white/60 hover:text-white text-sm transition-colors"
-              >
-                Mentions légales
-              </Link>
-              <Link
-                href="/politique-confidentialite"
-                className="text-white/60 hover:text-white text-sm transition-colors"
-              >
-                Politique de confidentialité
-              </Link>
-            </div>
-          </div>
+        <nav aria-label="Pied de page">
+          <h2 className="font-score mb-3 text-lg font-bold text-chalk">
+            Naviguer
+          </h2>
+          <ul className="space-y-1">
+            {LINKS.map(link => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className="inline-flex min-h-9 items-center text-sm transition-colors hover:text-chalk"
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div>
+          <h2 className="font-score mb-3 text-lg font-bold text-chalk">
+            Sources
+          </h2>
+          <p className="text-sm leading-relaxed">
+            Calendrier, poules et résultats publiés par la{" "}
+            <a
+              href="https://www.fffa.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-chalk underline decoration-flag decoration-2 hover:text-flag"
+            >
+              FFFA
+            </a>
+            .
+          </p>
+        </div>
+      </div>
+
+      <div className="border-t border-line">
+        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-5 text-xs sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <p>© {new Date().getFullYear()} Flagscore</p>
+          <ul className="flex gap-5">
+            {LEGAL.map(link => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className="inline-flex min-h-9 items-center transition-colors hover:text-chalk"
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </footer>
