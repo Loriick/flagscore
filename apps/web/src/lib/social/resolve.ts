@@ -113,10 +113,18 @@ interface Pending {
  */
 export function resolveObservations(
   observations: Observation[],
-  directory: TeamDirectory,
+  /**
+   * Un annuaire, ou une fonction qui renvoie l'annuaire de la compétition de
+   * la journée (voir `buildSeasonDirectories().forEvent`).
+   */
+  directories: TeamDirectory | ((event: CompetitionEvent) => TeamDirectory),
   { schedule = [], plateauSize = 4 }: ResolveOptions = {}
 ): ResolvedObservation[] {
+  const dirFor = (event: CompetitionEvent): TeamDirectory =>
+    typeof directories === "function" ? directories(event) : directories;
+
   const pending: Pending[] = observations.map(obs => {
+    const directory = dirFor(obs.event);
     const teamCands = directory.candidates(obs.team, obs.account);
     let oppCands = directory.candidates(obs.opponent);
     let inferred = false;
@@ -168,6 +176,7 @@ export function resolveObservations(
     other: string
   ) => {
     const opp = opponents.get(oppKey(event, team));
+    const directory = dirFor(event);
     const size = directory.poolOf(team)
       ? directory.poolMates(team).length + 1
       : plateauSize;
@@ -176,6 +185,7 @@ export function resolveObservations(
 
   const optionsFor = (p: Pending): Array<[string, string]> => {
     const daySchedule = scheduleByEvent.get(eventKey(p.obs.event)) ?? [];
+    const directory = dirFor(p.obs.event);
     const pairs: Array<[string, string]> = [];
     for (const a of p.teamCands) {
       for (const b of p.oppCands) {

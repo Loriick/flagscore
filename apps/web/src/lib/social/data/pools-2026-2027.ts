@@ -6,12 +6,21 @@
  * Le nom de référence d'une équipe est « Nom (Ville) », car plusieurs équipes
  * portent le même nom (Phenix, Hurricanes, Wildcats).
  *
- * À vérifier : « Reapers » est écrit « REAPRDS » sur le visuel (coquille probable).
+ * Lectures à vérifier sur le visuel :
+ * - « REAPRDS » → Reapers (coquille probable).
+ * - « Guardiens (Le Cannet) » → Guardians, comme sur le visuel de la Coupe.
+ * - « Météores (Fontenay) » → Fontenay-sous-Bois, comme sur le visuel de la Coupe.
+ *
+ * Les poules de la Coupe de France sont dans cdf-2026-2027.ts.
  */
 
 export type Conference = "Nord" | "Sud";
 
 export interface PoolDefinition {
+  /** Compétition (défaut : CM, Championnat de France mixte). */
+  competition?: "CM" | "CDF";
+  /** Catégorie (défaut : Mixte). */
+  category?: "Mixte" | "Masculin" | "Féminin";
   conference: Conference;
   pool: string;
   /** [nom, ville] */
@@ -95,7 +104,7 @@ export const POOLS_2026_2027: PoolDefinition[] = [
     conference: "Nord",
     pool: "IDF Est",
     teams: [
-      ["Météores", "Fontenay"],
+      ["Météores", "Fontenay-sous-Bois"],
       ["Monarques", "Saint-Denis"],
       ["Homies B", "Rosny-sous-Bois"],
       ["Juggernautes B", "Paris"],
@@ -274,7 +283,7 @@ export const POOLS_2026_2027: PoolDefinition[] = [
       ["Canonniers", "Toulon"],
       ["Iron Mask", "Cannes"],
       ["Dauphins", "Nice"],
-      ["Guardiens", "Le Cannet"],
+      ["Guardians", "Le Cannet"],
     ],
   },
   {

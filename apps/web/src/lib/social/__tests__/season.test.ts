@@ -1,10 +1,15 @@
 import { describe, expect, it } from "vitest";
 
 import type { CompetitionEvent } from "../calendar";
+import { CDF_POOLS_2026_2027 } from "../data/cdf-2026-2027";
 import { POOLS_2026_2027 } from "../data/pools-2026-2027";
 import { reconcile } from "../reconcile";
 import { resolveObservations, type Observation } from "../resolve";
-import { buildSeasonDirectory, listClubs } from "../season";
+import {
+  buildSeasonDirectories,
+  buildSeasonDirectory,
+  listClubs,
+} from "../season";
 
 /*
  * Les deux vrais posts du week-end du 7-8 novembre 2026 (Q - J2), rapprochés
@@ -76,9 +81,10 @@ describe("données de la saison 2026-2027", () => {
     ]);
   });
 
-  it("regroupe les équipes par club", () => {
+  it("regroupe les équipes par club, toutes compétitions confondues", () => {
     const molosses = listClubs().find(c => c.club === "Molosses (Asnières)");
-    expect(molosses?.teams).toHaveLength(3);
+    // CM : A, B, C ; Coupe masc. : A, B, C ; Coupe fém. : A, B
+    expect(molosses?.teams).toHaveLength(8);
   });
 });
 
@@ -138,5 +144,83 @@ describe("posts réels avec les vraies poules", () => {
       directory
     );
     expect(r.status).toBe("unmatched");
+  });
+});
+
+describe("Coupe de France (masculins et féminines)", () => {
+  const { forEvent, byCompetition } = buildSeasonDirectories();
+
+  const CDF_Q1: CompetitionEvent = {
+    competition: "CDF",
+    stage: "Q - J1",
+    start: "2026-11-01",
+    end: "2026-11-01",
+  };
+  const cdfObs = (
+    account: string,
+    team: string,
+    opponent: string
+  ): Observation => ({
+    ...obs("cdf", account, team, opponent, 20, 6),
+    event: CDF_Q1,
+  });
+
+  it("contient les poules masculines et féminines", () => {
+    expect(
+      CDF_POOLS_2026_2027.filter(p => p.category === "Masculin")
+    ).toHaveLength(21);
+    expect(
+      CDF_POOLS_2026_2027.filter(p => p.category === "Féminin")
+    ).toHaveLength(6);
+    expect(byCompetition.CDF.candidates("Molosses A").sort()).toEqual([
+      "Molosses A (Asnières) · Fém.",
+      "Molosses A (Asnières) · Masc.",
+    ]);
+  });
+
+  it("utilise les poules de la Coupe pour un post de Coupe", () => {
+    // En Coupe masc., Flash A est en poule 6 avec Molosses C (comme en CM),
+    // mais Flash B est en poule 10 avec Cougars A et Diables Rouges A.
+    const [r] = resolveObservations(
+      [cdfObs("flashdelacourneuve", "Flash B", "Cougars")],
+      forEvent
+    );
+    expect(pair(r)).toEqual([
+      "Cougars A (Saint-Ouen-l'Aumône) · Masc.",
+      "Flash B (La Courneuve) · Masc.",
+    ]);
+  });
+
+  it("la poule distingue masculin et féminin", () => {
+    // Seule l'équipe féminine de Flash affronte Fenris.
+    const [r] = resolveObservations(
+      [cdfObs("flashdelacourneuve", "Flash", "Fenris")],
+      forEvent
+    );
+    expect(pair(r)).toEqual([
+      "Fenris (Dijon) · Fém.",
+      "Flash (La Courneuve) · Fém.",
+    ]);
+  });
+
+  it("reste ambigu si masculin et féminin sont tous deux possibles", () => {
+    // Flash A masc. (poule 6) et Flash fém. (poule 2) affrontent tous deux
+    // une équipe des Molosses : sans autre indice, on ne tranche pas.
+    const [r] = resolveObservations(
+      [cdfObs("flashdelacourneuve", "Flash", "Molosses")],
+      forEvent
+    );
+    expect(r.status).toBe("ambiguous");
+  });
+
+  it("un même post de championnat n'utilise pas les poules de la Coupe", () => {
+    const resolved = resolveObservations(
+      [obs("flash", "flashdelacourneuve", "Flash B", "Homies", 26, 21)],
+      forEvent
+    );
+    expect(pair(resolved[0])).toEqual([
+      "Flash B (La Courneuve)",
+      "Homies A (Rosny-sous-Bois)",
+    ]);
   });
 });
