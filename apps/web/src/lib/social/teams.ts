@@ -53,6 +53,11 @@ export interface TeamDirectoryInput {
   aliases?: Array<{ alias: string; team: string }>;
   /** compte Instagram → noms de référence des équipes du club. */
   clubAccounts?: Array<{ handle: string; teams: string[] }>;
+  /**
+   * Composition des poules. Une équipe ne joue que contre les équipes de sa
+   * poule : c'est la contrainte la plus forte pour lever les ambiguïtés.
+   */
+  pools?: Array<{ pool: string; teams: string[] }>;
 }
 
 export class TeamDirectory {
@@ -60,9 +65,20 @@ export class TeamDirectory {
   private readonly teamTokens = new Map<string, Set<string>>();
   private readonly aliasIndex = new Map<string, Set<string>>();
   private readonly clubIndex = new Map<string, string[]>();
+  private readonly poolIndex = new Map<string, string>();
+  private readonly poolTeams = new Map<string, string[]>();
 
-  constructor({ teams, aliases = [], clubAccounts = [] }: TeamDirectoryInput) {
-    this.teams = [...new Set(teams)];
+  constructor({
+    teams,
+    aliases = [],
+    clubAccounts = [],
+    pools = [],
+  }: TeamDirectoryInput) {
+    for (const { pool, teams: members } of pools) {
+      this.poolTeams.set(pool, members);
+      for (const t of members) this.poolIndex.set(t, pool);
+    }
+    this.teams = [...new Set([...teams, ...this.poolIndex.keys()])];
     for (const team of this.teams) {
       this.teamTokens.set(team, new Set(nameTokens(team)));
     }
@@ -79,6 +95,24 @@ export class TeamDirectory {
 
   clubTeams(handle: string): string[] {
     return this.clubIndex.get(normalizeHandle(handle)) ?? [];
+  }
+
+  poolOf(team: string): string | undefined {
+    return this.poolIndex.get(team);
+  }
+
+  /** Autres équipes de la poule de `team` (vide si la poule est inconnue). */
+  poolMates(team: string): string[] {
+    const pool = this.poolIndex.get(team);
+    if (!pool) return [];
+    return (this.poolTeams.get(pool) ?? []).filter(t => t !== team);
+  }
+
+  /** Faux seulement si les deux poules sont connues et différentes. */
+  canPlay(a: string, b: string): boolean {
+    const pa = this.poolIndex.get(a);
+    const pb = this.poolIndex.get(b);
+    return !pa || !pb || pa === pb;
   }
 
   /**
