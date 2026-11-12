@@ -382,7 +382,7 @@ export const CLUB_INSTAGRAM: Record<string, string[]> = {
   "Grizzlys Catalans (Perpignan)": ["grizzlys_association"],
   "Guardians (Le Cannet)": ["guardians_le_cannet"],
   "Hawks (Lons-le-Saunier)": ["hawks.jura"],
-  "Homies (Rosny-sous-Bois)": ["homiefootball_rsb"], // confirmé
+  "Homies (Rosny-sous-Bois)": ["homiesfootball_rsb"], // confirmé
   "Hornets (Came)": ["hornetsdecame"],
   "Hurricanes (Montpellier)": ["hurricanes_montpellier"],
   "Iron Mask (Cannes)": ["flag.ironmaskcannes"],
@@ -401,13 +401,13 @@ export const CLUB_INSTAGRAM: Record<string, string[]> = {
   "Mariners (Vannes)": ["mariners_de_vannes56"],
   "Marne Soldiers (Meaux)": ["marne_soldiers"],
   "Monarques (Saint-Denis)": ["sdusmonarques"],
-  "Mustangs (Hénin-Beaumont)": ["les_mustangs_henin_baumont"], // confirmé
+  "Mustangs (Hénin-Beaumont)": ["les_mustangs_henin_beaumont"], // confirmé
   "Myrmidons (Savigny-le-Temple)": ["myrmidonsfootball"],
   "Météores (Fontenay-sous-Bois)": ["meteores.footus"],
   "Nighthawks (Sartrouville)": ["nighthawks_football"],
   "Ogres (Créteil)": ["les_ogres_94k"],
   "Phenix (Limoges)": ["phenix_limoges"],
-  "Pionniers (Tours)": ["pionnersdetouraine"], // confirmé
+  "Pionniers (Tours)": ["pionniersdetouraine"], // confirmé
   "Princes (Montbéliard)": ["princesdemontbeliard"],
   "Pygargues (Troyes)": ["pygargues"],
   "Quarks (Longjumeau)": ["quarksfamily"],
