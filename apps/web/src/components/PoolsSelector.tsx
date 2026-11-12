@@ -1,5 +1,7 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { useEffect } from "react";
 import { toast } from "sonner";
 
@@ -8,97 +10,82 @@ import { useAppDataSupabase } from "../hooks/useAppDataSupabase";
 import { ChampionshipSelector } from "./ChampionshipSelector";
 import { DaysNavigation } from "./organisms/DaysNavigation";
 import { OptimizedMatchesList } from "./organisms/OptimizedMatchesList";
+import { RankingTable } from "./organisms/RankingTable";
 import { PoolSelector } from "./PoolSelector";
 import { SeasonSelector } from "./SeasonSelector";
 
+const formatDay = (date: string) =>
+  new Date(date).toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+
+function StatusMessage({ title, text }: { title: string; text?: string }) {
+  return (
+    <div className="border-y border-line py-10">
+      <p className="font-score text-2xl font-bold text-chalk">{title}</p>
+      {text && <p className="mt-1 text-sm text-stone">{text}</p>}
+    </div>
+  );
+}
+
 export function PoolsSelector() {
-  const seasons = [2026]; // Available seasons
+  const seasons = [2026]; // Saisons disponibles
 
   const {
-    // State
     currentSeason,
     selectedChampionshipId,
     selectedPoolId,
     selectedDayId,
-
-    // Data
     championships,
     pools,
     days,
     matches,
-
-    // Loading states
+    rankings,
     loading,
     initialLoading,
     poolChangeLoading,
-
-    // Errors
     errors,
-
-    // Handlers
     handleSeasonChange,
     handleChampionshipChange,
     handlePoolChange,
     handleDayChange,
   } = useAppDataSupabase();
 
-  // Gestion des erreurs avec notifications - seulement pour les vraies erreurs
+  // Erreurs de compétitions et de poules : notification, car elles bloquent
+  // toute la page. Les erreurs de matchs s'affichent à leur place.
   useEffect(() => {
     if (errors.championships && !initialLoading) {
-      if (
+      const rateLimited =
         errors.championships.includes("too many requests") ||
-        errors.championships.includes("rate limit")
-      ) {
-        toast.error("Trop de requêtes - Veuillez patienter", {
-          description:
-            "L'API est temporairement limitée. Réessayez dans quelques minutes.",
-          duration: 10000,
-        });
-      } else {
-        toast.error("Erreur de chargement des compétitions", {
-          description: errors.championships,
-        });
-      }
+        errors.championships.includes("rate limit");
+      toast.error(
+        rateLimited
+          ? "Trop de requêtes, réessayez dans quelques minutes"
+          : "Les compétitions n'ont pas pu être chargées",
+        { duration: rateLimited ? 10000 : undefined }
+      );
     }
   }, [errors.championships, initialLoading]);
 
   useEffect(() => {
     if (errors.pools && !initialLoading) {
-      toast.error("Erreur de chargement des poules", {
-        description: errors.pools,
-      });
+      toast.error("Les poules n'ont pas pu être chargées");
     }
   }, [errors.pools, initialLoading]);
 
-  useEffect(() => {
-    if (errors.matches) {
-      toast.error("Erreur de chargement des matchs", {
-        description:
-          typeof errors.matches === "string"
-            ? errors.matches
-            : ((errors.matches as unknown as Error)?.message ??
-              String(errors.matches)),
-      });
-    }
-  }, [errors.matches]);
-
-  useEffect(() => {
-    if (errors.rankings) {
-      toast.error("Erreur de chargement des classements", {
-        description: errors.rankings,
-      });
-    }
-  }, [errors.rankings]);
+  const selectedDay = days.find(day => day.id === selectedDayId);
+  const selectedPool = pools.find(pool => pool.id === selectedPoolId);
+  const today = new Date().toISOString().slice(0, 10);
+  const dayIsUpcoming =
+    !!selectedDay?.date && selectedDay.date.slice(0, 10) > today;
+  const showResults = selectedPoolId > 0 && days.length > 0;
 
   return (
-    <div className="w-full max-w-md mx-auto py-4 sm:max-w-lg md:max-w-2xl lg:max-w-4xl">
-      <div className="space-y-4 mb-8">
-        <div className="flex flex-row items-end gap-2 sm:gap-4">
-          <SeasonSelector
-            seasons={seasons}
-            currentSeason={currentSeason}
-            onSeasonChange={handleSeasonChange}
-          />
+    <div>
+      <div className="grid grid-cols-[minmax(0,1fr)_8.75rem] gap-3 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_9rem]">
+        <div className="col-span-2 sm:col-span-1">
           <ChampionshipSelector
             championships={championships}
             selectedChampionshipId={selectedChampionshipId}
@@ -106,90 +93,112 @@ export function PoolsSelector() {
             loading={loading.championships}
           />
         </div>
-
-        {/* Pool Selector - toujours affiché avec état de chargement */}
         <PoolSelector
           pools={pools}
           selectedPoolId={selectedPoolId}
           onPoolChange={handlePoolChange}
           loading={loading.pools || poolChangeLoading}
         />
+        <SeasonSelector
+          seasons={seasons}
+          currentSeason={currentSeason}
+          onSeasonChange={handleSeasonChange}
+        />
       </div>
 
-      {/* Days Navigation - affiché seulement si on a des jours */}
-      {selectedPoolId > 0 && days.length > 0 && (
-        <div>
-          <DaysNavigation
-            days={days}
-            selectedDayId={selectedDayId}
-            onDaySelect={day => handleDayChange(day.id.toString())}
-            data-testid="days-navigation"
-          />
+      {showResults ? (
+        <div className="mt-8 lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-14">
+          <section aria-labelledby="scores-title">
+            <DaysNavigation
+              days={days}
+              selectedDayId={selectedDayId}
+              onDaySelect={day => handleDayChange(day.id.toString())}
+              data-testid="days-navigation"
+            />
 
-          {/* Date réelle du jour sélectionné */}
-          {selectedDayId > 0 && (
-            <div className="mt-4 mb-2">
-              <h3 className="text-lg font-medium text-white">
-                {(() => {
-                  const selectedDay = days.find(
-                    day => day.id === selectedDayId
-                  );
-                  if (selectedDay && selectedDay.date) {
-                    return new Date(selectedDay.date).toLocaleDateString(
-                      "fr-FR",
-                      {
-                        weekday: "long",
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      }
-                    );
-                  }
-                  return "";
-                })()}
-              </h3>
+            {selectedDayId > 0 && (
+              <>
+                <div className="mt-5 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-[4px] bg-flag px-4 py-2.5 text-ink">
+                  <h2
+                    id="scores-title"
+                    className="font-score text-[1.75rem] leading-none font-black"
+                  >
+                    {dayIsUpcoming ? "À venir" : "Score final"}
+                  </h2>
+                  <p className="text-sm font-semibold first-letter:uppercase">
+                    {[
+                      selectedPool?.label,
+                      selectedDay?.label,
+                      selectedDay?.date && formatDay(selectedDay.date),
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </p>
+                </div>
+
+                <OptimizedMatchesList
+                  key={selectedDayId}
+                  matches={matches}
+                  loading={loading.matches}
+                  error={errors.matches ? String(errors.matches) : null}
+                  onRetry={() => window.location.reload()}
+                  data-testid="matches-list"
+                />
+              </>
+            )}
+          </section>
+
+          <aside
+            aria-labelledby="ranking-title"
+            className="mt-12 self-start lg:sticky lg:top-24 lg:mt-0"
+          >
+            <div className="mb-2 flex items-baseline justify-between gap-4">
+              <h2
+                id="ranking-title"
+                className="font-score text-[1.75rem] leading-none font-black"
+              >
+                Classement
+              </h2>
+              <Link
+                href="/classements"
+                className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-stone transition-colors hover:text-flag"
+              >
+                Toutes les poules
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
             </div>
-          )}
-
-          {/* Matchs - affichés seulement si un jour est sélectionné */}
-          {selectedDayId > 0 && (
-            <OptimizedMatchesList
-              matches={matches}
-              loading={loading.matches}
-              data-testid="matches-list"
+            <RankingTable
+              rankings={rankings}
+              caption={`Classement ${selectedPool?.label ?? "de la poule"}`}
+              loading={loading.rankings}
+              compact
+            />
+          </aside>
+        </div>
+      ) : (
+        <div className="mt-8">
+          {initialLoading ? (
+            <StatusMessage title="Chargement…" />
+          ) : championships.length === 0 ? (
+            <StatusMessage
+              title="Aucune compétition"
+              text="Les compétitions de la saison n'ont pas encore été publiées."
+            />
+          ) : selectedPoolId === 0 ? (
+            <StatusMessage
+              title="Choisissez une poule"
+              text="Les journées et les scores s'affichent ici."
+            />
+          ) : loading.days ? (
+            <StatusMessage title="Chargement des journées…" />
+          ) : (
+            <StatusMessage
+              title="Pas encore de journée"
+              text="Le calendrier de cette poule n'a pas encore été publié."
             />
           )}
         </div>
       )}
-
-      {/* États de chargement et messages - logique exclusive stricte */}
-      {initialLoading ? (
-        <div className="text-center py-8">
-          <div className="text-white/60 text-sm">Chargement...</div>
-        </div>
-      ) : championships.length === 0 ? (
-        <div className="text-center py-8">
-          <div className="text-white/60 text-sm">
-            Aucune compétition disponible
-          </div>
-        </div>
-      ) : selectedPoolId === 0 ? (
-        <div className="text-center py-8">
-          <div className="text-white/60 text-sm">
-            Sélectionnez une poule pour voir les journées et matchs
-          </div>
-        </div>
-      ) : selectedPoolId > 0 && days.length === 0 && loading.days ? (
-        <div className="text-center py-8">
-          <div className="text-white/60 text-sm">
-            Chargement des journées...
-          </div>
-        </div>
-      ) : selectedPoolId > 0 && days.length === 0 ? (
-        <div className="text-center py-8">
-          <div className="text-white/60 text-sm">Aucune journée disponible</div>
-        </div>
-      ) : null}
     </div>
   );
 }

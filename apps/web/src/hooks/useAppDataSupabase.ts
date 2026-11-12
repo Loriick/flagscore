@@ -15,6 +15,20 @@ import { logger } from "@/lib/logger-advanced";
 import { Ranking as SupabaseRanking } from "@/lib/supabase";
 
 // Hook qui utilise Supabase pour la page de résultats
+/**
+ * Journée affichée par défaut : la plus récente dont la date est passée,
+ * sinon la première de la liste.
+ */
+export function defaultDayId(
+  days: Array<{ id: number; date: string }>,
+  today: string = new Date().toISOString().slice(0, 10)
+): number {
+  if (days.length === 0) return 0;
+  const past = days.filter(d => d.date && d.date.slice(0, 10) <= today);
+  if (past.length === 0) return days[0].id;
+  return past.reduce((latest, d) => (d.date > latest.date ? d : latest)).id;
+}
+
 export function useAppDataSupabase() {
   // Hook pour synchroniser avec l'URL
   const urlState = useShareableUrl();
@@ -135,12 +149,12 @@ export function useAppDataSupabase() {
     date: m.match_date,
     team_a: {
       name: m.team_home,
-      score: m.score_home || 0,
+      score: m.score_home ?? null,
       general_forfeit: false,
     },
     team_b: {
       name: m.team_away,
-      score: m.score_away || 0,
+      score: m.score_away ?? null,
       general_forfeit: false,
     },
     sheet: null,
@@ -178,13 +192,19 @@ export function useAppDataSupabase() {
     }
   }, [days, daysData?.source, effectivePoolId]);
 
+  // Par défaut : la dernière journée déjà jouée (les visiteurs viennent
+  // chercher les résultats du week-end), sinon la première à venir.
   const effectiveDayId = useMemo(() => {
     if (selectedDayId > 0) return selectedDayId;
-    return days.length > 0 ? days[0].id : 0;
+    return defaultDayId(days);
   }, [selectedDayId, days]);
 
-  // Filtrer les matchs par journée sélectionnée pour l'affichage (fallback)
-  let displayedMatches = mappedMatches.filter(m => m.day_id === effectiveDayId);
+  // Matchs Supabase de la journée sélectionnée (repli si l'API FFFA ne répond
+  // pas) : on les rattache à la journée par sa date.
+  const effectiveDayDate = days.find(d => d.id === effectiveDayId)?.date;
+  let displayedMatches = effectiveDayDate
+    ? mappedMatches.filter(m => m.date === effectiveDayDate)
+    : [];
 
   // Préférer les matchs par journée via l'API (FFFA proxy) quand disponible
   const {

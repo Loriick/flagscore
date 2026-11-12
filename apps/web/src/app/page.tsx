@@ -8,31 +8,25 @@ export const metadata: Metadata = pageMetadata.home;
 
 export default function Home() {
   return (
-    <div className="min-h-screen text-white">
-      <div className="max-w-6xl mx-auto p-4">
-        <header className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">
-            Résultats Flag Football France - Championnat & Coupe de France
-          </h1>
-          <p className="text-lg text-white/80 mb-6">
-            Consultez tous les résultats du championnat de France de flag
-            football et de la coupe de France. Classements par poule et
-            résultats des matchs.
-          </p>
-        </header>
+    <div className="mx-auto max-w-6xl px-4 pt-5 sm:px-6 sm:pt-10">
+      <h1 className="font-score mb-4 text-[2rem] leading-none font-black text-chalk sm:mb-6 sm:text-5xl">
+        Résultats
+        <span className="sr-only">
+          {" "}
+          du Championnat de France mixte et de la Coupe de France de flag
+          football
+        </span>
+      </h1>
 
-        <main>
-          <ClientOnly
-            fallback={
-              <div className="text-center py-8">
-                <div className="text-white/60 text-sm">Chargement...</div>
-              </div>
-            }
-          >
-            <PoolsSelector />
-          </ClientOnly>
-        </main>
-      </div>
+      <ClientOnly
+        fallback={
+          <p className="border-y border-line py-10 text-sm text-stone">
+            Chargement…
+          </p>
+        }
+      >
+        <PoolsSelector />
+      </ClientOnly>
     </div>
   );
 }

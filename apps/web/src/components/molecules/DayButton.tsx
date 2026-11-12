@@ -1,8 +1,7 @@
 import { memo } from "react";
 
-import { Button } from "../atoms/Button";
-
 import { logger } from "@/lib/logger-advanced";
+import { cn } from "@/lib/utils";
 
 interface DayButtonProps {
   day: {
@@ -18,6 +17,7 @@ interface DayButtonProps {
 export const DayButton = memo(function DayButton({
   day,
   onClick,
+  className,
   selected = false,
 }: DayButtonProps) {
   const handleClick = () => {
@@ -32,13 +32,19 @@ export const DayButton = memo(function DayButton({
   };
 
   return (
-    <Button
-      variant={selected ? "primary" : "ghost"}
+    <button
+      type="button"
       onClick={handleClick}
-      className="focus:ring-0 focus:ring-offset-0 focus:outline-none outline-none"
       aria-pressed={selected}
+      className={cn(
+        "font-score relative min-h-11 shrink-0 px-3 pt-2.5 pb-2 text-base font-bold whitespace-nowrap sm:text-lg transition-colors focus-visible:-outline-offset-2",
+        selected
+          ? "text-chalk after:absolute after:inset-x-3 after:bottom-0 after:h-[3px] after:bg-flag"
+          : "text-stone hover:text-chalk",
+        className
+      )}
     >
       {day.label}
-    </Button>
+    </button>
   );
 });

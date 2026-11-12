@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-12T12:30:00Z",
+  "title": "Design System: Flagscore",
+  "extensions": {
+    "colorMeta": {
+      "flag-yellow": { "role": "primary", "displayName": "Jaune flag", "canonical": "#ffd02b", "tonalRamp": ["#3d3000", "#6b5400", "#9a7a00", "#c79f00", "#e6b400", "#ffd02b", "#ffe27a", "#fff3c7"] },
+      "flag-yellow-deep": { "role": "primary", "displayName": "Jaune flag profond", "canonical": "#e6b400" },
+      "match-ink": { "role": "neutral", "displayName": "Encre de match", "canonical": "#100f0d", "tonalRamp": ["#100f0d", "#1a1916", "#24221e", "#2b2924", "#4a4740", "#77736a", "#a19d90", "#f4f1e8"] },
+      "ink-raised": { "role": "neutral", "displayName": "Encre relevée", "canonical": "#1a1916" },
+      "ink-hover": { "role": "neutral", "displayName": "Encre survolée", "canonical": "#24221e" },
+      "hairline": { "role": "neutral", "displayName": "Filet", "canonical": "#2b2924" },
+      "chalk": { "role": "neutral", "displayName": "Blanc craie", "canonical": "#f4f1e8" },
+      "stone": { "role": "neutral", "displayName": "Gris pierre", "canonical": "#a19d90" },
+      "alert-coral": { "role": "tertiary", "displayName": "Corail d'alerte", "canonical": "#ff7a5c" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Titre de page, compact sur les écrans de résultats." },
+      "headline": { "displayName": "Headline", "purpose": "Barre « Score final » et titres de section." },
+      "score": { "displayName": "Score", "purpose": "Scores des matchs, chiffres tabulaires." },
+      "team": { "displayName": "Team", "purpose": "Noms d'équipes, onglets de journée, menu mobile." },
+      "body": { "displayName": "Body", "purpose": "Textes explicatifs." },
+      "label": { "displayName": "Label", "purpose": "Libellés de champs et en-têtes de colonnes." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "score-reveal", "value": "420ms cubic-bezier(0.16, 1, 0.3, 1), décalage 45ms par ligne", "purpose": "Les lignes de match montent en cascade quand on change de journée ; désactivé si prefers-reduced-motion." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Barre Score final",
+      "kind": "custom",
+      "refersTo": "score-bar",
+      "description": "Ouvre chaque liste de matchs : statut de la journée et poule · journée · date.",
+      "html": "<div class=\"ds-score-bar\"><h2>Score final</h2><p>Nord · IDF Nord · Qualification J2 · samedi 7 novembre</p></div>",
+      "css": ".ds-score-bar { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; background: #ffd02b; color: #100f0d; border-radius: 4px; padding: 10px 16px; } .ds-score-bar h2 { margin: 0; font-family: 'Big Shoulders', 'Arial Narrow', sans-serif; font-variation-settings: 'opsz' 72; font-weight: 900; font-size: 28px; line-height: 1; text-transform: uppercase; } .ds-score-bar p { margin: 0; font-family: Geist, sans-serif; font-size: 14px; font-weight: 600; }"
+    },
+    {
+      "name": "Ligne de match",
+      "kind": "custom",
+      "refersTo": "match-row",
+      "description": "Deux lignes équipe / score ; vainqueur en blanc craie et score jaune, perdant en gris pierre.",
+      "html": "<div class=\"ds-match\"><span class=\"ds-team ds-win\">Cougars C</span><span class=\"ds-score ds-score-win\">43</span><span class=\"ds-team ds-loss\">Flash A</span><span class=\"ds-score ds-loss\">0</span></div>",
+      "css": ".ds-match { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 6px 24px; padding: 16px 0; border-bottom: 1px solid #2b2924; background: #100f0d; font-family: 'Big Shoulders', 'Arial Narrow', sans-serif; font-variation-settings: 'opsz' 72; text-transform: uppercase; } .ds-team { font-size: 24px; font-weight: 700; line-height: 1.05; } .ds-score { font-size: 46px; font-weight: 900; line-height: 0.9; text-align: right; font-variant-numeric: tabular-nums; } .ds-win { color: #f4f1e8; } .ds-score-win { color: #ffd02b; } .ds-loss { color: #a19d90; }"
+    },
+    {
+      "name": "Onglet de journée",
+      "kind": "nav",
+      "refersTo": "day-tab",
+      "description": "Journée inactive en pierre, active en craie soulignée de jaune.",
+      "html": "<div class=\"ds-days\"><button class=\"ds-day\">Qualification J1</button><button class=\"ds-day ds-day-active\" aria-pressed=\"true\">Qualification J2</button></div>",
+      "css": ".ds-days { display: flex; border-bottom: 1px solid #2b2924; background: #100f0d; } .ds-day { position: relative; min-height: 44px; padding: 10px 12px 8px; background: none; border: 0; color: #a19d90; font-family: 'Big Shoulders', 'Arial Narrow', sans-serif; font-variation-settings: 'opsz' 72; font-weight: 700; font-size: 18px; text-transform: uppercase; cursor: pointer; transition: color .15s; } .ds-day:hover { color: #f4f1e8; } .ds-day:focus-visible { outline: 2px solid #ffd02b; outline-offset: -2px; } .ds-day-active { color: #f4f1e8; } .ds-day-active::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 0; height: 3px; background: #ffd02b; }"
+    },
+    {
+      "name": "Champ de sélection",
+      "kind": "input",
+      "refersTo": "select-trigger",
+      "description": "Sélecteur standard en encre relevée, 44 px.",
+      "html": "<label class=\"ds-label\">Poule</label><button class=\"ds-select\">Nord · IDF Nord <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"m6 9 6 6 6-6\"/></svg></button>",
+      "css": ".ds-label { display: block; margin-bottom: 6px; font-family: Geist, sans-serif; font-size: 12px; font-weight: 600; letter-spacing: .025em; color: #a19d90; } .ds-select { display: flex; align-items: center; justify-content: space-between; width: 240px; height: 44px; padding: 0 12px; background: #1a1916; color: #f4f1e8; border: 1px solid #2b2924; border-radius: 4px; font-family: Geist, sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; } .ds-select svg { color: #a19d90; } .ds-select:hover { background: #24221e; } .ds-select:focus-visible { outline: 2px solid #ffd02b; outline-offset: 2px; }"
+    },
+    {
+      "name": "Bouton principal",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Action principale : jaune flag, texte encre.",
+      "html": "<button class=\"ds-btn\">Réessayer</button>",
+      "css": ".ds-btn { min-height: 44px; padding: 0 20px; background: #ffd02b; color: #100f0d; border: 0; border-radius: 4px; font-family: Geist, sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; transition: background .15s; } .ds-btn:hover { background: #e6b400; } .ds-btn:focus-visible { outline: 2px solid #ffd02b; outline-offset: 2px; }"
+    },
+    {
+      "name": "Bandeau de tête",
+      "kind": "nav",
+      "refersTo": "header-band",
+      "description": "Bandeau jaune flag avec logo et navigation en encre.",
+      "html": "<header class=\"ds-band\"><strong>FLAGSCORE</strong><nav><a aria-current=\"page\">Résultats</a><a>Classements</a></nav></header>",
+      "css": ".ds-band { display: flex; align-items: stretch; justify-content: space-between; height: 56px; padding: 0 16px; background: #ffd02b; color: #100f0d; font-family: Geist, sans-serif; } .ds-band strong { align-self: center; font-family: 'Big Shoulders', 'Arial Narrow', sans-serif; font-weight: 900; font-size: 24px; } .ds-band nav { display: flex; } .ds-band a { position: relative; display: flex; align-items: center; padding: 0 12px; font-size: 14px; font-weight: 600; color: rgba(16,15,13,.75); cursor: pointer; } .ds-band a:hover, .ds-band a[aria-current] { color: #100f0d; } .ds-band a[aria-current]::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 0; height: 3px; background: #100f0d; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Score final",
+    "overview": "Flagscore se lit comme les visuels que les clubs publient le dimanche soir, juste après le plateau. Des scores énormes et étroits sur de l'encre noire, sous un bandeau jaune flag. C'est un outil qu'on consulte pour savoir qui a gagné et ce que ça change au classement. Le monde visuel lui prête donc seulement quatre choses : une typographie condensée, une palette encre et jaune, une densité de liste sportive, et un geste signature, la barre « Score final ».",
+    "keyCharacteristics": [
+      "encre noire chaude en fond, jaune flag réservé aux signaux ;",
+      "capitales condensées Big Shoulders pour les équipes, les scores et les titres ; Geist pour l'interface ;",
+      "le score du vainqueur en jaune, le perdant en gris pierre ;",
+      "des listes séparées par des filets, jamais des cartes ;",
+      "un seul mouvement : les scores montent en cascade quand on change de journée."
+    ],
+    "rules": [
+      { "name": "La règle du signal unique", "body": "Le jaune n'apparaît que là où il signale quelque chose : où l'on est (bandeau, journée active, focus), qui a gagné, et quoi faire (bouton principal). Jamais en décoration ni en fond de section.", "section": "colors" },
+      { "name": "La règle de l'encre chaude", "body": "Le fond n'est pas un noir neutre ni un bleu nuit. On ne revient jamais au dégradé bleu de l'ancien site.", "section": "colors" },
+      { "name": "La règle du condensé réel", "body": "La voix display s'applique avec l'utilitaire font-score, qui appelle directement --font-big-shoulders et force opsz 72. Une police display qui retombe sur Geist ou sur une police système est un défaut à corriger, pas une variante acceptable.", "section": "typography" },
+      { "name": "La règle des chiffres alignés", "body": "Tout chiffre comparé, score ou statistique, est en chiffres tabulaires.", "section": "typography" },
+      { "name": "La règle du plat", "body": "Si un élément semble devoir flotter, c'est qu'il doit être séparé par un filet ou par un ton d'encre, pas par une ombre.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do poser chaque score dans la voix score (Big Shoulders 900, chiffres tabulaires), vainqueur en jaune flag et perdant en gris pierre.",
+      "Do ouvrir chaque liste de matchs par la barre « Score final » ou « À venir », avec poule · journée · date.",
+      "Do séparer les éléments par des filets de 1 px et des tons d'encre.",
+      "Do garder des contrôles standards (sélecteurs, onglets, tableaux) avec des cibles d'au moins 44 px.",
+      "Do citer la FFFA comme source des données."
+    ],
+    "donts": [
+      "Don't utiliser de cartes, d'ombres, de flou d'arrière-plan ni de dégradé, en particulier le dégradé bleu de l'ancien site.",
+      "Don't utiliser le jaune flag en décoration ou en grand fond de section, en dehors du bandeau et de la barre « Score final ».",
+      "Don't laisser la voix display retomber sur Geist ou sur une police système.",
+      "Don't présenter Flagscore ou ses résultats comme « officiels ».",
+      "Don't modifier le dessin du logo (orange-brun « FLAG SCORE.FR »). Seul son recadrage et sa taille sont réglables."
+    ]
+  }
+}

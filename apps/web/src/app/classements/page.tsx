@@ -1,25 +1,48 @@
 "use client";
 
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
+import { Ranking } from "../../app/types";
 import { ChampionshipSelector } from "../../components/ChampionshipSelector";
+import { RankingTable } from "../../components/organisms/RankingTable";
 import { PoolSelector } from "../../components/PoolSelector";
 import { SeasonSelector } from "../../components/SeasonSelector";
-import { useRankingsDirect } from "../../hooks/useRankingsDirect";
 import {
   useChampionshipsOptimized,
   usePoolsOptimized,
+  useRankingsOptimized,
 } from "../../hooks/useSupabaseOptimized";
 
-import { Ranking } from "@/lib/fffa-api";
+interface RankingRow {
+  id: string;
+  position: number;
+  team_name: string;
+  points: number;
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  goals_for: number;
+  goals_against: number;
+  goal_difference: number;
+}
+
+// [abréviation, signification, visible seulement à partir de sm]
+const LEGEND: Array<[string, string, boolean]> = [
+  ["J", "matchs joués", false],
+  ["G", "gagnés", true],
+  ["N", "nuls", true],
+  ["P", "perdus", true],
+  ["Diff", "points marqués moins points encaissés", false],
+  ["Pts", "points au classement", false],
+];
 
 const Rankings = () => {
   const [seasons] = useState<number[]>([2026]);
   const [currentSeason, setCurrentSeason] = useState<number>(2026);
-  const [selectedChampionshipId, setSelectedChampionshipId] =
-    useState<number>(0);
-  const [selectedPoolId, setSelectedPoolId] = useState<number>(0);
+  const [selectedChampionshipId, setSelectedChampionshipId] = useState(0);
+  const [selectedPoolId, setSelectedPoolId] = useState(0);
 
   const {
     data: championshipsData,
@@ -27,256 +50,169 @@ const Rankings = () => {
     error: championshipsError,
   } = useChampionshipsOptimized();
 
-  const championships =
-    championshipsData?.data?.map(c => ({
-      id: c.id,
-      label: c.name,
-      male: true, // Valeur par défaut
-      season: parseInt(c.season),
-    })) || [];
+  const championships = useMemo(
+    () =>
+      championshipsData?.data?.map(c => ({
+        id: c.id,
+        label: c.name,
+        male: true,
+        season: parseInt(c.season),
+      })) ?? [],
+    [championshipsData]
+  );
 
-  const effectiveChampionshipId = useMemo(() => {
-    if (selectedChampionshipId > 0) return selectedChampionshipId;
-    return championships.length > 0 ? championships[0].id : 0;
-  }, [selectedChampionshipId, championships]);
+  const effectiveChampionshipId =
+    selectedChampionshipId > 0
+      ? selectedChampionshipId
+      : (championships[0]?.id ?? 0);
 
   const {
     data: poolsData,
     isLoading: poolsLoading,
     error: poolsError,
-  } = usePoolsOptimized(
-    effectiveChampionshipId > 0 ? effectiveChampionshipId : 0
+  } = usePoolsOptimized(effectiveChampionshipId);
+
+  const pools = useMemo(
+    () =>
+      poolsData?.data?.map(p => ({
+        id: p.id,
+        label: p.name,
+        championship_id: p.championship_id,
+        phase_id: p.id,
+      })) ?? [],
+    [poolsData]
   );
 
-  const pools =
-    poolsData?.data?.map(p => ({
-      id: p.id,
-      label: p.name,
-      championship_id: p.championship_id,
-      phase_id: p.id, // Utiliser l'ID de la poule comme phase_id
-    })) || [];
-
-  const effectivePoolId = useMemo(() => {
-    if (selectedPoolId > 0) return selectedPoolId;
-    return pools.length > 0 ? pools[0].id : 0;
-  }, [selectedPoolId, pools]);
+  const effectivePoolId =
+    selectedPoolId > 0 ? selectedPoolId : (pools[0]?.id ?? 0);
+  const selectedPool = pools.find(p => p.id === effectivePoolId);
 
   const {
-    data: rankings,
+    data: rankingsData,
     isLoading: rankingsLoading,
     error: rankingsError,
-  } = useRankingsDirect(effectivePoolId);
+  } = useRankingsOptimized(effectivePoolId);
+
+  const rankings: Ranking[] = useMemo(
+    () =>
+      ((rankingsData?.data ?? []) as RankingRow[]).map(r => ({
+        position: r.position,
+        club: {
+          id: parseInt(r.id) || 0,
+          label: r.team_name,
+          general_forfeit: false,
+        },
+        points: r.points,
+        j: r.played,
+        g: r.won,
+        n: r.drawn,
+        p: r.lost,
+        points_won: r.goals_for,
+        points_loss: r.goals_against,
+        points_diff: r.goal_difference,
+      })),
+    [rankingsData]
+  );
 
   useEffect(() => {
     if (championshipsError) {
-      toast.error("Erreur de chargement des compétitions", {
-        description: championshipsError.message || "Erreur inconnue",
-      });
+      toast.error("Les compétitions n'ont pas pu être chargées");
     }
   }, [championshipsError]);
 
   useEffect(() => {
-    if (poolsError) {
-      toast.error("Erreur de chargement des poules", {
-        description: poolsError.message || "Erreur inconnue",
-      });
-    }
+    if (poolsError) toast.error("Les poules n'ont pas pu être chargées");
   }, [poolsError]);
 
   useEffect(() => {
-    if (rankingsError) {
-      toast.error("Erreur de chargement des classements", {
-        description: rankingsError.message || "Erreur inconnue",
-      });
-    }
+    if (rankingsError) toast.error("Le classement n'a pas pu être chargé");
   }, [rankingsError]);
 
-  const handleSeasonChange = useCallback((season: string) => {
-    setCurrentSeason(parseInt(season));
+  const handleChampionshipChange = useCallback((id: string) => {
+    setSelectedChampionshipId(parseInt(id));
+    setSelectedPoolId(0);
   }, []);
-
-  const handleChampionshipChange = useCallback((championshipId: string) => {
-    setSelectedChampionshipId(parseInt(championshipId));
-    setSelectedPoolId(0); // Reset pool selection
-  }, []);
-
-  const handlePoolChange = useCallback((poolId: string) => {
-    setSelectedPoolId(parseInt(poolId));
-  }, []);
-
-  const initialLoading = championshipsLoading && championships.length === 0;
 
   return (
-    <div className="min-h-screen">
-      <div className="container mx-auto px-4 py-8">
-        <header className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-4">
-            Classements Flag Football
-          </h1>
-          <p className="text-white/70 text-lg">
-            Suivez les performances des équipes en Championnat de France
-          </p>
-        </header>
+    <div className="mx-auto max-w-6xl px-4 pt-5 sm:px-6 sm:pt-10">
+      <h1 className="font-score mb-4 text-[2rem] leading-none font-black text-chalk sm:mb-6 sm:text-5xl">
+        Classements
+      </h1>
 
-        <main className="space-y-8">
-          <div className="space-y-4 mb-8">
-            <div className="flex flex-row items-end gap-2 sm:gap-4">
-              <SeasonSelector
-                seasons={seasons}
-                currentSeason={currentSeason}
-                onSeasonChange={handleSeasonChange}
-              />
-              <ChampionshipSelector
-                championships={championships}
-                selectedChampionshipId={effectiveChampionshipId}
-                onChampionshipChange={handleChampionshipChange}
-                loading={championshipsLoading}
-              />
-            </div>
+      <div className="grid grid-cols-[minmax(0,1fr)_8.75rem] gap-3 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_9rem]">
+        <div className="col-span-2 sm:col-span-1">
+          <ChampionshipSelector
+            championships={championships}
+            selectedChampionshipId={effectiveChampionshipId}
+            onChampionshipChange={handleChampionshipChange}
+            loading={championshipsLoading}
+          />
+        </div>
+        <PoolSelector
+          pools={pools}
+          selectedPoolId={effectivePoolId}
+          onPoolChange={id => setSelectedPoolId(parseInt(id))}
+          loading={poolsLoading}
+        />
+        <SeasonSelector
+          seasons={seasons}
+          currentSeason={currentSeason}
+          onSeasonChange={s => setCurrentSeason(parseInt(s))}
+        />
+      </div>
 
-            {effectiveChampionshipId > 0 && (
-              <PoolSelector
-                pools={pools}
-                selectedPoolId={effectivePoolId}
-                onPoolChange={handlePoolChange}
-                loading={poolsLoading}
-              />
-            )}
+      <div className="mt-8 lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-14">
+        <section aria-labelledby="pool-title">
+          <div className="mb-2 rounded-[4px] bg-flag px-4 py-2.5 text-ink">
+            <h2
+              id="pool-title"
+              className="font-score text-[1.75rem] leading-none font-black"
+            >
+              {selectedPool?.label ?? "Classement"}
+            </h2>
           </div>
 
           {effectivePoolId > 0 ? (
-            <div className="bg-white/5 rounded-lg p-6">
-              <h2 className="text-2xl font-semibold text-white mb-6">
-                Classement de la poule
-              </h2>
-
-              <div className="space-y-4">
-                {initialLoading && (!rankings || rankings.length === 0) ? (
-                  <div className="text-center py-8">
-                    <div className="text-white/60 text-sm">
-                      Chargement du classement...
-                    </div>
-                  </div>
-                ) : !rankingsLoading && rankings && rankings.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b border-white/20">
-                          <th className="text-left py-3 px-4 font-medium">
-                            Rang
-                          </th>
-                          <th className="text-left py-3 px-4 font-medium">
-                            Équipe
-                          </th>
-                          <th className="text-center py-3 px-4 font-medium">
-                            Pts
-                          </th>
-                          <th className="text-center py-3 px-4 font-medium">
-                            J
-                          </th>
-                          <th className="text-center py-3 px-4 font-medium">
-                            G
-                          </th>
-                          <th className="text-center py-3 px-4 font-medium">
-                            N
-                          </th>
-                          <th className="text-center py-3 px-4 font-medium">
-                            P
-                          </th>
-                          <th className="text-center py-3 px-4 font-medium">
-                            +/-
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {rankings.map((ranking: Ranking, index: number) => {
-                          const position = index + 1;
-
-                          return (
-                            <tr
-                              key={`ranking-${index}`}
-                              className="border-b border-white/10 hover:bg-white/5"
-                            >
-                              <td className="py-3 px-4 font-medium">
-                                <span className="text-white text-sm">
-                                  {position}
-                                </span>
-                              </td>
-                              <td className="py-3 px-4">
-                                <span className="text-white text-sm">
-                                  {ranking.club.label}
-                                </span>
-                              </td>
-                              <td className="py-3 px-4 text-center font-medium">
-                                {ranking.points}
-                              </td>
-                              <td className="py-3 px-4 text-center">
-                                {ranking.j}
-                              </td>
-                              <td className="py-3 px-4 text-center text-green-400">
-                                {ranking.g}
-                              </td>
-                              <td className="py-3 px-4 text-center text-yellow-400">
-                                {ranking.n}
-                              </td>
-                              <td className="py-3 px-4 text-center text-red-400">
-                                {ranking.p}
-                              </td>
-                              <td className="py-3 px-4 text-center">
-                                {ranking.points_diff}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <div className="text-white/60">
-                      Aucun classement disponible pour cette poule
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+            <RankingTable
+              rankings={rankings}
+              caption={`Classement ${selectedPool?.label ?? ""}`}
+              loading={rankingsLoading}
+            />
           ) : (
-            <div className="text-center py-8">
-              <div className="text-white/60">
-                Sélectionnez une compétition et une poule pour voir les
-                classements
-              </div>
-            </div>
+            <p className="border-y border-line py-10 text-sm text-stone">
+              {championshipsLoading || poolsLoading
+                ? "Chargement…"
+                : "Choisissez une compétition et une poule pour voir le classement."}
+            </p>
           )}
+        </section>
 
-          <section className="p-6 bg-white/5 rounded-lg">
-            <h2 className="text-2xl font-semibold mb-4">
-              À propos des classements
-            </h2>
-            <div className="grid md:grid-cols-2 gap-6 text-white/70">
-              <div>
-                <h3 className="text-lg font-medium mb-2 text-white">
-                  Système de points
-                </h3>
-                <p>
-                  Les équipes gagnent des points selon leurs performances :
-                  victoire, défaite, et match nul. Le classement est mis à jour
-                  après chaque journée de compétition.
-                </p>
+        <aside
+          aria-labelledby="legend-title"
+          className="mt-6 self-start lg:sticky lg:top-24 lg:mt-0 lg:border-t lg:border-line lg:pt-4"
+        >
+          <h2
+            id="legend-title"
+            className="font-score sr-only text-2xl font-black lg:not-sr-only lg:mb-3 lg:block"
+          >
+            Lire le classement
+          </h2>
+          <dl className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-stone lg:flex-col lg:gap-y-2 lg:text-sm">
+            {LEGEND.map(([abbr, text, smOnly]) => (
+              <div
+                key={abbr}
+                className={smOnly ? "hidden gap-1.5 sm:flex" : "flex gap-1.5"}
+              >
+                <dt className="font-semibold text-chalk">{abbr}</dt>
+                <dd>{text}</dd>
               </div>
-              <div>
-                <h3 className="text-lg font-medium mb-2 text-white">
-                  Critères de classement
-                </h3>
-                <p>
-                  En cas d&apos;égalité de points, les critères de départage
-                  incluent la différence de points, les points marqués, et les
-                  confrontations directes.
-                </p>
-              </div>
-            </div>
-          </section>
-        </main>
+            ))}
+          </dl>
+          <p className="mt-4 hidden max-w-sm text-sm leading-relaxed text-stone lg:block">
+            Le classement de la poule est mis à jour après chaque journée, à
+            partir des résultats publiés.
+          </p>
+        </aside>
       </div>
     </div>
   );

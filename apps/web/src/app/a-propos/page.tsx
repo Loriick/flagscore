@@ -5,99 +5,94 @@ import { pageMetadata } from "../../lib/seo";
 
 export const metadata: Metadata = pageMetadata.about;
 
+const COMPETITIONS = [
+  {
+    name: "Championnat de France mixte",
+    text: "Qualifications par plateaux à l'automne, journées de championnat de février à mars, puis demi-finales et finales au printemps.",
+  },
+  {
+    name: "Coupe de France",
+    text: "Deux tableaux, masculin et féminin, avec leurs propres poules de qualification, puis des phases finales de conférence et une finale nationale.",
+  },
+];
+
 export default function About() {
   return (
-    <div className="min-h-screen text-white">
-      <div className="max-w-4xl mx-auto p-4">
-        <header className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">À propos de Flagscore</h1>
-          <p className="text-lg text-white/80">
-            Votre plateforme de référence pour le flag football français
-          </p>
-        </header>
+    <div className="mx-auto max-w-6xl px-4 pt-8 sm:px-6 sm:pt-10">
+      <header className="mb-10 max-w-2xl">
+        <h1 className="font-score text-[clamp(2.5rem,11.5vw,3.75rem)] leading-none font-black text-chalk">
+          À propos
+        </h1>
+        <p className="mt-4 text-lg leading-relaxed text-chalk">
+          Flagscore réunit les scores et les classements des compétitions
+          nationales de flag football en France, pour les retrouver en quelques
+          secondes sur son téléphone, dès le lendemain d&apos;une journée.
+        </p>
+      </header>
 
-        <main className="space-y-8">
-          <section className="p-6 bg-white/5 rounded-lg">
-            <h2 className="text-2xl font-semibold mb-4">Notre Mission</h2>
-            <p className="text-white/80 leading-relaxed">
-              Flagscore est dédié à fournir les résultats les plus récents et
-              précis du flag football français. Nous nous engageons à offrir une
-              expérience utilisateur optimale pour suivre les performances des
-              équipes et l&apos;évolution des compétitions.
-            </p>
+      <div className="grid gap-12 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:gap-16">
+        <div className="space-y-10">
+          <section aria-labelledby="competitions">
+            <h2
+              id="competitions"
+              className="font-score mb-4 text-3xl leading-none font-black"
+            >
+              Les compétitions
+            </h2>
+            <ul className="border-t border-line">
+              {COMPETITIONS.map(c => (
+                <li key={c.name} className="border-b border-line py-4">
+                  <h3 className="font-score text-2xl font-bold text-chalk">
+                    {c.name}
+                  </h3>
+                  <p className="mt-1 max-w-prose text-sm leading-relaxed text-stone">
+                    {c.text}
+                  </p>
+                </li>
+              ))}
+            </ul>
           </section>
 
-          <section className="p-6 bg-white/5 rounded-lg">
-            <h2 className="text-2xl font-semibold mb-4">Les Compétitions</h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-lg font-medium mb-2 text-white">
-                  Championnat de France
-                </h3>
-                <p className="text-white/70">
-                  Le championnat de France de flag football mixte est organisé
-                  par la{" "}
-                  <a
-                    href="https://www.fffa.org"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-400 hover:text-blue-300 underline"
-                  >
-                    FFFA (Fédération Française de Flag Football)
-                  </a>
-                  . Découvrez les résultats de toutes les équipes participantes
-                  et suivez l&apos;évolution du championnat.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-lg font-medium mb-2 text-white">
-                  Coupe de France
-                </h3>
-                <p className="text-white/70">
-                  La coupe de France de flag football rassemble les meilleures
-                  équipes du territoire français. Suivez l&apos;évolution du
-                  tournoi et les performances des équipes dans cette compétition
-                  prestigieuse.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section className="p-6 bg-white/5 rounded-lg">
-            <h2 className="text-2xl font-semibold mb-4">Partenariat FFFA</h2>
-            <p className="text-white/80 mb-4">
-              Flagscore utilise les données officielles de la{" "}
+          <section aria-labelledby="sources">
+            <h2
+              id="sources"
+              className="font-score mb-4 text-3xl leading-none font-black"
+            >
+              D&apos;où viennent les scores
+            </h2>
+            <p className="max-w-prose leading-relaxed text-stone">
+              Le calendrier, les poules et les résultats viennent de la{" "}
               <a
                 href="https://www.fffa.org"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-400 hover:text-blue-300 underline font-medium"
+                className="text-chalk underline decoration-flag decoration-2 hover:text-flag"
               >
-                Fédération Française de Flag Football (FFFA)
-              </a>{" "}
-              pour vous offrir les données les plus fiables et à jour.
-            </p>
-            <p className="text-white/70">
-              La FFFA est l&apos;organisme officiel qui régit le flag football
-              en France. Visitez leur site pour plus d&apos;informations sur les
-              règles, les événements et l&apos;organisation du sport.
+                Fédération Française de Football Américain (FFFA)
+              </a>
+              , qui organise le flag football en France. Flagscore n&apos;est
+              pas un site de la fédération : pour les règlements et les
+              décisions officielles, référez-vous à la FFFA.
             </p>
           </section>
+        </div>
 
-          <section
-            id="contact"
-            className="p-6 bg-gray-800 border border-gray-700 rounded-lg"
+        <section
+          id="contact"
+          aria-labelledby="contact-title"
+          className="self-start border-t-[3px] border-flag pt-5"
+        >
+          <h2
+            id="contact-title"
+            className="font-score mb-2 text-3xl leading-none font-black"
           >
-            <h2 className="text-2xl font-semibold mb-4">Contact</h2>
-            <p className="text-white/80 mb-6">
-              Pour toute question ou suggestion concernant Flagscore,
-              contactez-nous. Nous sommes toujours à l&apos;écoute pour
-              améliorer votre expérience.
-            </p>
-
-            <ContactForm />
-          </section>
-        </main>
+            Une erreur de score ?
+          </h2>
+          <p className="mb-6 text-sm leading-relaxed text-stone">
+            Signalez-la, ou envoyez une idée pour améliorer Flagscore.
+          </p>
+          <ContactForm />
+        </section>
       </div>
     </div>
   );

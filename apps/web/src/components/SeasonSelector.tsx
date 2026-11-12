@@ -2,6 +2,13 @@ import { memo } from "react";
 
 import { NoSSR } from "./NoSSR";
 
+import {
+  fieldLabelClass,
+  selectContentClass,
+  selectFallbackClass,
+  selectItemClass,
+  selectTriggerClass,
+} from "@/components/ui/field-styles";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -23,14 +30,14 @@ export const SeasonSelector = memo(function SeasonSelector({
   onSeasonChange,
 }: SeasonSelectorProps) {
   return (
-    <div className="w-24 sm:w-36 space-y-2">
-      <Label htmlFor="season-select" className="text-white/80">
+    <div className="min-w-0">
+      <Label htmlFor="season-select" className={fieldLabelClass}>
         Saison
       </Label>
       <NoSSR
         fallback={
-          <div className="w-full h-10 bg-gray-800 border border-gray-600 rounded-md flex items-center px-3 text-white">
-            ...
+          <div className={selectFallbackClass} aria-hidden="true">
+            Chargement…
           </div>
         }
       >
@@ -38,18 +45,18 @@ export const SeasonSelector = memo(function SeasonSelector({
           <SelectTrigger
             id="season-select"
             name="season"
-            className="w-full bg-gray-800 border-gray-600 text-white hover:bg-gray-700 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+            className={selectTriggerClass}
           >
-            <SelectValue placeholder="Sélectionner une saison" />
+            <SelectValue placeholder="Choisir une saison" />
           </SelectTrigger>
-          <SelectContent className="bg-gray-800 border-gray-600">
+          <SelectContent className={selectContentClass}>
             {seasons.map(season => (
               <SelectItem
                 key={`season-${season}`}
                 value={season.toString()}
-                className="text-white hover:bg-gray-700"
+                className={selectItemClass}
               >
-                {season}
+                {season}–{season + 1}
               </SelectItem>
             ))}
           </SelectContent>

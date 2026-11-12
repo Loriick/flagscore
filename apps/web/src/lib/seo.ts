@@ -153,7 +153,7 @@ export const pageMetadata = {
   rankings: generateMetadata({
     title: "Classements",
     description:
-      "Consultez les classements officiels du championnat de France de flag football et de la coupe de France. Classements par poule avec résultats des équipes.",
+      "Consultez les classements du championnat de France de flag football et de la coupe de France. Classements par poule avec résultats des équipes.",
     keywords: [
       "classements flag football",
       "classement championnat france",
@@ -195,8 +195,7 @@ export const structuredData = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "Flagscore",
-    description:
-      "Plateforme officielle des résultats du flag football en France",
+    description: "Résultats et classements du flag football en France",
     url: getBaseUrl(),
     logo: getShareImageUrl(),
     sameAs: ["https://twitter.com/flagscore", "https://facebook.com/flagscore"],
