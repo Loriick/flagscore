@@ -38,6 +38,17 @@ const ResultSchema = z.object({
     .int()
     .describe("Numéro du visuel (1 = premier) où figure ce score"),
   forfeit: z.boolean().describe("Le post indique un forfait pour ce match"),
+  competition_text: z
+    .string()
+    .nullable()
+    .describe(
+      "Compétition de CE match telle qu'écrite (un post peut en mélanger plusieurs)"
+    ),
+  national_senior: z
+    .boolean()
+    .describe(
+      "true seulement pour le Championnat de France (mixte) ou la Coupe de France seniors (masculins/féminines)"
+    ),
 });
 
 export const ExtractionSchema = z.object({
@@ -80,6 +91,8 @@ Le post est publié par le club indiqué. Pour chaque match terminé visible sur
 - "team" est l'équipe du club qui publie, avec sa désignation exacte quand le club en a plusieurs (A/B, Red/Black…).
 - "opponent" est l'adversaire. S'il n'apparaît que sous forme de logo, prends son nom dans la légende ; sinon décris-le au mieux (ex. "logo aigle") et baisse la confiance.
 - Les scores sont orientés du point de vue de "team" : team_score est le score de l'équipe du club.
+- Quand le club a plusieurs équipes et écrit seulement « Flash 00-43 Cougars » sous un titre de section (« Flash A »), reprends la désignation de la section : team = "Flash A". Garde les désignations par couleur telles quelles ("Red", "White", "Black").
+- Un post peut mélanger plusieurs compétitions : renseigne competition_text pour chaque match. national_senior vaut true seulement pour le Championnat de France (mixte) et la Coupe de France seniors ; false pour les jeunes (U7 à U18), les championnats régionaux (ex. « championnat IDF »), les tournois et les matchs amicaux.
 
 Ne compte pas comme résultats : les bilans cumulés ("3-0" = 3 victoires, 0 défaite), les matchs à venir, les scores à la mi-temps, les classements.
 Ne déduis pas de date : remplis match_date seulement si la date est écrite.
@@ -176,12 +189,27 @@ export function toObservations(
   extraction: Extraction,
   calendar?: CompetitionEvent[]
 ): ToObservationsResult {
-  if (!extraction.is_results_post || extraction.results.length === 0) {
-    return { event: null, observations: [], skipped: "Pas de résultat" };
+  // Seuls les matchs seniors nationaux (Championnat / Coupe de France) comptent.
+  const results = extraction.results
+    .map((r, index) => ({ ...r, index }))
+    .filter(r => r.national_senior);
+  if (!extraction.is_results_post || results.length === 0) {
+    return {
+      event: null,
+      observations: [],
+      skipped:
+        extraction.results.length > 0
+          ? "Aucun résultat de Championnat ou Coupe de France seniors"
+          : "Pas de résultat",
+    };
   }
 
   const competition: Competition | null = competitionFromText(
-    [extraction.competition_text, extraction.stage_text]
+    [
+      results[0].competition_text,
+      extraction.competition_text,
+      extraction.stage_text,
+    ]
       .filter(Boolean)
       .join(" ")
   );
@@ -205,8 +233,8 @@ export function toObservations(
   }
 
   const handle = account.replace(/^@/, "").toLowerCase();
-  const observations: Observation[] = extraction.results.map((r, i) => ({
-    id: `${postId}#${i}`,
+  const observations: Observation[] = results.map(r => ({
+    id: `${postId}#${r.index}`,
     postId,
     account: handle,
     event,

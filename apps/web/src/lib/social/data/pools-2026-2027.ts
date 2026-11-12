@@ -319,5 +319,6 @@ export const clubName = (teamName: string) => teamName.replace(/\s+[A-C]$/, "");
  */
 export const CLUB_INSTAGRAM: Record<string, string[]> = {
   "Flash (La Courneuve)": ["flashdelacourneuve"],
-  "Molosses (Asnières)": ["molossesasnieres", "molossesflagasnieres"],
+  // @molossesflagasnieres renvoie les mêmes posts : inutile de le suivre aussi.
+  "Molosses (Asnières)": ["molossesasnieres"],
 };

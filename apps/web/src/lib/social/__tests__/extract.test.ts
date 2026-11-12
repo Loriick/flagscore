@@ -16,6 +16,8 @@ const flashExtraction: Extraction = {
       opponent_score: 43,
       slide: 1,
       forfeit: false,
+      competition_text: "Championnat de France Flag Football mixte",
+      national_senior: true,
     },
     {
       team: "Flash A",
@@ -24,6 +26,8 @@ const flashExtraction: Extraction = {
       opponent_score: 39,
       slide: 1,
       forfeit: false,
+      competition_text: "Championnat de France Flag Football mixte",
+      national_senior: true,
     },
     {
       team: "Flash B",
@@ -32,6 +36,8 @@ const flashExtraction: Extraction = {
       opponent_score: 21,
       slide: 1,
       forfeit: false,
+      competition_text: "Championnat de France Flag Football mixte",
+      national_senior: true,
     },
   ],
   confidence: 0.92,
@@ -81,6 +87,42 @@ describe("toObservations", () => {
       confidence: 3,
     });
     expect(r.observations[0].confidence).toBe(1);
+  });
+});
+
+describe("filtrage des compétitions", () => {
+  it("ignore les résultats jeunes et régionaux d'un même post", () => {
+    // Le vrai post Flash du 9 nov. mélange championnat de France et U18 IDF.
+    const r = toObservations("p", "flashdelacourneuve", "2026-11-09", {
+      ...flashExtraction,
+      results: [
+        ...flashExtraction.results,
+        {
+          team: "Flash",
+          opponent: "Molosses",
+          team_score: 28,
+          opponent_score: 6,
+          slide: 0,
+          forfeit: false,
+          competition_text: "Championnat IDF Flag Football U18",
+          national_senior: false,
+        },
+      ],
+    });
+    expect(r.observations).toHaveLength(3);
+    expect(r.observations.map(o => o.id)).toEqual(["p#0", "p#1", "p#2"]);
+  });
+
+  it("ne garde rien si le post ne parle que des jeunes", () => {
+    const r = toObservations("p", "club", "2026-11-09", {
+      ...flashExtraction,
+      results: flashExtraction.results.map(x => ({
+        ...x,
+        national_senior: false,
+      })),
+    });
+    expect(r.observations).toHaveLength(0);
+    expect(r.skipped).toMatch(/seniors/);
   });
 });
 
