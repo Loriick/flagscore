@@ -325,15 +325,9 @@ export const clubName = (teamName: string) => teamName.replace(/\s+[A-C]$/, "");
  * - Gavroches (Paris)
  * - Mustangs (Izel-lès-Equerchin)
  * - Phenix (Béthune)
- * - Spectres (Sens)
  * - Badgers (Léré)
- * - Lions (Bordeaux)
- * - Anges (Mont-de-Marsan)
  * - FFCC (Voeuil-et-Giget)
- * - Ours (Toulouse)
- * - Hurricanes (Albi)
  * - Golden Eagles (Fos-sur-Mer)
- * - Black Panthers (Thonon-les-Bains)
  * - Fontenaython (Fontenay-sous-Bois)
  * - Libertys (Paris)
  */
@@ -433,4 +427,10 @@ export const CLUB_INSTAGRAM: Record<string, string[]> = {
   "Wildcats (Saint-Jean-de-Védas)": ["wildcatsflagfootball34"],
   "Wolfpack (Haguenau)": ["wolfpack_haguenau"],
   "Yankees (Angers)": ["yankees_angers"],
+  "Black Panthers (Thonon-les-Bains)": ["blackpanthersthonon.flag"], // confirmé
+  "Ours (Toulouse)": ["oursflagfootball"], // confirmé
+  "Anges (Mont-de-Marsan)": ["anges.mdm"], // confirmé
+  "Lions (Bordeaux)": ["lionsdebordeaux_footus"], // confirmé
+  "Hurricanes (Albi)": ["hurricanealbi"], // confirmé
+  "Spectres (Sens)": ["spectresdesens_flag"], // confirmé
 };
