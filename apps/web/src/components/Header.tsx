@@ -1,214 +1,124 @@
 "use client";
 
+import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+const NAV_LINKS = [
+  { href: "/", label: "Résultats" },
+  { href: "/classements", label: "Classements" },
+  { href: "/recherche", label: "Recherche" },
+  { href: "/a-propos", label: "À propos" },
+];
+
+const DEV_LINKS = [
+  { href: "/monitoring", label: "Monitoring" },
+  { href: "/logs-monitor", label: "Logs" },
+  { href: "/test-teams-sync", label: "Test Teams" },
+  { href: "/create-teams-table", label: "Create Table" },
+];
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const closeMobileMenu = () => {
+  // Referme le menu mobile à chaque navigation.
+  useEffect(() => {
     setIsMobileMenuOpen(false);
-  };
+  }, [pathname]);
+
+  const links =
+    process.env.NODE_ENV === "development"
+      ? [...NAV_LINKS, ...DEV_LINKS]
+      : NAV_LINKS;
 
   const isActive = (path: string) => pathname === path;
 
   return (
-    <header
-      className="w-full bg-gray-800 border-b border-gray-600 relative z-10"
-      role="banner"
-    >
-      <div className="mx-auto px-4 sm:px-8">
-        <div className="flex h-20 sm:h-16 items-center justify-between">
-          {/* Logo centré en mobile, à gauche en desktop */}
-          <div className="flex-1 md:flex-none flex justify-center md:justify-start items-center">
-            <Link href="/" className="hover:opacity-80 transition-opacity">
-              <Image
-                src="/flagscore-logo-removebg-preview.png"
-                alt="logo FlagScore.fr"
-                width={250}
-                height={125}
-                className="h-20 md:h-20 sm:h-16 w-auto object-contain"
-                priority
-              />
-            </Link>
-          </div>
+    <header className="sticky top-0 z-30 w-full bg-flag text-ink">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 sm:h-16 sm:px-6">
+        <Link
+          href="/"
+          className="-ml-1 flex items-center rounded-sm focus-visible:outline-ink"
+          aria-label="Flagscore, accueil"
+        >
+          <Image
+            src="/flagscore-logo-removebg-preview.png"
+            alt="Flagscore"
+            width={250}
+            height={250}
+            className="h-14 w-auto object-contain sm:h-16"
+            priority
+          />
+        </Link>
 
-          {/* Menu desktop à droite */}
-          <nav
-            className="hidden md:flex items-center gap-4"
-            aria-label="Navigation principale"
-          >
+        <nav
+          className="hidden items-stretch self-stretch md:flex"
+          aria-label="Navigation principale"
+        >
+          {links.map(link => (
             <Link
-              href="/"
-              className={`text-sm transition-colors ${
-                isActive("/") ? "text-white" : "text-white/80 hover:text-white"
+              key={link.href}
+              href={link.href}
+              aria-current={isActive(link.href) ? "page" : undefined}
+              className={`relative flex items-center px-3 text-sm font-semibold tracking-wide transition-colors focus-visible:outline-ink focus-visible:-outline-offset-4 ${
+                isActive(link.href)
+                  ? "text-ink after:absolute after:inset-x-3 after:bottom-0 after:h-[3px] after:bg-ink"
+                  : "text-ink/75 hover:text-ink"
               }`}
             >
-              Résultats
+              {link.label}
             </Link>
-            <Link
-              href="/classements"
-              className={`text-sm transition-colors ${
-                isActive("/classements")
-                  ? "text-white"
-                  : "text-white/80 hover:text-white"
-              }`}
-            >
-              Classements
-            </Link>
-            <Link
-              href="/recherche"
-              className={`text-sm transition-colors ${
-                isActive("/recherche")
-                  ? "text-white"
-                  : "text-white/80 hover:text-white"
-              }`}
-            >
-              Recherche
-            </Link>
-            <Link
-              href="/a-propos"
-              className={`text-sm transition-colors ${
-                isActive("/a-propos")
-                  ? "text-white"
-                  : "text-white/80 hover:text-white"
-              }`}
-            >
-              À propos
-            </Link>
-            {process.env.NODE_ENV === "development" && (
-              <>
-                <Link
-                  href="/monitoring"
-                  className={`text-sm transition-colors ${
-                    isActive("/monitoring")
-                      ? "text-white"
-                      : "text-white/80 hover:text-white"
-                  }`}
-                >
-                  Monitoring
-                </Link>
-                <Link
-                  href="/logs-monitor"
-                  className={`text-sm transition-colors ${
-                    isActive("/logs-monitor")
-                      ? "text-white"
-                      : "text-white/80 hover:text-white"
-                  }`}
-                >
-                  Logs
-                </Link>
-                <Link
-                  href="/test-teams-sync"
-                  className={`text-sm transition-colors ${
-                    isActive("/test-teams-sync")
-                      ? "text-white"
-                      : "text-white/80 hover:text-white"
-                  }`}
-                >
-                  Test Teams
-                </Link>
-                <Link
-                  href="/create-teams-table"
-                  className={`text-sm transition-colors ${
-                    isActive("/create-teams-table")
-                      ? "text-white"
-                      : "text-white/80 hover:text-white"
-                  }`}
-                >
-                  Create Table
-                </Link>
-              </>
-            )}
-          </nav>
+          ))}
+        </nav>
 
-          {/* Bouton mobile menu à droite */}
-          <button
-            className="md:hidden flex flex-col items-center justify-center w-8 h-8 space-y-1"
-            onClick={toggleMobileMenu}
-            aria-label="Ouvrir le menu"
-            aria-controls="mobile-menu"
-            aria-expanded={isMobileMenuOpen}
-          >
-            <span
-              className={`block w-6 h-0.5 bg-white transition-all duration-300 ${
-                isMobileMenuOpen ? "rotate-45 translate-y-1.5" : ""
-              }`}
-            ></span>
-            <span
-              className={`block w-6 h-0.5 bg-white transition-all duration-300 ${
-                isMobileMenuOpen ? "opacity-0" : ""
-              }`}
-            ></span>
-            <span
-              className={`block w-6 h-0.5 bg-white transition-all duration-300 ${
-                isMobileMenuOpen ? "-rotate-45 -translate-y-1.5" : ""
-              }`}
-            ></span>
-          </button>
-        </div>
-
-        {isMobileMenuOpen && (
-          <div
-            id="mobile-menu"
-            className="md:hidden absolute top-full left-0 right-0 bg-gray-800 border-t border-gray-600"
-          >
-            <nav className="flex flex-col py-4" aria-label="Navigation mobile">
-              <Link
-                href="/"
-                className={`px-4 py-3 transition-colors ${
-                  isActive("/")
-                    ? "text-white bg-white/10"
-                    : "text-white/80 hover:text-white hover:bg-white/5"
-                }`}
-                onClick={closeMobileMenu}
-              >
-                Résultats
-              </Link>
-              <Link
-                href="/classements"
-                className={`px-4 py-3 transition-colors ${
-                  isActive("/classements")
-                    ? "text-white bg-white/10"
-                    : "text-white/80 hover:text-white hover:bg-white/5"
-                }`}
-                onClick={closeMobileMenu}
-              >
-                Classements
-              </Link>
-              <Link
-                href="/recherche"
-                className={`px-4 py-3 transition-colors ${
-                  isActive("/recherche")
-                    ? "text-white bg-white/10"
-                    : "text-white/80 hover:text-white hover:bg-white/5"
-                }`}
-                onClick={closeMobileMenu}
-              >
-                Recherche
-              </Link>
-              <Link
-                href="/a-propos"
-                className={`px-4 py-3 transition-colors ${
-                  isActive("/a-propos")
-                    ? "text-white bg-white/10"
-                    : "text-white/80 hover:text-white hover:bg-white/5"
-                }`}
-                onClick={closeMobileMenu}
-              >
-                À propos
-              </Link>
-            </nav>
-          </div>
-        )}
+        <button
+          type="button"
+          className="-mr-2 flex size-11 items-center justify-center rounded-sm text-ink transition-colors hover:bg-ink/10 focus-visible:outline-ink md:hidden"
+          onClick={() => setIsMobileMenuOpen(open => !open)}
+          aria-label={isMobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+          aria-controls="mobile-menu"
+          aria-expanded={isMobileMenuOpen}
+        >
+          {isMobileMenuOpen ? (
+            <X className="size-6" strokeWidth={2.25} aria-hidden="true" />
+          ) : (
+            <Menu className="size-6" strokeWidth={2.25} aria-hidden="true" />
+          )}
+        </button>
       </div>
+
+      {isMobileMenuOpen && (
+        <nav
+          id="mobile-menu"
+          className="absolute inset-x-0 top-full border-b border-line bg-ink md:hidden"
+          aria-label="Navigation mobile"
+        >
+          <ul className="mx-auto max-w-6xl px-4 py-2">
+            {links.map(link => (
+              <li
+                key={link.href}
+                className="border-b border-line last:border-b-0"
+              >
+                <Link
+                  href={link.href}
+                  aria-current={isActive(link.href) ? "page" : undefined}
+                  className={`font-score flex min-h-12 items-center text-2xl font-bold ${
+                    isActive(link.href)
+                      ? "text-flag"
+                      : "text-chalk hover:text-flag"
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
     </header>
   );
 }

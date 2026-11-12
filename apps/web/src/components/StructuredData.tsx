@@ -64,7 +64,7 @@ export function RankingStructuredData({
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: `Classement ${poolName}`,
-    description: `Classement officiel de la poule ${poolName}`,
+    description: `Classement de la poule ${poolName}`,
     numberOfItems: rankings.length,
     itemListElement: rankings.map((ranking, index) => ({
       "@type": "ListItem",

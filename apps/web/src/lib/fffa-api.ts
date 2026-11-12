@@ -1,3 +1,5 @@
+import { FAKE_DATA } from "./fake-data";
+
 export interface Championship {
   id: number;
   label: string;
@@ -71,6 +73,10 @@ function getServerOrigin(): string {
 }
 
 async function api<T>(params: Record<string, string | string[]>): Promise<T> {
+  if (FAKE_DATA) {
+    // Mode démo : pas d'appel à la FFFA, les hooks retombent sur fake-data.
+    throw new Error("FFFA désactivée en mode démo");
+  }
   try {
     // Use relative URL for same-origin requests
     const baseUrl =

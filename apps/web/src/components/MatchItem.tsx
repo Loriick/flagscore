@@ -7,8 +7,8 @@ interface MatchItemProps {
 }
 
 export const MatchItem = memo(function MatchItem({ match }: MatchItemProps) {
-  const teamAWon = match.team_a.score > match.team_b.score;
-  const teamBWon = match.team_b.score > match.team_a.score;
+  const teamAWon = (match.team_a.score ?? 0) > (match.team_b.score ?? 0);
+  const teamBWon = (match.team_b.score ?? 0) > (match.team_a.score ?? 0);
 
   const teamAStyle = teamAWon
     ? "text-white"

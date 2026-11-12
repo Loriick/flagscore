@@ -29,8 +29,9 @@ export interface Match {
   pool_id: number;
   day_id: number;
   date: string;
-  team_a: { name: string; score: number; general_forfeit: boolean };
-  team_b: { name: string; score: number; general_forfeit: boolean };
+  /** `null` tant que le match n'a pas de score (match à venir). */
+  team_a: { name: string; score: number | null; general_forfeit: boolean };
+  team_b: { name: string; score: number | null; general_forfeit: boolean };
   sheet: string | null;
 }
 
