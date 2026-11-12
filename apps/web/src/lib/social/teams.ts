@@ -37,9 +37,13 @@ export function normalizeName(raw: string): string {
 }
 
 export function nameTokens(raw: string): string[] {
-  return normalizeName(raw)
-    .split(" ")
-    .filter(t => t && !STOPWORDS.has(t));
+  return (
+    normalizeName(raw)
+      .split(" ")
+      // Les numéros de département ("Cougars Football 95", "Diables Rouges 93")
+      // ne font pas partie des noms d'équipes : on les ignore.
+      .filter(t => t && !STOPWORDS.has(t) && !/^\d+$/.test(t))
+  );
 }
 
 export function normalizeHandle(handle: string): string {

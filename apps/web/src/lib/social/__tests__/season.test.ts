@@ -224,3 +224,52 @@ describe("Coupe de France (masculins et féminines)", () => {
     ]);
   });
 });
+
+describe("cas réels du 12 novembre (première exécution en production)", () => {
+  // Post @molossesasnieres « Molosses Black invaincus pour cette deuxième
+  // journée » : trois matchs, adversaires écrits avec leur département.
+  const black = [
+    obs(
+      "black",
+      "molossesasnieres",
+      "Molosses Black",
+      "Juggernautes Paris",
+      34,
+      7
+    ),
+    obs(
+      "black",
+      "molossesasnieres",
+      "Molosses Black",
+      "Cougars Football 95",
+      65,
+      12
+    ),
+    obs(
+      "black",
+      "molossesasnieres",
+      "Molosses Black",
+      "Diables Rouges 93",
+      42,
+      14
+    ),
+  ];
+
+  it("ignore les numéros de département dans les noms", () => {
+    expect(directory.candidates("Cougars Football 95").sort()).toEqual([
+      "Cougars A (Saint-Ouen-l'Aumône)",
+      "Cougars B (Saint-Ouen-l'Aumône)",
+      "Cougars C (Saint-Ouen-l'Aumône)",
+    ]);
+  });
+
+  it("un même nom dans un même post désigne la même équipe (Black = Molosses A)", () => {
+    const resolved = resolveObservations(black, directory);
+    expect(resolved.every(r => r.status === "resolved")).toBe(true);
+    for (const r of resolved) {
+      expect([r.home, r.away]).toContain("Molosses A (Asnières)");
+    }
+    expect(pair(resolved[1])).toContain("Cougars B (Saint-Ouen-l'Aumône)");
+    expect(pair(resolved[2])).toContain("Diables Rouges B (Villepinte)");
+  });
+});

@@ -136,3 +136,29 @@ export function resolveEvent({
 
   return candidates.length === 1 ? candidates[0] : null;
 }
+
+const COMPETITION_LABEL: Record<Competition, string> = {
+  CM: "Championnat de France mixte",
+  CDF: "Coupe de France",
+};
+
+/**
+ * Journées nationales terminées dans les `maxDelayDays` jours avant la
+ * publication, en clair : « Championnat de France mixte, Q - J2 (2026-11-07 au
+ * 2026-11-08) ». Sert de contexte à la lecture d'un post.
+ */
+export function recentEventsLabel(
+  postedOn: string,
+  { calendar = SEASON_2026_2027, maxDelayDays = 6 } = {}
+): string | null {
+  const events = calendar.filter(
+    e => postedOn >= e.start && daysBetween(e.end, postedOn) <= maxDelayDays
+  );
+  if (events.length === 0) return null;
+  return events
+    .map(
+      e =>
+        `${COMPETITION_LABEL[e.competition]}, ${e.stage} (${e.start === e.end ? e.start : `${e.start} au ${e.end}`})`
+    )
+    .join(" ; ");
+}

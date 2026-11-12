@@ -28,6 +28,12 @@
       "timezone": "Europe/Paris",
       "path": "/api/cron/social?step=process&slot=3",
       "requestMethod": "GET"
+    },
+    "social-reconcile": {
+      "schedule": "30 7 * * 2,4",
+      "timezone": "Europe/Paris",
+      "path": "/api/cron/social?step=reconcile",
+      "requestMethod": "GET"
     }
   }
 }
