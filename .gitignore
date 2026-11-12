@@ -117,5 +117,8 @@ temp/
 # Turborepo cache
 .turbo/
 
+# Moteur Impeccable téléchargé au premier lancement
+.claude/skills/impeccable/scripts/bin/
+
 # Captures de travail Impeccable (non versionnées)
 .impeccable/review/
