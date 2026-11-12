@@ -22,7 +22,7 @@ export const maxDuration = 300;
  *                 avec Claude, rapproche et enregistre les scores
  *  (sans step)    les deux
  *
- * Appelée par les crons Vercel (voir vercel.json) avec
+ * Appelée par les Schedules Vercel (voir vercel.json, heure de Paris) avec
  * `Authorization: Bearer $CRON_SECRET`.
  */
 export async function GET(request: NextRequest) {
