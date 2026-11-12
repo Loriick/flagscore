@@ -20,7 +20,7 @@
  */
 
 import type { CompetitionEvent } from "./calendar";
-import type { TeamDirectory } from "./teams";
+import { normalizeName, type TeamDirectory } from "./teams";
 
 export interface ScheduledMatch {
   id: string;
@@ -238,6 +238,20 @@ export function resolveObservations(
     addOpponent(obs.event, team, opp);
     if (!postPairs.has(obs.postId)) postPairs.set(obs.postId, new Set());
     postPairs.get(obs.postId)!.add(pairKey(team, opp));
+
+    // Dans un même post, un même nom désigne la même équipe : une fois
+    // « Molosses Black » identifiée, ses autres matchs du post la suivent.
+    const sameName = normalizeName(obs.team);
+    for (const q of pending) {
+      if (
+        !q.result &&
+        q.obs.postId === obs.postId &&
+        normalizeName(q.obs.team) === sameName &&
+        q.teamCands.includes(team)
+      ) {
+        q.teamCands = [team];
+      }
+    }
   };
 
   // Passe 1 : ce qui est sans ambiguïté. Puis on recommence tant que la règle

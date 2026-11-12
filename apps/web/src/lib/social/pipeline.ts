@@ -17,7 +17,12 @@ import {
   startInstagramRun,
   type ApifyPost,
 } from "./apify";
-import { addDays, type Competition, type CompetitionEvent } from "./calendar";
+import {
+  addDays,
+  recentEventsLabel,
+  type Competition,
+  type CompetitionEvent,
+} from "./calendar";
 import { CLUB_INSTAGRAM } from "./data/pools-2026-2027";
 import {
   extractPost,
@@ -333,6 +338,7 @@ export async function processPendingPosts(
             caption: post.caption,
             postedAt: post.posted_at,
             images,
+            context: recentEventsLabel(post.posted_at.slice(0, 10)),
           });
           const { event, observations, skipped } = toObservations(
             post.id,
@@ -476,4 +482,18 @@ export async function reconcileEvents(
       resolved.filter(r => r.status !== "resolved").length;
   }
   return { events: eventKeys.length, matches, pendingReview };
+}
+
+/** Journées ayant des observations depuis `since` (YYYY-MM-DD). */
+export async function recentEventKeys(
+  db: SupabaseClient,
+  since: string
+): Promise<string[]> {
+  const rows = check(
+    await db
+      .from("score_observations")
+      .select("event_key")
+      .gte("event_start", since)
+  ) as Array<{ event_key: string }>;
+  return [...new Set(rows.map(r => r.event_key))];
 }

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   competitionFromText,
+  recentEventsLabel,
   resolveEvent,
   type CompetitionEvent,
 } from "../calendar";
@@ -300,5 +301,14 @@ describe("reconcile", () => {
     const decisions = reconcile(resolved);
     expect(decisions).toHaveLength(9);
     expect(decisions.every(d => d.autoApply)).toBe(true);
+  });
+});
+
+describe("recentEventsLabel", () => {
+  it("décrit la journée qui vient d'avoir lieu", () => {
+    expect(recentEventsLabel("2026-11-09")).toBe(
+      "Championnat de France mixte, Q - J2 (2026-11-07 au 2026-11-08)"
+    );
+    expect(recentEventsLabel("2026-12-20")).toBeNull();
   });
 });

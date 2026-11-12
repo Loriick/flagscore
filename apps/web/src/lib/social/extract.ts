@@ -94,6 +94,8 @@ Le post est publié par le club indiqué. Pour chaque match terminé visible sur
 - Quand le club a plusieurs équipes et écrit seulement « Flash 00-43 Cougars » sous un titre de section (« Flash A »), reprends la désignation de la section : team = "Flash A". Garde les désignations par couleur telles quelles ("Red", "White", "Black").
 - Un post peut mélanger plusieurs compétitions : renseigne competition_text pour chaque match. national_senior vaut true seulement pour le Championnat de France (mixte) et la Coupe de France seniors ; false pour les jeunes (U7 à U18), les championnats régionaux (ex. « championnat IDF »), les tournois et les matchs amicaux.
 
+Les équipes seniors d'un club sont souvent désignées par une lettre (A, B, C) ou une couleur (Red, White, Black) ; les équipes jeunes par une catégorie d'âge (U7 à U18). Quand le contexte indique qu'une journée nationale vient d'avoir lieu, les résultats d'équipes désignées par une lettre ou une couleur appartiennent à cette compétition, sauf mention contraire (championnat régional, tournoi, amical).
+
 Ne compte pas comme résultats : les bilans cumulés ("3-0" = 3 victoires, 0 défaite), les matchs à venir, les scores à la mi-temps, les classements.
 Ne déduis pas de date : remplis match_date seulement si la date est écrite.
 Si le post n'annonce aucun résultat, mets is_results_post à false et results à [].`;
@@ -110,6 +112,8 @@ export interface PostInput {
   /** Date de publication (ISO). */
   postedAt: string;
   images: PostImage[];
+  /** Journées nationales qui viennent d'avoir lieu (voir recentEventsLabel). */
+  context?: string | null;
 }
 
 export class ExtractionError extends Error {}
@@ -131,6 +135,7 @@ export async function extractPost(
     text: [
       `Compte qui publie : @${post.account.replace(/^@/, "")}`,
       `Publié le : ${post.postedAt.slice(0, 10)}`,
+      `Journées nationales juste avant la publication : ${post.context ?? "aucune"}`,
       `Légende :\n${post.caption?.trim() || "(aucune)"}`,
     ].join("\n"),
   });

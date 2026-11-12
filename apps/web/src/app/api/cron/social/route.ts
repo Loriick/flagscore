@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   collectFinishedRuns,
   processPendingPosts,
+  recentEventKeys,
   reconcileEvents,
   startCollection,
 } from "@/lib/social/pipeline";
@@ -20,7 +21,9 @@ export const maxDuration = 300;
  *                 une journée de compétition (sauf si &force=1)
  *  ?step=process  récupère les collectes terminées, lit les posts en attente
  *                 avec Claude, rapproche et enregistre les scores
- *  (sans step)    les deux
+ *  ?step=reconcile  relance seulement le rapprochement des 30 derniers jours
+ *                 (après une correction des alias ou des règles)
+ *  (sans step)    start puis process
  *
  * Appelée par les Schedules Vercel (voir vercel.json, heure de Paris) avec
  * `Authorization: Bearer $CRON_SECRET`.
@@ -66,6 +69,16 @@ export async function GET(request: NextRequest) {
       const processed = await processPendingPosts(db, { deadline });
       result.process = processed;
       result.reconcile = await reconcileEvents(db, processed.events);
+    }
+
+    if (step === "reconcile") {
+      const since = new Date(Date.now() - 30 * 86_400_000)
+        .toISOString()
+        .slice(0, 10);
+      result.reconcile = await reconcileEvents(
+        db,
+        await recentEventKeys(db, since)
+      );
     }
 
     // Résumé dans les journaux Vercel, pour suivre chaque exécution.
