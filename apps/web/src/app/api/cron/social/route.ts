@@ -50,6 +50,12 @@ export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
   const step = params.get("step") ?? "all";
   const force = params.get("force") === "1";
+  // Rattrapage : ?step=start&since=2026-10-17
+  const sinceParam = params.get("since");
+  const since =
+    sinceParam && /^\d{4}-\d{2}-\d{2}$/.test(sinceParam)
+      ? sinceParam
+      : undefined;
   // Marge avant la limite de 300 s pour finir proprement le lot en cours.
   const deadline = Date.now() + 200_000;
 
@@ -61,6 +67,7 @@ export async function GET(request: NextRequest) {
       result.start = await startCollection(db, {
         today: todayInParis(),
         force,
+        since,
       });
     }
 

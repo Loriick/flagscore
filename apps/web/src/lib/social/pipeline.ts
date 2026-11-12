@@ -190,18 +190,27 @@ export interface StartResult {
 
 export async function startCollection(
   db: SupabaseClient,
-  { today, force = false }: { today: string; force?: boolean }
+  {
+    today,
+    force = false,
+    since: sinceOverride,
+  }: {
+    today: string;
+    force?: boolean;
+    /** Rattrapage : collecter les posts depuis cette date (YYYY-MM-DD). */
+    since?: string;
+  }
 ): Promise<StartResult> {
   const window = collectionWindow(today);
-  if (!window && !force) {
+  if (!window && !force && !sinceOverride) {
     return { started: false, reason: "Pas de journée de compétition récente" };
   }
-  const since = window?.since ?? addDays(today, -4);
+  const since = sinceOverride ?? window?.since ?? addDays(today, -4);
 
   const running = check(
     await db.from("social_runs").select("id").eq("status", "started")
   ) as Array<{ id: string }>;
-  if (running.length > 0 && !force) {
+  if (running.length > 0 && !force && !sinceOverride) {
     return {
       started: false,
       reason: `Collecte déjà en cours (${running[0].id})`,
@@ -213,7 +222,10 @@ export async function startCollection(
     return { started: false, reason: "Aucun compte Instagram à suivre" };
   }
 
-  const run = await startInstagramRun(accounts, since);
+  // Un rattrapage couvre plusieurs semaines : on remonte plus de posts.
+  const run = await startInstagramRun(accounts, since, {
+    resultsLimit: sinceOverride ? 40 : 20,
+  });
   check(
     await db
       .from("social_runs")
@@ -277,6 +289,12 @@ export async function collectFinishedRuns(db: SupabaseClient) {
   return { runs: runs.length, posts, failed, stillRunning: pending };
 }
 
+/** Un score dans un texte : « 18 - 0 », « 40:25 », « 07-42 ». */
+export const SCORE_PATTERN = /\b\d{1,3}\s*[-–:]\s*\d{1,3}\b/;
+
+/** Nombre maximal de visuels lus par post. */
+const MAX_IMAGES = 4;
+
 // --- 3. Lire les posts en attente ----------------------------------------------
 
 export interface ProcessOptions {
@@ -292,7 +310,7 @@ export async function processPendingPosts(
   db: SupabaseClient,
   {
     deadline,
-    concurrency = 3,
+    concurrency = 6,
     maxAttempts = 3,
     extract = extractPost,
     loadImage = fetchImage,
@@ -321,8 +339,29 @@ export async function processPendingPosts(
     await Promise.all(
       current.map(async post => {
         try {
+          // Vidéo sans score dans la légende : rien à lire, inutile d'appeler Claude.
+          if (
+            post.media_type === "Video" &&
+            !SCORE_PATTERN.test(post.caption ?? "")
+          ) {
+            check(
+              await db
+                .from("social_posts")
+                .update({
+                  status: "ignored",
+                  skipped_reason: "Vidéo sans score dans la légende",
+                  processed_at: new Date().toISOString(),
+                })
+                .eq("id", post.id)
+            );
+            stats.ignored++;
+            return;
+          }
+          // Les scores sont dans les premiers visuels d'un carrousel.
           const images = (
-            await Promise.allSettled(post.image_urls.map(u => loadImage(u)))
+            await Promise.allSettled(
+              post.image_urls.slice(0, MAX_IMAGES).map(u => loadImage(u))
+            )
           )
             .filter(
               (r): r is PromiseFulfilledResult<PostImage> =>

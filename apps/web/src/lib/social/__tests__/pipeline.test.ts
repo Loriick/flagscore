@@ -5,6 +5,7 @@ import type { Extraction } from "../extract";
 import { toObservations } from "../extract";
 import {
   followedAccounts,
+  SCORE_PATTERN,
   fromObservationRow,
   toObservationRow,
   toPostRow,
@@ -163,5 +164,20 @@ describe("chaîne complète sur le vrai post Flash (sans base de données)", () 
     expect(dragons.auto_apply).toBe(false);
     expect(rows.filter(r => r.auto_apply)).toHaveLength(5);
     expect(rows.every(r => !("review" in r))).toBe(true);
+  });
+});
+
+describe("repérage d'un score dans une légende", () => {
+  it("reconnaît les formats des clubs", () => {
+    expect(SCORE_PATTERN.test("Red 18 - 0 Nighthawks")).toBe(true);
+    expect(SCORE_PATTERN.test("V 40 : 25")).toBe(true);
+    expect(SCORE_PATTERN.test("Flash 07-42 Dragons")).toBe(true);
+  });
+
+  it("ignore une légende sans score", () => {
+    expect(SCORE_PATTERN.test("Les meilleures actions de la journée 🔥")).toBe(
+      false
+    );
+    expect(SCORE_PATTERN.test("GAMEDAY ROSTER · SAMEDI 07.11")).toBe(false);
   });
 });
