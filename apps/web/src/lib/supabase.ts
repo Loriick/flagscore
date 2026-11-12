@@ -329,6 +329,11 @@ export class SupabaseService {
     poolId: number
   ) {
     if (FAKE_DATA) return undefined as never;
+    // Si la FFFA n'a pas (encore) de score, on n'envoie pas les colonnes de
+    // score : l'upsert ne met à jour que les colonnes fournies, donc un score
+    // déjà connu (par exemple venu des réseaux sociaux) n'est pas effacé.
+    const hasScore =
+      fffaData.score_home !== null && fffaData.score_away !== null;
     const { data, error } = await supabase
       .from("matches")
       .upsert({
@@ -336,8 +341,9 @@ export class SupabaseService {
         pool_id: poolId,
         team_home: fffaData.team_home,
         team_away: fffaData.team_away,
-        score_home: fffaData.score_home,
-        score_away: fffaData.score_away,
+        ...(hasScore
+          ? { score_home: fffaData.score_home, score_away: fffaData.score_away }
+          : {}),
         match_date: fffaData.match_date,
         status: fffaData.status,
         updated_at: new Date().toISOString(),
