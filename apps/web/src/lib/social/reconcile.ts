@@ -82,14 +82,21 @@ export function reconcile(
       accounts.length >= 2 ? "confirmed" : "single_source";
     const maxConfidence = Math.max(...items.map(i => i.observation.confidence));
 
+    // Adversaire déduit par élimination, sans autre compte pour le confirmer.
+    const onlyInferred =
+      status === "single_source" && items.every(i => i.inferred);
+
     const autoApply =
-      status === "confirmed" || maxConfidence >= singleSourceThreshold;
+      !onlyInferred &&
+      (status === "confirmed" || maxConfidence >= singleSourceThreshold);
     const reason =
       status === "confirmed"
         ? `Confirmé par ${accounts.length} comptes`
-        : autoApply
-          ? `Source unique, confiance ${maxConfidence.toFixed(2)}`
-          : `Source unique, confiance ${maxConfidence.toFixed(2)} < ${singleSourceThreshold}`;
+        : onlyInferred
+          ? `Adversaire « ${first.observation.opponent} » déduit par élimination dans la poule : à valider`
+          : autoApply
+            ? `Source unique, confiance ${maxConfidence.toFixed(2)}`
+            : `Source unique, confiance ${maxConfidence.toFixed(2)} < ${singleSourceThreshold}`;
 
     // Ne jamais écraser un score officiel FFFA.
     const existing = first.matchId ? official.get(first.matchId) : undefined;

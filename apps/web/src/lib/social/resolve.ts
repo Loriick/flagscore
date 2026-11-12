@@ -66,12 +66,21 @@ export interface ResolvedObservation {
   scoreAway?: number;
   /** Paires encore possibles quand status === "ambiguous". */
   options?: Array<[string, string]>;
+  /**
+   * Vrai si l'adversaire n'a pas été reconnu par son nom mais déduit par
+   * élimination dans la poule (ex. « Dragons » → seule équipe restante).
+   * Le score ne doit alors pas être appliqué sans validation humaine.
+   */
+  inferred?: boolean;
 }
 
 export interface ResolveOptions {
   /** Matchs prévus (toutes dates confondues, filtrés ici par journée). */
   schedule?: ScheduledMatch[];
-  /** Nombre d'équipes par plateau. 4 en qualification (3 matchs chacune). */
+  /**
+   * Nombre d'équipes par plateau quand la poule est inconnue. Si la poule est
+   * connue, sa taille est utilisée.
+   */
   plateauSize?: number;
 }
 
@@ -92,6 +101,8 @@ interface Pending {
   obs: Observation;
   teamCands: string[];
   oppCands: string[];
+  /** Adversaire déduit de la poule faute d'avoir reconnu son nom. */
+  inferred: boolean;
   result?: ResolvedObservation;
 }
 
@@ -105,11 +116,22 @@ export function resolveObservations(
   directory: TeamDirectory,
   { schedule = [], plateauSize = 4 }: ResolveOptions = {}
 ): ResolvedObservation[] {
-  const pending: Pending[] = observations.map(obs => ({
-    obs,
-    teamCands: directory.candidates(obs.team, obs.account),
-    oppCands: directory.candidates(obs.opponent),
-  }));
+  const pending: Pending[] = observations.map(obs => {
+    const teamCands = directory.candidates(obs.team, obs.account);
+    let oppCands = directory.candidates(obs.opponent);
+    let inferred = false;
+    if (oppCands.length === 0) {
+      // Nom inconnu ("Dragons") : l'adversaire est forcément dans la poule.
+      oppCands = [...new Set(teamCands.flatMap(t => directory.poolMates(t)))];
+      inferred = oppCands.length > 0;
+    }
+    return { obs, teamCands, oppCands, inferred };
+  });
+
+  // Paires déjà attribuées dans chaque post : un post n'annonce pas deux fois
+  // le même match.
+  const postPairs = new Map<string, Set<string>>();
+  const pairKey = (a: string, b: string) => [a, b].sort().join("|");
 
   // Matchs prévus, regroupés par journée.
   const scheduleByEvent = new Map<string, ScheduledMatch[]>();
@@ -146,7 +168,10 @@ export function resolveObservations(
     other: string
   ) => {
     const opp = opponents.get(oppKey(event, team));
-    return !!opp && opp.size >= plateauSize - 1 && !opp.has(other);
+    const size = directory.poolOf(team)
+      ? directory.poolMates(team).length + 1
+      : plateauSize;
+    return !!opp && opp.size >= size - 1 && !opp.has(other);
   };
 
   const optionsFor = (p: Pending): Array<[string, string]> => {
@@ -155,6 +180,12 @@ export function resolveObservations(
     for (const a of p.teamCands) {
       for (const b of p.oppCands) {
         if (a === b) continue;
+        if (!directory.canPlay(a, b)) continue;
+        if (
+          p.oppCands.length > 1 &&
+          postPairs.get(p.obs.postId)?.has(pairKey(a, b))
+        )
+          continue;
         if (daySchedule.length > 0) {
           const scheduled = daySchedule.some(
             m =>
@@ -192,8 +223,11 @@ export function resolveObservations(
       away: teamIsHome ? opp : team,
       scoreHome: teamIsHome ? obs.teamScore : obs.opponentScore,
       scoreAway: teamIsHome ? obs.opponentScore : obs.teamScore,
+      ...(p.inferred ? { inferred: true } : {}),
     };
     addOpponent(obs.event, team, opp);
+    if (!postPairs.has(obs.postId)) postPairs.set(obs.postId, new Set());
+    postPairs.get(obs.postId)!.add(pairKey(team, opp));
   };
 
   // Passe 1 : ce qui est sans ambiguïté. Puis on recommence tant que la règle
