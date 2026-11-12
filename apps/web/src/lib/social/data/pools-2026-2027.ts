@@ -314,11 +314,123 @@ export const teamRef = (name: string, city: string) => `${name} (${city})`;
 export const clubName = (teamName: string) => teamName.replace(/\s+[A-C]$/, "");
 
 /**
- * Comptes Instagram connus, par club ("Nom (Ville)" sans la lettre d'équipe).
- * À compléter : seuls les comptes vérifiés sur des posts réels sont renseignés.
+ * Comptes Instagram suivis, par club (« Nom (Ville) » sans la lettre d'équipe).
+ *
+ * Trouvés le 12 novembre 2026 par une recherche Apify (profil dont le nom
+ * correspond au club et qui parle de football américain ou de flag), relus à
+ * la main ; les comptes marqués « confirmé » ont été donnés par l'utilisateur.
+ *
+ * Clubs sans compte trouvé (à compléter) :
+ * - Stade Poitevin (Poitiers)
+ * - Gavroches (Paris)
+ * - Mustangs (Izel-lès-Equerchin)
+ * - Phenix (Béthune)
+ * - Spectres (Sens)
+ * - Badgers (Léré)
+ * - Lions (Bordeaux)
+ * - Anges (Mont-de-Marsan)
+ * - FFCC (Voeuil-et-Giget)
+ * - Ours (Toulouse)
+ * - Hurricanes (Albi)
+ * - Golden Eagles (Fos-sur-Mer)
+ * - Black Panthers (Thonon-les-Bains)
+ * - Fontenaython (Fontenay-sous-Bois)
+ * - Libertys (Paris)
  */
 export const CLUB_INSTAGRAM: Record<string, string[]> = {
   "Flash (La Courneuve)": ["flashdelacourneuve"],
   // @molossesflagasnieres renvoie les mêmes posts : inutile de le suivre aussi.
   "Molosses (Asnières)": ["molossesasnieres"],
+  "AFC Carnutes (Chartres)": ["afc_carnutes"],
+  "Aigles (Chambéry)": ["aigleschambery"],
+  "Ankou (Rennes)": ["weareankou"],
+  "Arciers (Nevers)": ["arciersnevers"],
+  "Argonautes (Aix-en-Provence)": ["argonautesaix"],
+  "Artilleurs (Metz)": ["les_artilleurs"],
+  "Asgards (Evreux)": ["asgards.evreux"],
+  "Atlantes (Biarritz)": ["atlantescotebasque"],
+  "Avalanches (Annecy)": ["annecyavalanches"],
+  "Bisons (Besançon)": ["besanconbisons"],
+  "Blue Ravens (Saint-Paul-lès-Dax)": ["blueravenssps"],
+  "Blue Stars (Marseille)": ["bluestarsmarseille"],
+  "Caimans (Le Mans)": ["caimans_flag"], // confirmé
+  "Canonniers (Toulon)": ["canonniersdetoulon"],
+  "Capricornes (Templeuve)": ["capricornes.flag.football"], // confirmé
+  "Centaures (Grenoble)": ["centaures_grenoble"],
+  "Centurions (Nîmes)": ["centurions_nimes"],
+  "Chevaliers (Orléans)": ["chevaliersfootball"],
+  "Citizens (Alfortville)": ["citizens.football"],
+  "Cobras (Paris)": ["cobras_de_paris"],
+  "Conquérants (Caen)": ["conquerantsfootball"],
+  "Corsaires (Evry)": ["evrycorsaires"],
+  "Cougars (Saint-Ouen-l'Aumône)": ["cougars_football95"],
+  "Crazy Bees (Barentin)": ["sportsusbarentin"],
+  "Dauphins (Nice)": ["dauphins_de_nice"],
+  "Diables Rouges (Villepinte)": ["diablesrouges93"],
+  "Dockers (Nantes)": ["dockersdenantes"],
+  "Eagles (L'Aigle)": ["eaglesdelaigle"],
+  "Esox (Basse-Goulaine)": ["les_esox"],
+  "Falcons (Villeurbanne)": ["falconsvilleurbanne"],
+  "Fenris (Dijon)": ["fenrisdijon"],
+  "Flagmingos (Balma)": ["flagmingosflagfootball"],
+  "Fox (Chantilly)": ["foxdechantilly"],
+  "Giants (Saint-Etienne)": ["stegiants"],
+  "Gladiateurs (La Queue-en-Brie)": ["gladiateursfootus"],
+  "Gones (Lyon)": ["gones_footus"],
+  "Gorilla (Strasbourg)": ["gorilla.strasbourg"],
+  "Grands Ducs (Rodez)": ["grandsducsflagfootball"],
+  "Grizzlys Catalans (Perpignan)": ["grizzlys_association"],
+  "Guardians (Le Cannet)": ["guardians_le_cannet"],
+  "Hawks (Lons-le-Saunier)": ["hawks.jura"],
+  "Homies (Rosny-sous-Bois)": ["homiefootball_rsb"], // confirmé
+  "Hornets (Came)": ["hornetsdecame"],
+  "Hurricanes (Montpellier)": ["hurricanes_montpellier"],
+  "Iron Mask (Cannes)": ["flag.ironmaskcannes"],
+  "Jaguars (Châteauneuf-les-Martigues)": ["jaguarsfootus"],
+  "Juggernautes (Paris)": ["juggernautesparis"],
+  "Kangourous (Pessac)": ["kangourousdepessac"],
+  "Korrigans (Ploërmel)": ["korrigansdeploermel"],
+  "Leviathan (Rueil-Malmaison)": ["leviathanflagfootball"],
+  "Libérateurs (Colmar)": ["liberateurs_colmar"],
+  "Licornes (Saint-Brieuc)": ["licornes_st_brieuc"],
+  "Lions Flag (Châteauroux)": ["lions__flag"],
+  "Loups (Haumont)": ["loups.hautmont.flag.footus"],
+  "Lycans (Les Mureaux)": ["lycansdesmureaux"],
+  "Lynx (Auxerre)": ["lynxauxerre"],
+  "Léopards (Rouen)": ["leopards_rouen"],
+  "Mariners (Vannes)": ["mariners_de_vannes56"],
+  "Marne Soldiers (Meaux)": ["marne_soldiers"],
+  "Monarques (Saint-Denis)": ["sdusmonarques"],
+  "Mustangs (Hénin-Beaumont)": ["les_mustangs_henin_baumont"], // confirmé
+  "Myrmidons (Savigny-le-Temple)": ["myrmidonsfootball"],
+  "Météores (Fontenay-sous-Bois)": ["meteores.footus"],
+  "Nighthawks (Sartrouville)": ["nighthawks_football"],
+  "Ogres (Créteil)": ["les_ogres_94k"],
+  "Phenix (Limoges)": ["phenix_limoges"],
+  "Pionniers (Tours)": ["pionnersdetouraine"], // confirmé
+  "Princes (Montbéliard)": ["princesdemontbeliard"],
+  "Pygargues (Troyes)": ["pygargues"],
+  "Quarks (Longjumeau)": ["quarksfamily"],
+  "Reapers (Marsac-sur-l'Isle)": ["reapers_perigord"],
+  "Sabres (Châteauroux)": ["sabresdechtx"],
+  "Sailors (Décines)": ["les_sailors_du_grand_large"],
+  "Salamandres (Le Havre)": ["salamandres_lh"],
+  "Sangliers (Saint-Magne)": ["sangliers_stmagne"],
+  "Scorpions (Muret)": ["scorpionsmuret"],
+  "Sea Devils (La Rochelle)": ["seadevils_larochelle"],
+  "Seagulls (Calais)": ["seagulls_de_calais"],
+  "Servals (Clermont-Ferrand)": ["servals_clermont"],
+  "Spartiates (Amiens)": ["spartiatesfoot"],
+  "Sphinx (Pau)": ["sphinxdepau"],
+  "Stallions (Laval)": ["stallionsdelaval"],
+  "Templiers (Elancourt)": ["templiers_elancourt"],
+  "The Bridge (Saint-Nazaire)": ["thebridge.saintnazaire"],
+  "Tigres (Nancy)": ["tigresdenancy"],
+  "Vikings (Villeneuve-d'Ascq)": ["vikings_footus"],
+  "War Eagles (Teyran)": ["wareaglesfr"],
+  "Warriors (Narbonne)": ["warriorsnarbonne"],
+  "Wildcats (Reims)": ["wildcats_reims"],
+  "Wildcats (Saint-Jean-de-Védas)": ["wildcatsflagfootball34"],
+  "Wolfpack (Haguenau)": ["wolfpack_haguenau"],
+  "Yankees (Angers)": ["yankees_angers"],
 };

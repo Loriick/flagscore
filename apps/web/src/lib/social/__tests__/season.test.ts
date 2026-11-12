@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { CompetitionEvent } from "../calendar";
 import { CDF_POOLS_2026_2027 } from "../data/cdf-2026-2027";
-import { POOLS_2026_2027 } from "../data/pools-2026-2027";
+import { CLUB_INSTAGRAM, POOLS_2026_2027 } from "../data/pools-2026-2027";
 import { reconcile } from "../reconcile";
 import { resolveObservations, type Observation } from "../resolve";
 import {
@@ -271,5 +271,18 @@ describe("cas réels du 12 novembre (première exécution en production)", () =>
     }
     expect(pair(resolved[1])).toContain("Cougars B (Saint-Ouen-l'Aumône)");
     expect(pair(resolved[2])).toContain("Diables Rouges B (Villepinte)");
+  });
+});
+
+describe("comptes Instagram des clubs", () => {
+  it("chaque compte est rattaché à un club existant des poules", () => {
+    const clubs = new Set(listClubs().map(c => c.club));
+    const unknown = Object.keys(CLUB_INSTAGRAM).filter(c => !clubs.has(c));
+    expect(unknown).toEqual([]);
+  });
+
+  it("aucun compte n'est suivi deux fois", () => {
+    const handles = Object.values(CLUB_INSTAGRAM).flat();
+    expect(new Set(handles).size).toBe(handles.length);
   });
 });
