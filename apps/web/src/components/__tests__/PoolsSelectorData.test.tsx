@@ -4,6 +4,12 @@ import { describe, expect, it, vi } from "vitest";
 import { PoolsSelector } from "../PoolsSelector";
 
 // Mock hooks
+// La page lit les scores Instagram : même forme de données que l'ancienne source.
+vi.mock("../../hooks/useSocialResults", async () => ({
+  useSocialResults: (await import("../../hooks/useAppDataSupabase"))
+    .useAppDataSupabase,
+}));
+
 vi.mock("../../hooks/useAppDataSupabase", () => ({
   useAppDataSupabase: () => ({
     // State

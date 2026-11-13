@@ -8,11 +8,14 @@ import { ChampionshipSelector } from "../../components/ChampionshipSelector";
 import { RankingTable } from "../../components/organisms/RankingTable";
 import { PoolSelector } from "../../components/PoolSelector";
 import { SeasonSelector } from "../../components/SeasonSelector";
+import { useSocialResults } from "../../hooks/useSocialResults";
 import {
   useChampionshipsOptimized,
   usePoolsOptimized,
   useRankingsOptimized,
 } from "../../hooks/useSupabaseOptimized";
+
+import { FAKE_DATA } from "@/lib/fake-data";
 
 interface RankingRow {
   id: string;
@@ -38,9 +41,8 @@ const LEGEND: Array<[string, string, boolean]> = [
   ["Pts", "points au classement", false],
 ];
 
-const Rankings = () => {
-  const [seasons] = useState<number[]>([2026]);
-  const [currentSeason, setCurrentSeason] = useState<number>(2026);
+/** Ancienne source (données FFFA en base), gardée pour le mode démo. */
+function useLegacyRankings() {
   const [selectedChampionshipId, setSelectedChampionshipId] = useState(0);
   const [selectedPoolId, setSelectedPoolId] = useState(0);
 
@@ -85,7 +87,6 @@ const Rankings = () => {
 
   const effectivePoolId =
     selectedPoolId > 0 ? selectedPoolId : (pools[0]?.id ?? 0);
-  const selectedPool = pools.find(p => p.id === effectivePoolId);
 
   const {
     data: rankingsData,
@@ -133,6 +134,67 @@ const Rankings = () => {
     setSelectedPoolId(0);
   }, []);
 
+  return {
+    championships,
+    selectedChampionshipId: effectiveChampionshipId,
+    pools,
+    selectedPoolId: effectivePoolId,
+    rankings,
+    loading: {
+      championships: championshipsLoading,
+      pools: poolsLoading,
+      rankings: rankingsLoading,
+    },
+    handleChampionshipChange,
+    handlePoolChange: (id: string) => setSelectedPoolId(parseInt(id)),
+  };
+}
+
+/** Classements calculés à partir des scores relevés sur Instagram. */
+function useSocialRankings() {
+  const data = useSocialResults();
+  useEffect(() => {
+    if (data.errors.rankings) {
+      toast.error("Le classement n'a pas pu être chargé");
+    }
+  }, [data.errors.rankings]);
+  return {
+    championships: data.championships,
+    selectedChampionshipId: data.selectedChampionshipId,
+    pools: data.pools,
+    selectedPoolId: data.selectedPoolId,
+    rankings: data.rankings,
+    loading: {
+      championships: false,
+      pools: false,
+      rankings: data.loading.rankings,
+    },
+    handleChampionshipChange: data.handleChampionshipChange,
+    handlePoolChange: data.handlePoolChange,
+  };
+}
+
+const useRankingsData = FAKE_DATA ? useLegacyRankings : useSocialRankings;
+
+const Rankings = () => {
+  const [seasons] = useState<number[]>([2026]);
+  const [currentSeason, setCurrentSeason] = useState<number>(2026);
+  const {
+    championships,
+    selectedChampionshipId: effectiveChampionshipId,
+    pools,
+    selectedPoolId: effectivePoolId,
+    rankings,
+    loading: {
+      championships: championshipsLoading,
+      pools: poolsLoading,
+      rankings: rankingsLoading,
+    },
+    handleChampionshipChange,
+    handlePoolChange,
+  } = useRankingsData();
+  const selectedPool = pools.find(p => p.id === effectivePoolId);
+
   return (
     <div className="mx-auto max-w-6xl px-4 pt-5 sm:px-6 sm:pt-10">
       <h1 className="font-score mb-4 text-[2rem] leading-none font-black text-chalk sm:mb-6 sm:text-5xl">
@@ -151,7 +213,7 @@ const Rankings = () => {
         <PoolSelector
           pools={pools}
           selectedPoolId={effectivePoolId}
-          onPoolChange={id => setSelectedPoolId(parseInt(id))}
+          onPoolChange={handlePoolChange}
           loading={poolsLoading}
         />
         <SeasonSelector
@@ -210,8 +272,15 @@ const Rankings = () => {
           </dl>
           <p className="mt-4 hidden max-w-sm text-sm leading-relaxed text-stone lg:block">
             Le classement de la poule est mis à jour après chaque journée, à
-            partir des résultats publiés.
+            partir des scores publiés par les clubs sur Instagram. Victoire 3
+            points, nul 1, défaite 0.
           </p>
+          {!FAKE_DATA && (
+            <p className="mt-3 hidden max-w-sm text-sm leading-relaxed text-stone lg:block">
+              En championnat, le 1er de la poule se qualifie pour la D1 et le 2e
+              pour la D2.
+            </p>
+          )}
         </aside>
       </div>
     </div>

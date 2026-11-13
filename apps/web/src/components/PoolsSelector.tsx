@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 
 import { useAppDataSupabase } from "../hooks/useAppDataSupabase";
+import { useSocialResults } from "../hooks/useSocialResults";
 
 import { ChampionshipSelector } from "./ChampionshipSelector";
 import { DaysNavigation } from "./organisms/DaysNavigation";
@@ -13,6 +14,12 @@ import { OptimizedMatchesList } from "./organisms/OptimizedMatchesList";
 import { RankingTable } from "./organisms/RankingTable";
 import { PoolSelector } from "./PoolSelector";
 import { SeasonSelector } from "./SeasonSelector";
+
+import { FAKE_DATA } from "@/lib/fake-data";
+
+// Scores relevés sur Instagram ; les fausses données de démo gardent
+// l'ancienne source.
+const useResultsData = FAKE_DATA ? useAppDataSupabase : useSocialResults;
 
 const formatDay = (date: string) =>
   new Date(date).toLocaleDateString("fr-FR", {
@@ -51,7 +58,7 @@ export function PoolsSelector() {
     handleChampionshipChange,
     handlePoolChange,
     handleDayChange,
-  } = useAppDataSupabase();
+  } = useResultsData();
 
   // Erreurs de compétitions et de poules : notification, car elles bloquent
   // toute la page. Les erreurs de matchs s'affichent à leur place.
@@ -144,6 +151,13 @@ export function PoolsSelector() {
                   onRetry={() => window.location.reload()}
                   data-testid="matches-list"
                 />
+                {!FAKE_DATA && (
+                  <p className="mt-3 text-xs text-stone">
+                    Scores relevés sur les comptes Instagram des clubs. Un match
+                    peut manquer tant qu&apos;aucun des deux clubs ne l&apos;a
+                    publié.
+                  </p>
+                )}
               </>
             )}
           </section>

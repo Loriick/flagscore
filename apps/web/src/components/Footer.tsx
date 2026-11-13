@@ -47,7 +47,7 @@ export function Footer() {
             Sources
           </h2>
           <p className="text-sm leading-relaxed">
-            Calendrier, poules et résultats publiés par la{" "}
+            Calendrier et poules publiés par la{" "}
             <a
               href="https://www.fffa.org"
               target="_blank"
@@ -56,7 +56,7 @@ export function Footer() {
             >
               FFFA
             </a>
-            .
+            . Scores relevés sur les comptes Instagram des clubs.
           </p>
         </div>
       </div>

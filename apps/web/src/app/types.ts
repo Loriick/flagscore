@@ -33,6 +33,8 @@ export interface Match {
   team_a: { name: string; score: number | null; general_forfeit: boolean };
   team_b: { name: string; score: number | null; general_forfeit: boolean };
   sheet: string | null;
+  /** Comptes Instagram d'où vient le score, quand il a été relevé sur un post. */
+  sources?: string[];
 }
 
 export interface Ranking {
@@ -46,4 +48,6 @@ export interface Ranking {
   points_won: number;
   points_loss: number;
   points_diff: number;
+  /** Division visée par cette place, ex. « D1 » (championnat de qualification). */
+  qualification?: string;
 }

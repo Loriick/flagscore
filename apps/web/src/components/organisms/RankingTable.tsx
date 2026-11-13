@@ -127,6 +127,19 @@ export const RankingTable = memo(function RankingTable({
               className="font-score py-2.5 pr-3 text-left text-lg leading-tight font-bold text-chalk"
             >
               {r.club.label}
+              {r.qualification && (
+                <span
+                  title={`Place qualificative pour la ${r.qualification}`}
+                  className={cn(
+                    "font-sans ml-2 inline-block rounded-[3px] px-1.5 py-0.5 align-middle text-[0.6875rem] leading-none font-bold",
+                    r.qualification === "D1"
+                      ? "bg-flag text-ink"
+                      : "border border-flag text-flag"
+                  )}
+                >
+                  {r.qualification}
+                </span>
+              )}
             </th>
             <td className="py-2.5 text-right text-stone">{r.j}</td>
             <td className={cn("py-2.5 text-right text-stone", detail)}>
