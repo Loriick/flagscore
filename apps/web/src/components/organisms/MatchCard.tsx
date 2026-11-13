@@ -100,6 +100,24 @@ export const MatchCard = memo(function MatchCard({
           outcome={b}
         />
       </div>
+      {match.sources && match.sources.length > 0 && (
+        <p className="mt-2 text-xs text-stone">
+          {match.sources.length > 1 ? "Confirmé par " : "D'après "}
+          {match.sources.map((handle, i) => (
+            <span key={handle}>
+              {i > 0 && " et "}
+              <a
+                href={`https://www.instagram.com/${handle}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline decoration-line underline-offset-2 transition-colors hover:text-flag"
+              >
+                @{handle}
+              </a>
+            </span>
+          ))}
+        </p>
+      )}
     </li>
   );
 });
