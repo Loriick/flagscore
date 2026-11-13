@@ -89,7 +89,7 @@ const SYSTEM_PROMPT = `Tu lis des posts Instagram de clubs français de flag foo
 
 Le post est publié par le club indiqué. Pour chaque match terminé visible sur un visuel ou dans la légende :
 - "team" est l'équipe du club qui publie, avec sa désignation exacte quand le club en a plusieurs (A/B, Red/Black…).
-- "opponent" est l'adversaire. S'il n'apparaît que sous forme de logo, prends son nom dans la légende ; sinon décris-le au mieux (ex. "logo aigle") et baisse la confiance.
+- "opponent" est l'adversaire. S'il n'apparaît que sous forme de logo, prends son nom dans la légende. Sinon, cherche dans les poules du club (fournies avec le post) l'équipe dont le nom correspond au logo : les noms d'équipes sont des mascottes (logo de frelon → Hornets, de viking → Vikings, de loup → Wolves ou Loups). Si aucune ne correspond clairement, décris le logo (ex. "logo aigle") et baisse la confiance.
 - Les scores sont orientés du point de vue de "team" : team_score est le score de l'équipe du club.
 - Quand le club a plusieurs équipes et écrit seulement « Flash 00-43 Cougars » sous un titre de section (« Flash A »), reprends la désignation de la section : team = "Flash A". Garde les désignations par couleur telles quelles ("Red", "White", "Black").
 - Un post peut mélanger plusieurs compétitions : renseigne competition_text pour chaque match. national_senior vaut true seulement pour le Championnat de France (mixte) et la Coupe de France seniors ; false pour les jeunes (U7 à U18), les championnats régionaux (ex. « championnat IDF »), les tournois et les matchs amicaux.
@@ -114,6 +114,8 @@ export interface PostInput {
   images: PostImage[];
   /** Journées nationales qui viennent d'avoir lieu (voir recentEventsLabel). */
   context?: string | null;
+  /** Poules du club qui publie (voir clubPoolsLabel). */
+  pools?: string | null;
 }
 
 export class ExtractionError extends Error {}
@@ -136,6 +138,7 @@ export async function extractPost(
       `Compte qui publie : @${post.account.replace(/^@/, "")}`,
       `Publié le : ${post.postedAt.slice(0, 10)}`,
       `Journées nationales juste avant la publication : ${post.context ?? "aucune"}`,
+      `Poules du club (adversaires possibles) :\n${post.pools ?? "(inconnues)"}`,
       `Légende :\n${post.caption?.trim() || "(aucune)"}`,
     ].join("\n"),
   });
