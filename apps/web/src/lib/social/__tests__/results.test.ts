@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   displayTeamName,
+  publishedRows,
   socialDays,
   socialMatches,
   socialPools,
@@ -89,5 +90,26 @@ describe("résultats affichés à partir d'Instagram", () => {
   it("raccourcit les noms de référence", () => {
     expect(displayTeamName("Molosses B (Asnières) · Fém.")).toBe("Molosses B");
     expect(displayTeamName("Phenix (Béthune)")).toBe("Phenix");
+  });
+
+  it("applique les décisions de /admin/scores", () => {
+    const base = row(J1, "Ankou (Rennes)", "Mariners (Vannes)", 30, 12);
+    const out = publishedRows([
+      { ...base, auto_apply: true },
+      { ...base, match_key: "rejeté", auto_apply: true, review: "rejected" },
+      { ...base, match_key: "à vérifier", auto_apply: false },
+      {
+        ...base,
+        match_key: "corrigé",
+        auto_apply: false,
+        review: "approved",
+        review_score_home: 31,
+        review_score_away: 12,
+      },
+    ]);
+    expect(out.map(r => [r.match_key, r.score_home])).toEqual([
+      [base.match_key, 30],
+      ["corrigé", 31],
+    ]);
   });
 });

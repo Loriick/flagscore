@@ -5,7 +5,10 @@ import { defaultDayId } from "./useAppDataSupabase";
 import { useShareableUrl } from "./useShareableUrl";
 
 import {
+  PUBLISHED_FILTER,
+  publishedRows,
   SOCIAL_CHAMPIONSHIPS,
+  SOCIAL_MATCH_COLUMNS,
   SOCIAL_SEASON,
   socialDays,
   socialMatches,
@@ -15,16 +18,14 @@ import {
 } from "@/lib/social/results";
 import { supabase } from "@/lib/supabase";
 
-/** Scores retenus, toutes compétitions : quelques centaines de lignes. */
+/** Scores publiables, toutes compétitions : quelques centaines de lignes. */
 async function fetchSocialMatches(): Promise<SocialMatchRow[]> {
   const { data, error } = await supabase
     .from("social_matches")
-    .select(
-      "match_key, event_key, team_home, team_away, score_home, score_away, status, accounts"
-    )
-    .eq("auto_apply", true);
+    .select(SOCIAL_MATCH_COLUMNS)
+    .or(PUBLISHED_FILTER);
   if (error) throw new Error(error.message);
-  return (data ?? []) as SocialMatchRow[];
+  return publishedRows((data ?? []) as SocialMatchRow[]);
 }
 
 const firstId = (items: Array<{ id: number }>) => items[0]?.id ?? 0;
