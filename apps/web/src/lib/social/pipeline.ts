@@ -15,6 +15,7 @@ import {
   postAccount,
   postImageUrls,
   startInstagramRun,
+  startPostsRun,
   type ApifyPost,
 } from "./apify";
 import {
@@ -40,7 +41,7 @@ import {
   type ResolvedObservation,
 } from "./resolve";
 import { collectionWindow } from "./schedule";
-import { buildSeasonDirectory } from "./season";
+import { buildSeasonDirectory, clubPoolsLabel } from "./season";
 import type { TeamDirectory } from "./teams";
 
 // --- Lignes de base de données ----------------------------------------------
@@ -289,6 +290,75 @@ export async function collectFinishedRuns(db: SupabaseClient) {
   return { runs: runs.length, posts, failed, stillRunning: pending };
 }
 
+// --- 2 bis. Relire les posts mal rapprochés -----------------------------------
+
+/**
+ * Remet en lecture les posts dont un score n'a pas pu être rattaché à un match
+ * (adversaire montré par un logo, nom inconnu…), après une amélioration de la
+ * lecture. Les liens d'images Instagram expirent : les posts sont d'abord
+ * re-récupérés avec Apify, puis remis « en attente » ; l'étape process les
+ * relit et le rapprochement est refait.
+ */
+export async function rereadUnresolvedPosts(
+  db: SupabaseClient,
+  { deadline, limit = 80 }: { deadline: number; limit?: number }
+) {
+  const rows = check(
+    await db
+      .from("score_observations")
+      .select("post_id")
+      .in("resolution", ["ambiguous", "unmatched"])
+  ) as Array<{ post_id: string }>;
+  const postIds = [...new Set(rows.map(r => r.post_id))].slice(0, limit);
+  if (postIds.length === 0) return { posts: 0, refreshed: 0 };
+
+  const posts = check(
+    await db.from("social_posts").select("id, permalink").in("id", postIds)
+  ) as Array<{ id: string; permalink: string }>;
+
+  let run = await startPostsRun(posts.map(p => p.permalink));
+  while (!["SUCCEEDED", ...FINISHED_FAILED].includes(run.status)) {
+    if (Date.now() > deadline) {
+      return {
+        posts: posts.length,
+        refreshed: 0,
+        message: "Collecte Apify trop longue : relancer l'étape reread",
+      };
+    }
+    await new Promise(r => setTimeout(r, 5_000));
+    run = await getRun(run.id);
+  }
+  if (run.status !== "SUCCEEDED") {
+    throw new Error(`Collecte Apify échouée (${run.status})`);
+  }
+
+  const fresh = new Map(
+    (await getRunPosts(run.defaultDatasetId)).map(p => [p.id, postImageUrls(p)])
+  );
+  let refreshed = 0;
+  for (const post of posts) {
+    const images = fresh.get(post.id);
+    if (!images) continue;
+    check(await db.from("score_observations").delete().eq("post_id", post.id));
+    check(
+      await db
+        .from("social_posts")
+        .update({
+          image_urls: images,
+          status: "pending",
+          attempts: 0,
+          extraction: null,
+          error: null,
+          skipped_reason: null,
+          processed_at: null,
+        })
+        .eq("id", post.id)
+    );
+    refreshed++;
+  }
+  return { posts: posts.length, refreshed };
+}
+
 /** Un score dans un texte : « 18 - 0 », « 40:25 », « 07-42 ». */
 export const SCORE_PATTERN = /\b\d{1,3}\s*[-–:]\s*\d{1,3}\b/;
 
@@ -378,6 +448,7 @@ export async function processPendingPosts(
             postedAt: post.posted_at,
             images,
             context: recentEventsLabel(post.posted_at.slice(0, 10)),
+            pools: clubPoolsLabel(post.account),
           });
           const { event, observations, skipped } = toObservations(
             post.id,

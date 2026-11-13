@@ -5,6 +5,7 @@ import {
   processPendingPosts,
   recentEventKeys,
   reconcileEvents,
+  rereadUnresolvedPosts,
   startCollection,
 } from "@/lib/social/pipeline";
 import { todayInParis } from "@/lib/social/schedule";
@@ -21,6 +22,8 @@ export const maxDuration = 300;
  *                 une journée de compétition (sauf si &force=1)
  *  ?step=process  récupère les collectes terminées, lit les posts en attente
  *                 avec Claude, rapproche et enregistre les scores
+ *  ?step=reread  re-récupère les posts dont un score n'a pas été rattaché à
+ *                 un match et les remet en lecture (suivre avec process)
  *  ?step=reconcile  relance seulement le rapprochement des 30 derniers jours
  *                 (après une correction des alias ou des règles)
  *  (sans step)    start puis process
@@ -76,6 +79,10 @@ export async function GET(request: NextRequest) {
       const processed = await processPendingPosts(db, { deadline });
       result.process = processed;
       result.reconcile = await reconcileEvents(db, processed.events);
+    }
+
+    if (step === "reread") {
+      result.reread = await rereadUnresolvedPosts(db, { deadline });
     }
 
     if (step === "reconcile") {

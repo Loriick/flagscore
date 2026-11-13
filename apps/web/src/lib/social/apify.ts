@@ -110,6 +110,20 @@ export async function startInstagramRun(
   return data;
 }
 
+/** Re-récupère des posts précis (liens d'images neufs) à partir de leur lien. */
+export async function startPostsRun(permalinks: string[]): Promise<ApifyRun> {
+  const { data } = await call<{ data: ApifyRun }>(`/acts/${ACTOR}/runs`, {
+    method: "POST",
+    body: JSON.stringify({
+      resultsType: "posts",
+      directUrls: permalinks,
+      resultsLimit: 1,
+      addParentData: false,
+    }),
+  });
+  return data;
+}
+
 export async function getRun(runId: string): Promise<ApifyRun> {
   const { data } = await call<{ data: ApifyRun }>(`/actor-runs/${runId}`);
   return data;

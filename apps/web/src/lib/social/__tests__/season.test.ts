@@ -8,6 +8,7 @@ import { resolveObservations, type Observation } from "../resolve";
 import {
   buildSeasonDirectories,
   buildSeasonDirectory,
+  clubPoolsLabel,
   listClubs,
 } from "../season";
 
@@ -284,5 +285,24 @@ describe("comptes Instagram des clubs", () => {
   it("aucun compte n'est suivi deux fois", () => {
     const handles = Object.values(CLUB_INSTAGRAM).flat();
     expect(new Set(handles).size).toBe(handles.length);
+  });
+});
+
+describe("poules données à Claude pour nommer un adversaire en logo", () => {
+  it("liste les adversaires du club qui publie, par compétition", () => {
+    const label = clubPoolsLabel("@HornetsDeCame")!;
+    expect(label).toContain(
+      "Championnat de France mixte, poule Sud - NAQ Sud : Hornets (Came) contre Sphinx (Pau)"
+    );
+  });
+
+  it("couvre les Coupes de France masculine et féminine", () => {
+    const label = clubPoolsLabel("molossesasnieres")!;
+    expect(label).toContain("Coupe de France masculin, poule Nord - Poule 5");
+    expect(label).toContain("Coupe de France féminin, poule Nord - Poule 3");
+  });
+
+  it("ne renvoie rien pour un compte inconnu", () => {
+    expect(clubPoolsLabel("inconnu")).toBeNull();
   });
 });

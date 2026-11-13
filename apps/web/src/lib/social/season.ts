@@ -109,3 +109,53 @@ export function listClubs(pools = ALL_POOLS_2026_2027) {
   }
   return [...clubs.values()];
 }
+
+const COMPETITION_LABEL: Record<Competition, string> = {
+  CM: "Championnat de France mixte",
+  CDF: "Coupe de France",
+};
+
+/**
+ * Poules du club qui publie, pour aider Claude à nommer un adversaire montré
+ * seulement par son logo (logo de frelon → Hornets).
+ *
+ * Ex. « Championnat de France mixte, poule Nord - IDF Centre : Molosses A
+ * (Asnières) contre Flash A (La Courneuve), Cougars B (Sarcelles)… »
+ */
+export function clubPoolsLabel(
+  account: string,
+  {
+    pools = ALL_POOLS_2026_2027,
+    instagram = CLUB_INSTAGRAM,
+  }: Pick<DirectoryOptions, "pools" | "instagram"> = {}
+): string | null {
+  const handle = account.replace(/^@/, "").toLowerCase();
+  const clubs = new Set(
+    Object.entries(instagram)
+      .filter(([, handles]) =>
+        handles.some(h => h.replace(/^@/, "").toLowerCase() === handle)
+      )
+      .map(([club]) => club)
+  );
+  if (clubs.size === 0) return null;
+
+  const lines = pools.flatMap(p => {
+    const own = p.teams.filter(([name, city]) =>
+      clubs.has(clubKey(name, city))
+    );
+    if (own.length === 0) return [];
+    const others = p.teams
+      .filter(t => !own.includes(t))
+      .map(([name, city]) => teamRef(name, city));
+    const category =
+      p.category && p.category !== "Mixte"
+        ? ` ${p.category.toLowerCase()}`
+        : "";
+    return [
+      `- ${COMPETITION_LABEL[competitionOf(p)]}${category}, poule ${p.conference} - ${p.pool.replace(/^(Masc\.|Fém\.)\s+(Nord|Sud)\s+-\s+/, "")} : ${own
+        .map(([name, city]) => teamRef(name, city))
+        .join(", ")} contre ${others.join(", ")}`,
+    ];
+  });
+  return lines.length > 0 ? lines.join("\n") : null;
+}
