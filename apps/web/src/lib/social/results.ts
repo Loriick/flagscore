@@ -3,9 +3,11 @@
  * (table `social_matches`), rangés selon les poules et le calendrier de la
  * saison 2026-2027.
  *
- * Seuls les scores retenus automatiquement (`auto_apply`) sont affichés :
- * confirmés par les deux clubs, ou publiés par un seul club et rapprochés
- * sans doute possible. Les scores à vérifier et les conflits restent cachés.
+ * Scores affichés (voir `publishedRows`) :
+ *  - ceux retenus automatiquement (`auto_apply`) : confirmés par les deux
+ *    clubs, ou publiés par un seul club et rapprochés sans doute possible ;
+ *  - ceux validés à la main sur /admin/scores, avec la correction éventuelle.
+ * Les scores rejetés, à vérifier ou en conflit restent cachés.
  */
 
 import { SEASON_2026_2027, type Competition } from "./calendar";
@@ -24,6 +26,36 @@ export interface SocialMatchRow {
   score_away: number;
   status: string;
   accounts: string[] | null;
+  auto_apply?: boolean;
+  review?: "approved" | "rejected" | null;
+  review_score_home?: number | null;
+  review_score_away?: number | null;
+}
+
+/** Colonnes à lire pour l'affichage. */
+export const SOCIAL_MATCH_COLUMNS =
+  "match_key, event_key, team_home, team_away, score_home, score_away, status, accounts, auto_apply, review, review_score_home, review_score_away";
+
+/**
+ * Filtre Supabase (`.or(...)`) des lignes publiables : retenues
+ * automatiquement et pas rejetées, ou validées à la main.
+ */
+export const PUBLISHED_FILTER =
+  "and(auto_apply.eq.true,review.is.null),review.eq.approved";
+
+/** Lignes à afficher, avec la correction manuelle appliquée. */
+export function publishedRows(rows: SocialMatchRow[]): SocialMatchRow[] {
+  return rows.flatMap(row => {
+    if (row.review === "rejected") return [];
+    if (row.review !== "approved" && row.auto_apply === false) return [];
+    return [
+      {
+        ...row,
+        score_home: row.review_score_home ?? row.score_home,
+        score_away: row.review_score_away ?? row.score_away,
+      },
+    ];
+  });
 }
 
 export const SOCIAL_SEASON = 2026;
