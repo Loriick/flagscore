@@ -34,12 +34,6 @@
       "timezone": "Europe/Paris",
       "path": "/api/cron/social?step=reconcile",
       "requestMethod": "GET"
-    },
-    "social-backfill": {
-      "schedule": "0 4 1 1 *",
-      "timezone": "Europe/Paris",
-      "path": "/api/cron/social?step=start&since=2026-10-17",
-      "requestMethod": "GET"
     }
   }
 }
