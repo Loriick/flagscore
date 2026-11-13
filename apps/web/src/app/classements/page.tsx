@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { Ranking } from "../../app/types";
@@ -176,7 +176,7 @@ function useSocialRankings() {
 
 const useRankingsData = FAKE_DATA ? useLegacyRankings : useSocialRankings;
 
-const Rankings = () => {
+const RankingsContent = () => {
   const [seasons] = useState<number[]>([2026]);
   const [currentSeason, setCurrentSeason] = useState<number>(2026);
   const {
@@ -287,6 +287,22 @@ const Rankings = () => {
   );
 };
 
-export const dynamic = "force-dynamic";
+// La sélection est lue dans l'URL (useSearchParams) : rendu côté client.
+const Rankings = () => (
+  <Suspense
+    fallback={
+      <div className="mx-auto max-w-6xl px-4 pt-5 sm:px-6 sm:pt-10">
+        <h1 className="font-score mb-4 text-[2rem] leading-none font-black text-chalk sm:mb-6 sm:text-5xl">
+          Classements
+        </h1>
+        <p className="border-y border-line py-10 text-sm text-stone">
+          Chargement…
+        </p>
+      </div>
+    }
+  >
+    <RankingsContent />
+  </Suspense>
+);
 
 export default Rankings;
