@@ -19,7 +19,7 @@ import {
 import { supabase } from "@/lib/supabase";
 
 /** Scores publiables, toutes compétitions : quelques centaines de lignes. */
-async function fetchSocialMatches(): Promise<SocialMatchRow[]> {
+export async function fetchSocialMatches(): Promise<SocialMatchRow[]> {
   const { data, error } = await supabase
     .from("social_matches")
     .select(SOCIAL_MATCH_COLUMNS)

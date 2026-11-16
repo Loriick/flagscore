@@ -4,17 +4,20 @@ import { ExternalLink } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { AddMatch } from "./AddMatch";
+
 import { cn } from "@/lib/utils";
 
 /** Mot de passe gardé le temps de l'onglet. */
 const STORAGE_KEY = "flagscore-admin-secret";
 
-type View = "pending" | "published" | "reviewed";
+type View = "pending" | "published" | "reviewed" | "add";
 
 const VIEWS: Array<[View, string]> = [
   ["pending", "À vérifier"],
   ["published", "Publiés"],
   ["reviewed", "Décidés"],
+  ["add", "Ajouter"],
 ];
 
 interface Evidence {
@@ -311,7 +314,7 @@ export default function AdminScoresPage() {
   );
 
   useEffect(() => {
-    if (!secret) return;
+    if (!secret || view === "add") return;
     setLoading(true);
     setError(null);
     api(undefined, `?view=${view}`)
@@ -444,14 +447,20 @@ export default function AdminScoresPage() {
       </div>
 
       <p className="mt-4 text-sm text-stone">
-        {view === "pending"
-          ? "Scores pas affichés sur le site : une seule source peu sûre, ou deux clubs qui ne publient pas le même score. Validez (en corrigeant si besoin) ou rejetez."
-          : view === "published"
-            ? "Scores affichés automatiquement. Corrigez-en un ou retirez-le du site s'il est faux."
-            : "Décisions déjà prises. Elles ne sont jamais écrasées par la collecte."}
+        {view === "add"
+          ? "Pour un match dont vous connaissez le score par un autre moyen (feuille de match, message d'un club…). Il apparaît sur le site dans les minutes qui suivent."
+          : view === "pending"
+            ? "Scores pas affichés sur le site : une seule source peu sûre, ou deux clubs qui ne publient pas le même score. Validez (en corrigeant si besoin) ou rejetez."
+            : view === "published"
+              ? "Scores affichés automatiquement. Corrigez-en un ou retirez-le du site s'il est faux."
+              : "Décisions déjà prises. Elles ne sont jamais écrasées par la collecte."}
       </p>
 
-      {error ? (
+      {view === "add" ? (
+        <AddMatch
+          submit={body => api({ method: "POST", body: JSON.stringify(body) })}
+        />
+      ) : error ? (
         <p className="border-y border-line py-10 text-sm text-stone">
           Les scores n&apos;ont pas pu être chargés : {error}
         </p>
