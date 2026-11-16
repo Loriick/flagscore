@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   displayTeamName,
+  manualMatchRow,
+  socialPoolTeams,
   publishedRows,
   socialDays,
   socialMatches,
@@ -111,5 +113,41 @@ describe("résultats affichés à partir d'Instagram", () => {
       [base.match_key, 30],
       ["corrigé", 31],
     ]);
+  });
+
+  it("prépare un match saisi à la main avec la même clé que le pipeline", () => {
+    const row = manualMatchRow({
+      poolId: bre.id,
+      dayId: 20261107,
+      teamA: "Mariners (Vannes)",
+      teamB: "Ankou (Rennes)",
+      scoreA: 14,
+      scoreB: 20,
+    })!;
+    expect(row).toMatchObject({
+      match_key: "CM|Q - J2|2026-11-07|Ankou (Rennes)|Mariners (Vannes)",
+      team_home: "Ankou (Rennes)",
+      review: "approved",
+      review_score_home: 20,
+      review_score_away: 14,
+    });
+    expect(socialPoolTeams(bre.id).map(t => t.label)).toContain("Korrigans");
+    // Équipe d'une autre poule, journée inconnue : refusé.
+    const base = { poolId: bre.id, dayId: 20261107, scoreA: 1, scoreB: 0 };
+    expect(
+      manualMatchRow({
+        ...base,
+        teamA: "Ankou (Rennes)",
+        teamB: "Esox (Basse-Goulaine)",
+      })
+    ).toBeNull();
+    expect(
+      manualMatchRow({
+        ...base,
+        dayId: 1,
+        teamA: "Ankou (Rennes)",
+        teamB: "Mariners (Vannes)",
+      })
+    ).toBeNull();
   });
 });

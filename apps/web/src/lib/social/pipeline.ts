@@ -301,14 +301,39 @@ export async function collectFinishedRuns(db: SupabaseClient) {
  */
 export async function rereadUnresolvedPosts(
   db: SupabaseClient,
-  { deadline, limit = 80 }: { deadline: number; limit?: number }
+  {
+    deadline,
+    limit = 60,
+    what = "unresolved",
+  }: {
+    deadline: number;
+    limit?: number;
+    /**
+     * unresolved : posts dont un score n'a pas été rattaché à un match ;
+     * videos : vidéos écartées sans lecture (avant que Claude lise leur
+     * miniature).
+     */
+    what?: "unresolved" | "videos";
+  }
 ) {
-  const rows = check(
-    await db
-      .from("score_observations")
-      .select("post_id")
-      .in("resolution", ["ambiguous", "unmatched"])
-  ) as Array<{ post_id: string }>;
+  const rows =
+    what === "videos"
+      ? (
+          check(
+            await db
+              .from("social_posts")
+              .select("id")
+              .eq("status", "ignored")
+              .eq("skipped_reason", "Vidéo sans score dans la légende")
+              .limit(limit)
+          ) as Array<{ id: string }>
+        ).map(r => ({ post_id: r.id }))
+      : (check(
+          await db
+            .from("score_observations")
+            .select("post_id")
+            .in("resolution", ["ambiguous", "unmatched"])
+        ) as Array<{ post_id: string }>);
   const postIds = [...new Set(rows.map(r => r.post_id))].slice(0, limit);
   if (postIds.length === 0) return { posts: 0, refreshed: 0 };
 
@@ -359,9 +384,6 @@ export async function rereadUnresolvedPosts(
   return { posts: posts.length, refreshed };
 }
 
-/** Un score dans un texte : « 18 - 0 », « 40:25 », « 07-42 ». */
-export const SCORE_PATTERN = /\b\d{1,3}\s*[-–:]\s*\d{1,3}\b/;
-
 /** Nombre maximal de visuels lus par post. */
 const MAX_IMAGES = 4;
 
@@ -409,24 +431,8 @@ export async function processPendingPosts(
     await Promise.all(
       current.map(async post => {
         try {
-          // Vidéo sans score dans la légende : rien à lire, inutile d'appeler Claude.
-          if (
-            post.media_type === "Video" &&
-            !SCORE_PATTERN.test(post.caption ?? "")
-          ) {
-            check(
-              await db
-                .from("social_posts")
-                .update({
-                  status: "ignored",
-                  skipped_reason: "Vidéo sans score dans la légende",
-                  processed_at: new Date().toISOString(),
-                })
-                .eq("id", post.id)
-            );
-            stats.ignored++;
-            return;
-          }
+          // Vidéo : Claude lit sa miniature et sa légende (le score est souvent
+          // affiché sur la couverture d'un Reel).
           // Les scores sont dans les premiers visuels d'un carrousel.
           const images = (
             await Promise.allSettled(

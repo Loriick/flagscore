@@ -176,6 +176,71 @@ function poolTeamRefs(def: PoolDefinition): Set<string> {
   return new Set(def.teams.map(([name, city]) => poolTeamRef(def, name, city)));
 }
 
+/** Équipes d'une poule : nom de référence et nom affiché. */
+export function socialPoolTeams(pid: number) {
+  const pool = findPool(pid);
+  if (!pool) return [];
+  return [...poolTeamRefs(pool.def)].map(ref => ({
+    ref,
+    label: displayTeamName(ref),
+  }));
+}
+
+/**
+ * Ligne `social_matches` pour un match saisi à la main sur /admin/scores
+ * (score connu par un autre moyen qu'Instagram). Même clé que celle du
+ * pipeline : si un post publie ce match plus tard, il complète la même ligne
+ * sans écraser la saisie (stockée comme une décision humaine).
+ * Renvoie null si la poule, la journée ou les équipes ne correspondent pas.
+ */
+export function manualMatchRow(input: {
+  poolId: number;
+  dayId: number;
+  teamA: string;
+  teamB: string;
+  scoreA: number;
+  scoreB: number;
+}) {
+  const pool = findPool(input.poolId);
+  if (!pool || input.teamA === input.teamB) return null;
+  const teams = poolTeamRefs(pool.def);
+  if (!teams.has(input.teamA) || !teams.has(input.teamB)) return null;
+  const event = qualificationEvents(pool.champ.competition).find(
+    e => dayId(e.start) === input.dayId
+  );
+  if (!event) return null;
+
+  // Orientation du pipeline : ordre alphabétique des noms de référence.
+  const aIsHome = [input.teamA, input.teamB].sort()[0] === input.teamA;
+  const [home, away] = aIsHome
+    ? [input.teamA, input.teamB]
+    : [input.teamB, input.teamA];
+  const [scoreHome, scoreAway] = aIsHome
+    ? [input.scoreA, input.scoreB]
+    : [input.scoreB, input.scoreA];
+
+  return {
+    match_key: `${eventKey(event)}|${home}|${away}`,
+    event_key: eventKey(event),
+    competition: event.competition,
+    stage: event.stage,
+    event_start: event.start,
+    event_end: event.end,
+    team_home: home,
+    team_away: away,
+    score_home: scoreHome,
+    score_away: scoreAway,
+    status: "single_source",
+    auto_apply: false,
+    review: "approved",
+    review_score_home: scoreHome,
+    review_score_away: scoreAway,
+    reason: "Saisi à la main",
+    accounts: [] as string[],
+    observation_ids: [] as string[],
+  };
+}
+
 /** Scores de la poule, toutes journées, avec leur journée. */
 function poolRows(rows: SocialMatchRow[], pid: number) {
   const pool = findPool(pid);

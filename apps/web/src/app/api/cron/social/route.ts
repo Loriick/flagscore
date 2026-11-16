@@ -23,7 +23,8 @@ export const maxDuration = 300;
  *  ?step=process  récupère les collectes terminées, lit les posts en attente
  *                 avec Claude, rapproche et enregistre les scores
  *  ?step=reread  re-récupère les posts dont un score n'a pas été rattaché à
- *                 un match et les remet en lecture (suivre avec process)
+ *                 un match et les remet en lecture (suivre avec process) ;
+ *                 &what=videos : les vidéos écartées sans lecture (60 par appel)
  *  ?step=reconcile  relance seulement le rapprochement des 30 derniers jours
  *                 (après une correction des alias ou des règles)
  *  (sans step)    start puis process
@@ -82,7 +83,10 @@ export async function GET(request: NextRequest) {
     }
 
     if (step === "reread") {
-      result.reread = await rereadUnresolvedPosts(db, { deadline });
+      result.reread = await rereadUnresolvedPosts(db, {
+        deadline,
+        what: params.get("what") === "videos" ? "videos" : "unresolved",
+      });
     }
 
     if (step === "reconcile") {

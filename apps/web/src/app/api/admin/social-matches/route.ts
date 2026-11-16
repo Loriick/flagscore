@@ -3,6 +3,7 @@ import { timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 import { CLUB_INSTAGRAM, clubName } from "@/lib/social/data/pools-2026-2027";
+import { manualMatchRow } from "@/lib/social/results";
 import { normalizeHandle } from "@/lib/social/teams";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
@@ -169,7 +170,16 @@ export async function POST(request: NextRequest) {
     action?: unknown;
     score_home?: unknown;
     score_away?: unknown;
+    pool_id?: unknown;
+    day_id?: unknown;
+    team_a?: unknown;
+    team_b?: unknown;
+    score_a?: unknown;
+    score_b?: unknown;
   } | null;
+
+  if (body?.action === "create") return createMatch(body);
+
   const matchKey = typeof body?.match_key === "string" ? body.match_key : "";
   const action = body?.action;
   if (!matchKey || !["approve", "reject", "reset"].includes(String(action))) {
@@ -202,6 +212,19 @@ export async function POST(request: NextRequest) {
     update = { review: null, review_score_home: null, review_score_away: null };
   }
 
+  // Annuler un match saisi à la main : il n'a pas d'autre source, on le
+  // supprime.
+  if (action === "reset") {
+    const { data: manual } = await getSupabaseAdmin()
+      .from("social_matches")
+      .delete()
+      .eq("match_key", matchKey)
+      .eq("reason", MANUAL_REASON)
+      .eq("observation_ids", "{}")
+      .select("match_key");
+    if (manual?.length) return NextResponse.json({ ok: true });
+  }
+
   const { data, error } = await getSupabaseAdmin()
     .from("social_matches")
     .update({ ...update, reviewed_at: action === "reset" ? null : new Date() })
@@ -220,4 +243,66 @@ export async function POST(request: NextRequest) {
     );
   }
   return NextResponse.json({ ok: true });
+}
+
+const MANUAL_REASON = "Saisi à la main";
+
+/** Ajoute un match dont le score est connu par un autre moyen qu'Instagram. */
+async function createMatch(body: Record<string, unknown>) {
+  if (!isScore(body.score_a) || !isScore(body.score_b)) {
+    return NextResponse.json(
+      { ok: false, message: "Scores invalides" },
+      { status: 400 }
+    );
+  }
+  const row = manualMatchRow({
+    poolId: Number(body.pool_id),
+    dayId: Number(body.day_id),
+    teamA: String(body.team_a ?? ""),
+    teamB: String(body.team_b ?? ""),
+    scoreA: body.score_a,
+    scoreB: body.score_b,
+  });
+  if (!row) {
+    return NextResponse.json(
+      { ok: false, message: "Poule, journée ou équipes invalides" },
+      { status: 400 }
+    );
+  }
+
+  const db = getSupabaseAdmin();
+  const reviewedAt = new Date().toISOString();
+  const { data: existing, error: readError } = await db
+    .from("social_matches")
+    .select("match_key")
+    .eq("match_key", row.match_key);
+  if (readError) {
+    return NextResponse.json(
+      { ok: false, message: readError.message },
+      { status: 500 }
+    );
+  }
+
+  // Match déjà vu sur Instagram : on garde ses sources et on enregistre la
+  // saisie comme une décision.
+  const { error } = existing?.length
+    ? await db
+        .from("social_matches")
+        .update({
+          review: "approved",
+          review_score_home: row.review_score_home,
+          review_score_away: row.review_score_away,
+          reviewed_at: reviewedAt,
+        })
+        .eq("match_key", row.match_key)
+    : await db
+        .from("social_matches")
+        .insert({ ...row, reviewed_at: reviewedAt });
+  if (error) {
+    return NextResponse.json(
+      { ok: false, message: error.message },
+      { status: 500 }
+    );
+  }
+  return NextResponse.json({ ok: true, updated: !!existing?.length });
 }
