@@ -34,18 +34,6 @@
       "timezone": "Europe/Paris",
       "path": "/api/cron/social?step=reconcile",
       "requestMethod": "GET"
-    },
-    "social-reread": {
-      "schedule": "0 4 1 1 *",
-      "timezone": "Europe/Paris",
-      "path": "/api/cron/social?step=reread",
-      "requestMethod": "GET"
-    },
-    "social-reread-videos": {
-      "schedule": "0 4 1 1 *",
-      "timezone": "Europe/Paris",
-      "path": "/api/cron/social?step=reread&what=videos",
-      "requestMethod": "GET"
     }
   }
 }
