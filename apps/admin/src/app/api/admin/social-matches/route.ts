@@ -11,6 +11,12 @@ import {
   publishedRows,
   SOCIAL_MATCH_COLUMNS,
 } from "@flagscore/core/social/results";
+import {
+  addManualMatch,
+  reviewMatch,
+  type ReviewAction,
+  type ReviewOutcome,
+} from "@flagscore/core/social/review";
 import { normalizeHandle } from "@flagscore/core/social/teams";
 import { getSupabaseAdmin } from "@flagscore/core/supabase-admin";
 
@@ -195,64 +201,39 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
-
-  let update: Record<string, unknown>;
-  if (action === "approve") {
-    if (!isScore(body?.score_home) || !isScore(body?.score_away)) {
-      return NextResponse.json(
-        { ok: false, message: "Scores invalides" },
-        { status: 400 }
-      );
-    }
-    update = {
-      review: "approved",
-      review_score_home: body.score_home,
-      review_score_away: body.score_away,
-    };
-  } else if (action === "reject") {
-    update = {
-      review: "rejected",
-      review_score_home: null,
-      review_score_away: null,
-    };
-  } else {
-    update = { review: null, review_score_home: null, review_score_away: null };
-  }
-
-  // Annuler un match saisi à la main : il n'a pas d'autre source, on le
-  // supprime.
-  if (action === "reset") {
-    const { data: manual } = await getSupabaseAdmin()
-      .from("social_matches")
-      .delete()
-      .eq("match_key", matchKey)
-      .eq("reason", MANUAL_REASON)
-      .eq("observation_ids", "{}")
-      .select("match_key");
-    if (manual?.length) return NextResponse.json({ ok: true });
-  }
-
-  const { data, error } = await getSupabaseAdmin()
-    .from("social_matches")
-    .update({ ...update, reviewed_at: action === "reset" ? null : new Date() })
-    .eq("match_key", matchKey)
-    .select("match_key");
-  if (error) {
+  if (
+    action === "approve" &&
+    (!isScore(body?.score_home) || !isScore(body?.score_away))
+  ) {
     return NextResponse.json(
-      { ok: false, message: error.message },
+      { ok: false, message: "Scores invalides" },
+      { status: 400 }
+    );
+  }
+  const decision: ReviewAction =
+    action === "approve"
+      ? {
+          type: "approve",
+          scoreHome: body!.score_home as number,
+          scoreAway: body!.score_away as number,
+        }
+      : { type: action as "reject" | "reset" };
+  return respond(() => reviewMatch(getSupabaseAdmin(), matchKey, decision));
+}
+
+async function respond(run: () => Promise<ReviewOutcome>) {
+  try {
+    const outcome = await run();
+    return outcome.ok
+      ? NextResponse.json(outcome)
+      : NextResponse.json(outcome, { status: outcome.status });
+  } catch (e) {
+    return NextResponse.json(
+      { ok: false, message: (e as Error).message },
       { status: 500 }
     );
   }
-  if (!data?.length) {
-    return NextResponse.json(
-      { ok: false, message: "Match introuvable" },
-      { status: 404 }
-    );
-  }
-  return NextResponse.json({ ok: true });
 }
-
-const MANUAL_REASON = "Saisi à la main";
 
 /** Ajoute un match dont le score est connu par un autre moyen qu'Instagram. */
 async function createMatch(body: Record<string, unknown>) {
@@ -276,40 +257,5 @@ async function createMatch(body: Record<string, unknown>) {
       { status: 400 }
     );
   }
-
-  const db = getSupabaseAdmin();
-  const reviewedAt = new Date().toISOString();
-  const { data: existing, error: readError } = await db
-    .from("social_matches")
-    .select("match_key")
-    .eq("match_key", row.match_key);
-  if (readError) {
-    return NextResponse.json(
-      { ok: false, message: readError.message },
-      { status: 500 }
-    );
-  }
-
-  // Match déjà vu sur Instagram : on garde ses sources et on enregistre la
-  // saisie comme une décision.
-  const { error } = existing?.length
-    ? await db
-        .from("social_matches")
-        .update({
-          review: "approved",
-          review_score_home: row.review_score_home,
-          review_score_away: row.review_score_away,
-          reviewed_at: reviewedAt,
-        })
-        .eq("match_key", row.match_key)
-    : await db
-        .from("social_matches")
-        .insert({ ...row, reviewed_at: reviewedAt });
-  if (error) {
-    return NextResponse.json(
-      { ok: false, message: error.message },
-      { status: 500 }
-    );
-  }
-  return NextResponse.json({ ok: true, updated: !!existing?.length });
+  return respond(() => addManualMatch(getSupabaseAdmin(), row));
 }
