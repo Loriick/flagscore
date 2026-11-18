@@ -20,7 +20,7 @@
  */
 
 import type { CompetitionEvent } from "./calendar";
-import { normalizeName, type TeamDirectory } from "./teams";
+import { categorySuffix, normalizeName, type TeamDirectory } from "./teams";
 
 export interface ScheduledMatch {
   id: string;
@@ -241,7 +241,10 @@ export function resolveObservations(
 
     // Dans un même post, un même nom désigne la même équipe : une fois
     // « Molosses Black » identifiée, ses autres matchs du post la suivent.
+    // Sauf entre catégories : un club peut publier ses matchs masculins et
+    // féminins sous le même nom (« Capricornes »).
     const sameName = normalizeName(obs.team);
+    const category = categorySuffix(team);
     for (const q of pending) {
       if (
         !q.result &&
@@ -249,7 +252,9 @@ export function resolveObservations(
         normalizeName(q.obs.team) === sameName &&
         q.teamCands.includes(team)
       ) {
-        q.teamCands = [team];
+        q.teamCands = q.teamCands.filter(
+          t => t === team || categorySuffix(t) !== category
+        );
       }
     }
   };

@@ -306,3 +306,41 @@ describe("poules données à Claude pour nommer un adversaire en logo", () => {
     expect(clubPoolsLabel("inconnu")).toBeNull();
   });
 });
+
+describe("noms d'équipes tels que les clubs les écrivent", () => {
+  const cdf = buildSeasonDirectory("CDF", {
+    aliases: [{ alias: "Orskaria", team: "Ours (Toulouse) · Fém." }],
+  });
+  const cm = buildSeasonDirectory("CM");
+
+  it("reconnaît l'équipe féminine ou masculine d'un club", () => {
+    expect(cdf.candidates("Team féminine", "molossesasnieres")).toEqual([
+      "Molosses B (Asnières) · Fém.",
+      "Molosses A (Asnières) · Fém.",
+    ]);
+    expect(cdf.candidates("Femme", "foxdechantilly")).toEqual([
+      "Fox (Chantilly) · Fém.",
+    ]);
+    expect(
+      cdf.candidates("Homme", "foxdechantilly").every(t => t.endsWith("Masc."))
+    ).toBe(true);
+  });
+
+  it("ne rabat pas une équipe féminine sur l'équipe masculine", () => {
+    // Les Diables Rouges n'ont pas d'équipe féminine dans les poules.
+    expect(cdf.candidates("DR F", "diablesrouges93")).toEqual([]);
+  });
+
+  it("tolère une faute ou un pluriel", () => {
+    expect(cm.candidates("Flamingos B")).toEqual(["Flagmingos B (Balma)"]);
+    expect(cdf.candidates("Avalanche")).toContain(
+      "Avalanches (Annecy) · Masc."
+    );
+  });
+
+  it("applique un alias d'entente même publié par un autre club", () => {
+    expect(cdf.candidates("Orskaria", "hurricanealbi")).toEqual([
+      "Ours (Toulouse) · Fém.",
+    ]);
+  });
+});

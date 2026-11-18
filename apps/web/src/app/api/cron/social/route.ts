@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { SEASON_2026_2027 } from "@/lib/social/calendar";
 import {
   collectFinishedRuns,
   processPendingPosts,
@@ -25,7 +26,8 @@ export const maxDuration = 300;
  *  ?step=reread  re-récupère les posts dont un score n'a pas été rattaché à
  *                 un match et les remet en lecture (suivre avec process) ;
  *                 &what=videos : les vidéos écartées sans lecture (60 par appel)
- *  ?step=reconcile  relance seulement le rapprochement des 30 derniers jours
+ *                 &what=carousels : les carrousels lus seulement en partie
+ *  ?step=reconcile  relance seulement le rapprochement de toute la saison
  *                 (après une correction des alias ou des règles)
  *  (sans step)    start puis process
  *
@@ -85,17 +87,21 @@ export async function GET(request: NextRequest) {
     if (step === "reread") {
       result.reread = await rereadUnresolvedPosts(db, {
         deadline,
-        what: params.get("what") === "videos" ? "videos" : "unresolved",
+        what:
+          params.get("what") === "videos"
+            ? "videos"
+            : params.get("what") === "carousels"
+              ? "carousels"
+              : "unresolved",
       });
     }
 
     if (step === "reconcile") {
-      const since = new Date(Date.now() - 30 * 86_400_000)
-        .toISOString()
-        .slice(0, 10);
+      // Toute la saison : une correction (alias, règle) peut concerner une
+      // journée ancienne.
       result.reconcile = await reconcileEvents(
         db,
-        await recentEventKeys(db, since)
+        await recentEventKeys(db, SEASON_2026_2027[0].start)
       );
     }
 
