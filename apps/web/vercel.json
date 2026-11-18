@@ -3,43 +3,5 @@
   "buildCommand": "cd ../.. && pnpm build --filter=@flagscore/web",
   "outputDirectory": ".next",
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
-  "framework": "nextjs",
-  "schedules": {
-    "social-start": {
-      "schedule": "0 19 * * 1",
-      "timezone": "Europe/Paris",
-      "path": "/api/cron/social?step=start",
-      "requestMethod": "GET"
-    },
-    "social-process-1": {
-      "schedule": "0 20 * * 1",
-      "timezone": "Europe/Paris",
-      "path": "/api/cron/social?step=process&slot=1",
-      "requestMethod": "GET"
-    },
-    "social-process-2": {
-      "schedule": "0 21 * * 1",
-      "timezone": "Europe/Paris",
-      "path": "/api/cron/social?step=process&slot=2",
-      "requestMethod": "GET"
-    },
-    "social-process-3": {
-      "schedule": "0 7 * * 2",
-      "timezone": "Europe/Paris",
-      "path": "/api/cron/social?step=process&slot=3",
-      "requestMethod": "GET"
-    },
-    "social-reconcile": {
-      "schedule": "30 7 * * 2",
-      "timezone": "Europe/Paris",
-      "path": "/api/cron/social?step=reconcile",
-      "requestMethod": "GET"
-    },
-    "social-reread-carousels": {
-      "schedule": "0 4 1 1 *",
-      "timezone": "Europe/Paris",
-      "path": "/api/cron/social?step=reread&what=carousels",
-      "requestMethod": "GET"
-    }
-  }
+  "framework": "nextjs"
 }

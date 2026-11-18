@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { Match } from "../../types";
+import { Match } from "@flagscore/core/types";
 
 import {
   createOptimizedResponse,

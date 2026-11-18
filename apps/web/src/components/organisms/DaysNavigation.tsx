@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import { Day } from "../../app/types";
+import { Day } from "@flagscore/core/types";
 import { DayButton } from "../molecules/DayButton";
 
 import { cn } from "@/lib/utils";

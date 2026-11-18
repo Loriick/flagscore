@@ -10,7 +10,7 @@ import {
   useDaysOptimized,
 } from "./useSupabaseOptimized";
 
-import type { Match } from "@/app/types";
+import type { Match } from "@flagscore/core/types";
 import { logger } from "@/lib/logger-advanced";
 import { Ranking as SupabaseRanking } from "@/lib/supabase";
 

@@ -18,7 +18,7 @@ import {
   extractPost,
   toObservations,
   type PostImage,
-} from "../src/lib/social/extract";
+} from "@flagscore/core/social/extract";
 
 function arg(name: string): string | undefined {
   const i = process.argv.indexOf(`--${name}`);

@@ -63,8 +63,8 @@ Flagscore est **plus à jour que la source fédérale**. Il complète les donné
 
 ## Evidence on Hand
 
-- Composition officielle des poules 2026-2027 (Championnat mixte, Coupe de France masculine et féminine) : `apps/web/src/lib/social/data/`.
-- Calendrier prévisionnel 2026-2027 : `apps/web/src/lib/social/calendar.ts`.
+- Composition officielle des poules 2026-2027 (Championnat mixte, Coupe de France masculine et féminine) : `packages/core/src/social/data/`.
+- Calendrier prévisionnel 2026-2027 : `packages/core/src/social/calendar.ts`.
 - Scores réels du week-end du 7-8 novembre 2026 (posts de Flash de La Courneuve et des Molosses d'Asnières), utilisés dans les tests.
 - **Absences à ne pas inventer** : aucun témoignage, aucune statistique d'audience, aucun partenaire, aucune photo de match sous licence.
 

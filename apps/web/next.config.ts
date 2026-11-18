@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  transpilePackages: ["@flagscore/core"],
+
   // Performance optimizations
   experimental: {
     optimizeCss: true,

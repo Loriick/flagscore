@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-import { Ranking } from "../../app/types";
+import { Ranking } from "@flagscore/core/types";
 import { ChampionshipSelector } from "../../components/ChampionshipSelector";
 import { RankingTable } from "../../components/organisms/RankingTable";
 import { PoolSelector } from "../../components/PoolSelector";
