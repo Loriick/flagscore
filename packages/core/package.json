@@ -7,6 +7,7 @@
     "./types": "./src/types.ts",
     "./supabase-admin": "./src/supabase-admin.ts",
     "./social/*": "./src/social/*.ts",
+    "./sheets": "./src/sheets/index.ts",
     "./auth/server": "./src/auth/server.ts",
     "./auth/proxy": "./src/auth/proxy.ts"
   },

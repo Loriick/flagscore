@@ -186,9 +186,60 @@ export function socialPoolTeams(pid: number) {
   }));
 }
 
+/** Journées de qualification d'une poule, avec leur clé `event_key`. */
+export function poolEvents(pid: number) {
+  const pool = findPool(pid);
+  if (!pool) return [];
+  return qualificationEvents(pool.champ.competition).map(e => ({
+    key: eventKey(e),
+    ...e,
+  }));
+}
+
 /**
- * Ligne `social_matches` pour un match saisi à la main sur la page Scores de l'admin
- * (score connu par un autre moyen qu'Instagram). Même clé que celle du
+ * Identité d'un match de la poule : clé `match_key` et orientation du
+ * pipeline (ordre alphabétique des noms de référence). Partagée par la
+ * saisie à la main et les feuilles de match, pour retomber sur la même ligne
+ * que celle qu'un post Instagram produirait.
+ * Renvoie null si la journée ou les équipes ne sont pas celles de la poule.
+ */
+export function poolMatch(input: {
+  poolId: number;
+  eventKey: string;
+  teamA: string;
+  teamB: string;
+}) {
+  const pool = findPool(input.poolId);
+  if (!pool || input.teamA === input.teamB) return null;
+  const teams = poolTeamRefs(pool.def);
+  if (!teams.has(input.teamA) || !teams.has(input.teamB)) return null;
+  const event = qualificationEvents(pool.champ.competition).find(
+    e => eventKey(e) === input.eventKey
+  );
+  if (!event) return null;
+
+  const aIsHome = [input.teamA, input.teamB].sort()[0] === input.teamA;
+  const [home, away] = aIsHome
+    ? [input.teamA, input.teamB]
+    : [input.teamB, input.teamA];
+  return {
+    aIsHome,
+    row: {
+      match_key: `${eventKey(event)}|${home}|${away}`,
+      event_key: eventKey(event),
+      competition: event.competition,
+      stage: event.stage,
+      event_start: event.start,
+      event_end: event.end,
+      team_home: home,
+      team_away: away,
+    },
+  };
+}
+
+/**
+ * Ligne `social_matches` pour un match saisi à la main sur la page Scores de
+ * l'admin (score connu par un autre moyen qu'Instagram). Même clé que celle du
  * pipeline : si un post publie ce match plus tard, il complète la même ligne
  * sans écraser la saisie (stockée comme une décision humaine).
  * Renvoie null si la poule, la journée ou les équipes ne correspondent pas.
@@ -201,37 +252,23 @@ export function manualMatchRow(input: {
   scoreA: number;
   scoreB: number;
 }) {
-  const pool = findPool(input.poolId);
-  if (!pool || input.teamA === input.teamB) return null;
-  const teams = poolTeamRefs(pool.def);
-  if (!teams.has(input.teamA) || !teams.has(input.teamB)) return null;
-  const event = qualificationEvents(pool.champ.competition).find(
+  const event = poolEvents(input.poolId).find(
     e => dayId(e.start) === input.dayId
   );
   if (!event) return null;
-
-  // Orientation du pipeline : ordre alphabétique des noms de référence.
-  const aIsHome = [input.teamA, input.teamB].sort()[0] === input.teamA;
-  const [home, away] = aIsHome
-    ? [input.teamA, input.teamB]
-    : [input.teamB, input.teamA];
-  const [scoreHome, scoreAway] = aIsHome
+  const match = poolMatch({ ...input, eventKey: event.key });
+  if (!match) return null;
+  const [scoreHome, scoreAway] = match.aIsHome
     ? [input.scoreA, input.scoreB]
     : [input.scoreB, input.scoreA];
 
   return {
-    match_key: `${eventKey(event)}|${home}|${away}`,
-    event_key: eventKey(event),
-    competition: event.competition,
-    stage: event.stage,
-    event_start: event.start,
-    event_end: event.end,
-    team_home: home,
-    team_away: away,
+    ...match.row,
     score_home: scoreHome,
     score_away: scoreAway,
     status: "single_source",
     auto_apply: false,
+    source: "manual",
     review: "approved",
     review_score_home: scoreHome,
     review_score_away: scoreAway,
