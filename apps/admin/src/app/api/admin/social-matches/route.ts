@@ -41,7 +41,7 @@ async function authorized(): Promise<NextResponse | null> {
 }
 
 const MATCH_COLUMNS =
-  "match_key, event_key, competition, stage, event_start, team_home, team_away, score_home, score_away, status, auto_apply, review, review_score_home, review_score_away, reviewed_at, reason, accounts, observation_ids";
+  "match_key, event_key, competition, stage, event_start, team_home, team_away, score_home, score_away, status, auto_apply, review, review_score_home, review_score_away, reviewed_at, reason, accounts, observation_ids, source";
 
 /** Comptes du club d'une équipe : « Molosses B (Asnières) · Fém. » → Molosses (Asnières). */
 function clubHandles(ref: string): string[] {

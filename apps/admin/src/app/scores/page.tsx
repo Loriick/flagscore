@@ -44,6 +44,7 @@ interface AdminMatch {
   review_score_home: number | null;
   review_score_away: number | null;
   reason: string | null;
+  source: "instagram" | "manual" | "delegate";
   evidence: Evidence[];
 }
 
@@ -97,6 +98,8 @@ function MatchReview({
     scores?: [number, number]
   ) => Promise<void>;
 }) {
+  // Score d'une feuille de match : décidé sur la page du plateau, pas ici.
+  const fromSheet = match.source === "delegate";
   // Pré-rempli avec la décision, le score retenu, sinon le premier post.
   const firstPost = match.evidence.find(e => e.oriented)?.oriented;
   const [home, setHome] = useState(
@@ -163,6 +166,13 @@ function MatchReview({
             {match.review === "approved" ? "Validé" : "Rejeté"}
           </span>
         )}
+        {fromSheet && (
+          <span className="rounded-[3px] bg-flag px-1.5 py-0.5 text-ink">
+            {match.review === "approved"
+              ? "Feuille signée"
+              : "Feuille rouverte"}
+          </span>
+        )}
         {match.reason && <span className="text-stone">{match.reason}</span>}
       </div>
 
@@ -225,36 +235,43 @@ function MatchReview({
         </ul>
       )}
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        <button
-          type="button"
-          disabled={busy}
-          onClick={approve}
-          className="inline-flex min-h-11 items-center rounded-[4px] bg-flag px-4 text-sm font-bold text-ink transition-colors hover:bg-flag-deep disabled:opacity-50"
-        >
-          {view === "pending" ? "Valider ce score" : "Enregistrer ce score"}
-        </button>
-        {match.review !== "rejected" && (
+      {fromSheet ? (
+        <p className="mt-4 text-sm text-stone">
+          Score d&apos;une feuille de match : pour le changer, utilisez «
+          Rouvrir » sur la page du plateau.
+        </p>
+      ) : (
+        <div className="mt-4 flex flex-wrap gap-2">
           <button
             type="button"
             disabled={busy}
-            onClick={() => void run("reject")}
-            className="inline-flex min-h-11 items-center rounded-[4px] border border-line px-4 text-sm font-semibold text-chalk transition-colors hover:border-chalk disabled:opacity-50"
+            onClick={approve}
+            className="inline-flex min-h-11 items-center rounded-[4px] bg-flag px-4 text-sm font-bold text-ink transition-colors hover:bg-flag-deep disabled:opacity-50"
           >
-            {view === "published" ? "Retirer du site" : "Rejeter"}
+            {view === "pending" ? "Valider ce score" : "Enregistrer ce score"}
           </button>
-        )}
-        {match.review && (
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => void run("reset")}
-            className="inline-flex min-h-11 items-center rounded-[4px] px-4 text-sm font-semibold text-stone transition-colors hover:text-chalk disabled:opacity-50"
-          >
-            Annuler la décision
-          </button>
-        )}
-      </div>
+          {match.review !== "rejected" && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void run("reject")}
+              className="inline-flex min-h-11 items-center rounded-[4px] border border-line px-4 text-sm font-semibold text-chalk transition-colors hover:border-chalk disabled:opacity-50"
+            >
+              {view === "published" ? "Retirer du site" : "Rejeter"}
+            </button>
+          )}
+          {match.review && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void run("reset")}
+              className="inline-flex min-h-11 items-center rounded-[4px] px-4 text-sm font-semibold text-stone transition-colors hover:text-chalk disabled:opacity-50"
+            >
+              Annuler la décision
+            </button>
+          )}
+        </div>
+      )}
     </li>
   );
 }

@@ -68,4 +68,31 @@ describe("décisions de la page Scores", () => {
       status: 404,
     });
   });
+
+  it("refuse toute décision sur le score d'une feuille signée", async () => {
+    const signed: Row = {
+      ...instagram,
+      source: "delegate",
+      review: "approved",
+      review_score_home: 31,
+      review_score_away: 12,
+      reason: "Feuille signée par les deux équipes",
+    };
+    const { db, tables } = memoryDb({ social_matches: [{ ...signed }] });
+    const actions = [
+      { type: "approve", scoreHome: 0, scoreAway: 0 },
+      { type: "reject" },
+      { type: "reset" },
+    ] as const;
+    for (const action of actions) {
+      const outcome = await reviewMatch(db, manual.match_key, action);
+      expect(outcome).toMatchObject({ ok: false, status: 409 });
+      expect(!outcome.ok && outcome.message).toContain("Rouvrir");
+    }
+    expect(await addManualMatch(db, manual)).toMatchObject({
+      ok: false,
+      status: 409,
+    });
+    expect(tables.social_matches).toEqual([signed]);
+  });
 });
