@@ -240,7 +240,7 @@ export async function saveResult(
   });
 }
 
-/** Renvoie true quand cette signature était la quatrième. */
+/** Renvoie true quand la feuille est signée et son score publié. */
 export async function saveSignature(
   db: SupabaseClient,
   bundle: SheetBundle,
@@ -297,9 +297,23 @@ export async function saveSignature(
       .eq("status", "draft")
       .select(SHEET_COLUMNS)
   ) as SheetRow[];
-  // Une autre requête a déjà conclu (et publié) : rien à refaire.
-  if (!signed.length) return true;
-  await publishSheet(db, signed[0], bundle.plateau);
+  // Une autre requête a conclu, ou le score a changé entre-temps.
+  if (!signed.length) return isPublished(db, bundle.row.id, version);
+  try {
+    await publishSheet(db, signed[0], bundle.plateau);
+  } catch {
+    // Jamais « signée » sans être publiée : on revient au brouillon, les
+    // signatures restent et la suivante relance la publication.
+    check(
+      await db
+        .from("match_sheets")
+        .update({ status: "draft", signed_at: null })
+        .eq("id", bundle.row.id)
+        .eq("version", version)
+        .eq("status", "signed")
+    );
+    throw new SheetError(PUBLISH_FAILED);
+  }
   await audit(db, {
     actor: actorId,
     action: "sheet.signed",
@@ -308,6 +322,34 @@ export async function saveSignature(
     details: { match_key: bundle.row.match_key },
   });
   return true;
+}
+
+const PUBLISH_FAILED =
+  "Le score n'a pas pu être publié. La feuille n'est pas signée : refais la dernière signature.";
+
+/** La feuille est signée à cette version et son score est sur le site. */
+async function isPublished(
+  db: SupabaseClient,
+  sheetId: string,
+  version: number
+) {
+  const sheet = check(
+    await db
+      .from("match_sheets")
+      .select(SHEET_COLUMNS)
+      .eq("id", sheetId)
+      .maybeSingle()
+  ) as SheetRow | null;
+  if (sheet?.status !== "signed" || sheet.version !== version) return false;
+  const published = check(
+    await db
+      .from("social_matches")
+      .select("match_key")
+      .eq("match_key", sheet.match_key)
+      .eq("source", "delegate")
+      .eq("review", "approved")
+  ) as Array<{ match_key: string }>;
+  return published.length > 0;
 }
 
 export async function reopenSheet(

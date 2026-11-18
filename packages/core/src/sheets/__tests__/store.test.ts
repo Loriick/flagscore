@@ -24,6 +24,12 @@ type Row = Record<string, unknown>;
  * le store : filtres eq/in, insert/update/upsert/delete, select en retour.
  */
 function memoryDb(tables: Record<string, Row[]>) {
+  const hooks = {
+    /** Tables dont toute écriture échoue (panne réseau, contrainte). */
+    failingWrites: new Set<string>(),
+    /** Appelé juste avant chaque update, pour simuler une requête concurrente. */
+    beforeUpdate: (_table: string, _values: Row) => {},
+  };
   class Query {
     private filters: Array<(r: Row) => boolean> = [];
     private op: "select" | "insert" | "update" | "upsert" | "delete" = "select";
@@ -105,7 +111,14 @@ function memoryDb(tables: Record<string, Row[]>) {
         }
       }
     }
-    then(resolve: (r: { data: unknown; error: null }) => void) {
+    then(
+      resolve: (r: { data: unknown; error: { message: string } | null }) => void
+    ) {
+      if (this.op !== "select" && hooks.failingWrites.has(this.table)) {
+        resolve({ data: null, error: { message: "network down" } });
+        return;
+      }
+      if (this.op === "update") hooks.beforeUpdate(this.table, this.values[0]);
       const data = this.run().map(r => ({ ...r }));
       resolve({
         data: this.mode === "many" ? data : (data[0] ?? null),
@@ -116,6 +129,7 @@ function memoryDb(tables: Record<string, Row[]>) {
   return {
     db: { from: (t: string) => new Query(t) } as unknown as SupabaseClient,
     tables,
+    hooks,
   };
 }
 
@@ -267,6 +281,60 @@ describe("feuilles en base", () => {
       saveResult(db, stale, { kind: "score", home: 3, away: 0 }, "u1")
     ).rejects.toBeInstanceOf(SheetError);
     expect(tables.match_sheets[0]).toMatchObject({ score_home: 2 });
+  });
+
+  it("laisse la feuille en brouillon, avec un message clair, quand la publication échoue", async () => {
+    const { db, tables, hooks } = setup();
+    await saveResult(
+      db,
+      (await loadSheet(db, "s1"))!,
+      { kind: "score", home: 30, away: 12 },
+      "u1"
+    );
+    hooks.failingWrites.add("social_matches");
+    const error = await signAll(db).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(SheetError);
+    expect((error as Error).message).toBe(
+      "Le score n'a pas pu être publié. La feuille n'est pas signée : refais la dernière signature."
+    );
+    expect(tables.match_sheets[0]).toMatchObject({
+      status: "draft",
+      signed_at: null,
+    });
+
+    hooks.failingWrites.clear();
+    const [side, role] = REQUIRED_SIGNATURES[REQUIRED_SIGNATURES.length - 1];
+    expect(
+      await saveSignature(
+        db,
+        (await loadSheet(db, "s1"))!,
+        signature(side, role),
+        "u1"
+      )
+    ).toBe(true);
+    expect(onSite(tables)).toEqual([
+      expect.objectContaining({ score_home: 30, score_away: 12 }),
+    ]);
+  });
+
+  it("ne dit pas « publié » quand le score a changé pendant la dernière signature", async () => {
+    const { db, tables, hooks } = setup();
+    await saveResult(
+      db,
+      (await loadSheet(db, "s1"))!,
+      { kind: "score", home: 30, away: 12 },
+      "u1"
+    );
+    hooks.beforeUpdate = (table, values) => {
+      if (table !== "match_sheets" || values.status !== "signed") return;
+      Object.assign(tables.match_sheets[0], {
+        score_home: 31,
+        version: (tables.match_sheets[0].version as number) + 1,
+      });
+    };
+    expect(await signAll(db)).toBe(false);
+    expect(tables.match_sheets[0]).toMatchObject({ status: "draft" });
+    expect(onSite(tables)).toEqual([]);
   });
 
   it("rouvre une feuille signée et retire le score du site", async () => {
