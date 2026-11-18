@@ -22,19 +22,22 @@ export interface SocialMatchRow {
   event_key: string;
   team_home: string;
   team_away: string;
-  score_home: number;
-  score_away: number;
+  /** null pour un forfait (aucun score conventionnel n'est inventé). */
+  score_home: number | null;
+  score_away: number | null;
   status: string;
   accounts: string[] | null;
   auto_apply?: boolean;
   review?: "approved" | "rejected" | null;
   review_score_home?: number | null;
   review_score_away?: number | null;
+  source?: "instagram" | "manual" | "delegate";
+  forfeit?: "home" | "away" | null;
 }
 
 /** Colonnes à lire pour l'affichage. */
 export const SOCIAL_MATCH_COLUMNS =
-  "match_key, event_key, team_home, team_away, score_home, score_away, status, accounts, auto_apply, review, review_score_home, review_score_away";
+  "match_key, event_key, team_home, team_away, score_home, score_away, status, accounts, auto_apply, review, review_score_home, review_score_away, source, forfeit";
 
 /**
  * Filtre Supabase (`.or(...)`) des lignes publiables : retenues
@@ -294,6 +297,10 @@ function poolRows(rows: SocialMatchRow[], pid: number) {
   });
 }
 
+/** Score venu d'une feuille de match signée par les deux équipes. */
+const isSignedSheet = (row: SocialMatchRow) =>
+  row.source === "delegate" && row.review === "approved";
+
 export function socialMatches(
   rows: SocialMatchRow[],
   pid: number,
@@ -301,26 +308,30 @@ export function socialMatches(
 ): Match[] {
   return poolRows(rows, pid)
     .filter(({ event }) => dayId(event.start) === did)
-    .map(({ row, event }, i) => ({
-      id: i + 1,
-      championship_id: Math.floor(pid / 100),
-      phase_id: 1,
-      pool_id: pid,
-      day_id: did,
-      date: event.start,
-      team_a: {
-        name: displayTeamName(row.team_home),
-        score: row.score_home,
-        general_forfeit: false,
-      },
-      team_b: {
-        name: displayTeamName(row.team_away),
-        score: row.score_away,
-        general_forfeit: false,
-      },
-      sheet: null,
-      sources: row.accounts ?? [],
-    }));
+    .map(({ row, event }, i) => {
+      const signed = isSignedSheet(row);
+      return {
+        id: i + 1,
+        championship_id: Math.floor(pid / 100),
+        phase_id: 1,
+        pool_id: pid,
+        day_id: did,
+        date: event.start,
+        team_a: {
+          name: displayTeamName(row.team_home),
+          score: row.score_home,
+          general_forfeit: row.forfeit === "home",
+        },
+        team_b: {
+          name: displayTeamName(row.team_away),
+          score: row.score_away,
+          general_forfeit: row.forfeit === "away",
+        },
+        sheet: null,
+        sources: signed ? [] : (row.accounts ?? []),
+        signed,
+      };
+    });
 }
 
 /**
@@ -329,7 +340,8 @@ export function socialMatches(
  *
  * En championnat, le 1er de chaque poule de qualification va en D1 et le 2e
  * en D2 (indiqué dès qu'il a joué au moins un match).
- * Les équipes sans score connu apparaissent avec 0 match.
+ * Les équipes sans score connu apparaissent avec 0 match. Un forfait compte
+ * comme une victoire et une défaite, sans points marqués ni encaissés.
  */
 export function socialRankings(rows: SocialMatchRow[], pid: number): Ranking[] {
   const pool = findPool(pid);
@@ -341,15 +353,20 @@ export function socialRankings(rows: SocialMatchRow[], pid: number): Ranking[] {
       { j: 0, g: 0, n: 0, p: 0, total: 0, won: 0, loss: 0 },
     ])
   );
-  const record = (team: string, scored: number, conceded: number) => {
+  const record = (
+    team: string,
+    scored: number,
+    conceded: number,
+    forced?: "win" | "loss"
+  ) => {
     const s = stats.get(team)!;
     s.j += 1;
     s.won += scored;
     s.loss += conceded;
-    if (scored > conceded) {
+    if (forced === "win" || (!forced && scored > conceded)) {
       s.g += 1;
       s.total += 3;
-    } else if (scored === conceded) {
+    } else if (!forced && scored === conceded) {
       s.n += 1;
       s.total += 1;
     } else {
@@ -357,8 +374,15 @@ export function socialRankings(rows: SocialMatchRow[], pid: number): Ranking[] {
     }
   };
   for (const { row } of poolRows(rows, pid)) {
-    record(row.team_home, row.score_home, row.score_away);
-    record(row.team_away, row.score_away, row.score_home);
+    if (row.forfeit) {
+      const loser = row.forfeit === "home" ? row.team_home : row.team_away;
+      const winner = row.forfeit === "home" ? row.team_away : row.team_home;
+      record(winner, 0, 0, "win");
+      record(loser, 0, 0, "loss");
+    } else if (row.score_home !== null && row.score_away !== null) {
+      record(row.team_home, row.score_home, row.score_away);
+      record(row.team_away, row.score_away, row.score_home);
+    }
   }
 
   return [...stats.entries()]

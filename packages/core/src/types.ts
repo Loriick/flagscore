@@ -35,6 +35,8 @@ export interface Match {
   sheet: string | null;
   /** Comptes Instagram d'où vient le score, quand il a été relevé sur un post. */
   sources?: string[];
+  /** Score d'une feuille de match signée par les deux équipes. */
+  signed?: boolean;
 }
 
 export interface Ranking {

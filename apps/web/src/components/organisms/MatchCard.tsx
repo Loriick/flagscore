@@ -14,6 +14,8 @@ interface MatchCardProps {
 type Outcome = "win" | "loss" | "draw" | "upcoming";
 
 function outcomes(match: Match): [Outcome, Outcome] {
+  if (match.team_a.general_forfeit) return ["loss", "win"];
+  if (match.team_b.general_forfeit) return ["win", "loss"];
   const a = match.team_a.score;
   const b = match.team_b.score;
   if (a === null || b === null || a === undefined || b === undefined) {
@@ -40,10 +42,12 @@ const SCORE_TONE: Record<Outcome, string> = {
 function TeamLine({
   name,
   score,
+  forfeit,
   outcome,
 }: {
   name: string;
   score: number | null;
+  forfeit: boolean;
   outcome: Outcome;
 }) {
   return (
@@ -62,7 +66,13 @@ function TeamLine({
           SCORE_TONE[outcome]
         )}
       >
-        {outcome === "upcoming" ? "" : score}
+        {forfeit ? (
+          <span className="text-[1.5rem] sm:text-[1.75rem]">Forfait</span>
+        ) : outcome === "upcoming" ? (
+          ""
+        ) : (
+          score
+        )}
       </span>
     </>
   );
@@ -75,9 +85,16 @@ export const MatchCard = memo(function MatchCard({
 }: MatchCardProps) {
   const [a, b] = outcomes(match);
   const upcoming = a === "upcoming";
-  const label = upcoming
-    ? `${match.team_a.name} contre ${match.team_b.name}, à venir`
-    : `${match.team_a.name} ${match.team_a.score}, ${match.team_b.name} ${match.team_b.score}`;
+  const forfeit = match.team_a.general_forfeit
+    ? match.team_a
+    : match.team_b.general_forfeit
+      ? match.team_b
+      : null;
+  const label = forfeit
+    ? `${match.team_a.name} contre ${match.team_b.name}, forfait de ${forfeit.name}`
+    : upcoming
+      ? `${match.team_a.name} contre ${match.team_b.name}, à venir`
+      : `${match.team_a.name} ${match.team_a.score}, ${match.team_b.name} ${match.team_b.score}`;
 
   return (
     <li
@@ -92,14 +109,21 @@ export const MatchCard = memo(function MatchCard({
         <TeamLine
           name={match.team_a.name}
           score={match.team_a.score}
+          forfeit={match.team_a.general_forfeit}
           outcome={a}
         />
         <TeamLine
           name={match.team_b.name}
           score={match.team_b.score}
+          forfeit={match.team_b.general_forfeit}
           outcome={b}
         />
       </div>
+      {match.signed && (
+        <p className="mt-2 text-xs text-stone">
+          Feuille de match signée par les deux équipes
+        </p>
+      )}
       {match.sources && match.sources.length > 0 && (
         <p className="mt-2 text-xs text-stone">
           {match.sources.length > 1 ? "Confirmé par " : "D'après "}

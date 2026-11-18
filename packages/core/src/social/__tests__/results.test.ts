@@ -94,7 +94,7 @@ describe("résultats affichés à partir d'Instagram", () => {
     expect(displayTeamName("Phenix (Béthune)")).toBe("Phenix");
   });
 
-  it("applique les décisions de /admin/scores", () => {
+  it("applique les décisions de la page Scores de l'admin", () => {
     const base = row(J1, "Ankou (Rennes)", "Mariners (Vannes)", 30, 12);
     const out = publishedRows([
       { ...base, auto_apply: true },
@@ -149,5 +149,53 @@ describe("résultats affichés à partir d'Instagram", () => {
         teamB: "Mariners (Vannes)",
       })
     ).toBeNull();
+  });
+});
+
+describe("scores venus d'une feuille de match signée", () => {
+  const bre = socialPools(1)[0];
+  const signed = (
+    team_home: string,
+    team_away: string,
+    scores: [number | null, number | null],
+    forfeit: "home" | "away" | null = null
+  ): SocialMatchRow => ({
+    ...row(J1, team_home, team_away, 0, 0, []),
+    score_home: scores[0],
+    score_away: scores[1],
+    source: "delegate",
+    review: "approved",
+    forfeit,
+  });
+
+  it("signale la feuille signée à la place des comptes Instagram", () => {
+    const [match] = socialMatches(
+      [
+        {
+          ...signed("Ankou (Rennes)", "Mariners (Vannes)", [30, 12]),
+          accounts: ["ankou"],
+        },
+      ],
+      bre.id,
+      20261017
+    );
+    expect(match).toMatchObject({ signed: true, sources: [] });
+  });
+
+  it("compte un forfait comme une victoire et une défaite, sans points", () => {
+    const rows = [
+      signed("Ankou (Rennes)", "Mariners (Vannes)", [null, null], "away"),
+    ];
+    const [match] = socialMatches(rows, bre.id, 20261017);
+    expect(match.team_b).toMatchObject({ score: null, general_forfeit: true });
+    const table = socialRankings(rows, bre.id);
+    expect(
+      table
+        .filter(r => r.j > 0)
+        .map(r => [r.club.label, r.points, r.g, r.p, r.points_diff])
+    ).toEqual([
+      ["Ankou", 3, 1, 0, 0],
+      ["Mariners", 0, 0, 1, 0],
+    ]);
   });
 });
