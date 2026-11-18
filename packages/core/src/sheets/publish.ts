@@ -83,6 +83,7 @@ export async function publishSheet(
           .update({
             source: row.source,
             review: row.review,
+            reason: row.reason,
             review_score_home: row.review_score_home,
             review_score_away: row.review_score_away,
             forfeit: row.forfeit,
@@ -95,13 +96,20 @@ export async function publishSheet(
   );
 }
 
-/** Feuille rouverte : le score disparaît du site jusqu'à la nouvelle signature. */
+const REOPENED_REASON = "Feuille rouverte";
+
+/**
+ * Feuille rouverte : le score disparaît du site jusqu'à la nouvelle signature.
+ * La ligne est rejetée plutôt que remise à zéro : sans décision, un score
+ * Instagram retenu automatiquement redeviendrait visible.
+ */
 export async function unpublishSheet(db: SupabaseClient, matchKey: string) {
   check(
     await db
       .from("social_matches")
       .update({
-        review: null,
+        review: "rejected",
+        reason: REOPENED_REASON,
         review_score_home: null,
         review_score_away: null,
         forfeit: null,

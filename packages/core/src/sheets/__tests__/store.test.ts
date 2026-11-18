@@ -1,7 +1,13 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { describe, expect, it } from "vitest";
 
-import { poolMatch, socialPools, socialPoolTeams } from "../../social/results";
+import {
+  poolMatch,
+  publishedRows,
+  type SocialMatchRow,
+  socialPools,
+  socialPoolTeams,
+} from "../../social/results";
 import {
   loadSheet,
   REQUIRED_SIGNATURES,
@@ -178,6 +184,9 @@ async function signAll(db: SupabaseClient) {
   return last;
 }
 
+const onSite = (tables: Record<string, Row[]>) =>
+  publishedRows(tables.social_matches as unknown as SocialMatchRow[]);
+
 describe("feuilles en base", () => {
   it("publie le score à la quatrième signature", async () => {
     const { db, tables } = setup();
@@ -281,9 +290,41 @@ describe("feuilles en base", () => {
       signatures: [],
       result: { kind: "forfeit", side: "away" },
     });
-    expect(tables.social_matches[0]).toMatchObject({
-      review: null,
-      forfeit: null,
-    });
+    expect(onSite(tables)).toEqual([]);
+  });
+
+  it("cache le score Instagram d'une feuille rouverte jusqu'à la nouvelle signature", async () => {
+    const { db, tables } = setup([
+      {
+        ...match.row,
+        score_home: 28,
+        score_away: 12,
+        status: "single_source",
+        auto_apply: true,
+        review: null,
+        accounts: ["ankou"],
+        observation_ids: ["post#0"],
+      },
+    ]);
+    await saveResult(
+      db,
+      (await loadSheet(db, "s1"))!,
+      { kind: "score", home: 30, away: 12 },
+      "u1"
+    );
+    await signAll(db);
+    await reopenSheet(db, (await loadSheet(db, "s1"))!, "admin1");
+    expect(onSite(tables)).toEqual([]);
+
+    await saveResult(
+      db,
+      (await loadSheet(db, "s1"))!,
+      { kind: "score", home: 31, away: 12 },
+      "u1"
+    );
+    await signAll(db);
+    expect(onSite(tables)).toEqual([
+      expect.objectContaining({ score_home: 31, score_away: 12 }),
+    ]);
   });
 });
