@@ -115,6 +115,23 @@ describe("résultats affichés à partir d'Instagram", () => {
     ]);
   });
 
+  it("n'affiche aucun score pour un forfait, même relevé sur Instagram", () => {
+    const base = row(J1, "Ankou (Rennes)", "Mariners (Vannes)", 28, 12);
+    const out = publishedRows([
+      {
+        ...base,
+        source: "delegate",
+        review: "approved",
+        review_score_home: null,
+        review_score_away: null,
+        forfeit: "away",
+      },
+    ]);
+    expect(out.map(r => [r.score_home, r.score_away, r.forfeit])).toEqual([
+      [null, null, "away"],
+    ]);
+  });
+
   it("prépare un match saisi à la main avec la même clé que le pipeline", () => {
     const row = manualMatchRow({
       poolId: bre.id,

@@ -46,11 +46,15 @@ export const SOCIAL_MATCH_COLUMNS =
 export const PUBLISHED_FILTER =
   "and(auto_apply.eq.true,review.is.null),review.eq.approved";
 
-/** Lignes à afficher, avec la correction manuelle appliquée. */
+/**
+ * Lignes à afficher, avec la correction manuelle appliquée. Un forfait n'a
+ * aucun score : ni inventé, ni repris d'Instagram.
+ */
 export function publishedRows(rows: SocialMatchRow[]): SocialMatchRow[] {
   return rows.flatMap(row => {
     if (row.review === "rejected") return [];
     if (row.review !== "approved" && row.auto_apply === false) return [];
+    if (row.forfeit) return [{ ...row, score_home: null, score_away: null }];
     return [
       {
         ...row,
