@@ -21,7 +21,10 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const NAV = [{ href: "/scores", label: "Scores" }];
+const NAV = [
+  { href: "/plateaux", label: "Plateaux" },
+  { href: "/scores", label: "Scores" },
+];
 
 export default async function RootLayout({
   children,
