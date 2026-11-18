@@ -7,7 +7,7 @@ import { cache } from "react";
 
 import { getSupabaseAdmin } from "../supabase-admin";
 
-import { safeNext, supabasePublicEnv } from "./env";
+import { callbackRedirect, safeNext, supabasePublicEnv } from "./env";
 
 export type Role = "admin" | "delegate";
 
@@ -142,7 +142,6 @@ export async function handleAuthCallback(request: NextRequest) {
   const params = request.nextUrl.searchParams;
   const code = params.get("code");
   const tokenHash = params.get("token_hash");
-  const next = safeNext(params.get("next"));
   const supabase = await createSupabaseServer();
 
   let ok = false;
@@ -154,11 +153,9 @@ export async function handleAuthCallback(request: NextRequest) {
       .error;
   }
 
-  const target = request.nextUrl.clone();
-  target.search = "";
-  target.pathname = ok ? next : "/login";
-  if (!ok) target.searchParams.set("error", "lien");
-  return NextResponse.redirect(target);
+  return NextResponse.redirect(
+    callbackRedirect(request.nextUrl, params.get("next"), ok)
+  );
 }
 
 export async function handleSignOut(request: NextRequest) {
