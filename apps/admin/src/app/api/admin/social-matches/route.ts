@@ -1,43 +1,37 @@
-import { timingSafeEqual } from "node:crypto";
-
 import { NextRequest, NextResponse } from "next/server";
 
-import { CLUB_INSTAGRAM, clubName } from "@flagscore/core/social/data/pools-2026-2027";
-import { manualMatchRow } from "@flagscore/core/social/results";
+import { roleOrResponse } from "@flagscore/core/auth/server";
+import {
+  CLUB_INSTAGRAM,
+  clubName,
+} from "@flagscore/core/social/data/pools-2026-2027";
+import {
+  manualMatchRow,
+  PUBLISHED_FILTER,
+  publishedRows,
+  SOCIAL_MATCH_COLUMNS,
+} from "@flagscore/core/social/results";
 import { normalizeHandle } from "@flagscore/core/social/teams";
 import { getSupabaseAdmin } from "@flagscore/core/supabase-admin";
 
 export const dynamic = "force-dynamic";
 
 /**
- * Validation des scores relevés sur Instagram (page /admin/scores).
+ * Validation des scores relevés sur Instagram (page /scores).
  *
  *  GET  ?view=pending    scores à vérifier ou en conflit, pas encore revus
  *       ?view=published  scores affichés automatiquement (pour en rejeter un)
  *       ?view=reviewed   décisions déjà prises
+ *       ?view=site       lignes affichées sur le site (pour « Ajouter »)
  *  POST { match_key, action: "approve" | "reject" | "reset",
  *         score_home?, score_away? }
  *
- * Protégé par `Authorization: Bearer $ADMIN_SECRET`.
+ * Réservé aux comptes admin (session Supabase).
  */
 
-function authorized(request: NextRequest): NextResponse | null {
-  const secret = process.env.ADMIN_SECRET;
-  if (!secret) {
-    return NextResponse.json(
-      { ok: false, message: "ADMIN_SECRET non configuré" },
-      { status: 500 }
-    );
-  }
-  const given = Buffer.from(request.headers.get("authorization") ?? "");
-  const expected = Buffer.from(`Bearer ${secret}`);
-  if (given.length !== expected.length || !timingSafeEqual(given, expected)) {
-    return NextResponse.json(
-      { ok: false, message: "Mot de passe incorrect" },
-      { status: 401 }
-    );
-  }
-  return null;
+async function authorized(): Promise<NextResponse | null> {
+  const session = await roleOrResponse(["admin"]);
+  return session instanceof NextResponse ? session : null;
 }
 
 const MATCH_COLUMNS =
@@ -82,11 +76,24 @@ interface ObservationRow {
 }
 
 export async function GET(request: NextRequest) {
-  const denied = authorized(request);
+  const denied = await authorized();
   if (denied) return denied;
 
   const view = request.nextUrl.searchParams.get("view") ?? "pending";
   const db = getSupabaseAdmin();
+  if (view === "site") {
+    const { data, error } = await db
+      .from("social_matches")
+      .select(SOCIAL_MATCH_COLUMNS)
+      .or(PUBLISHED_FILTER);
+    if (error) {
+      return NextResponse.json(
+        { ok: false, message: error.message },
+        { status: 500 }
+      );
+    }
+    return NextResponse.json({ ok: true, matches: publishedRows(data) });
+  }
   let query = db
     .from("social_matches")
     .select(MATCH_COLUMNS)
@@ -162,7 +169,7 @@ const isScore = (v: unknown): v is number =>
   typeof v === "number" && Number.isInteger(v) && v >= 0 && v <= 300;
 
 export async function POST(request: NextRequest) {
-  const denied = authorized(request);
+  const denied = await authorized();
   if (denied) return denied;
 
   const body = (await request.json().catch(() => null)) as {

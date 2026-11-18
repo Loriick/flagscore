@@ -6,10 +6,7 @@ import { toast } from "sonner";
 
 import { AddMatch } from "./AddMatch";
 
-import { cn } from "@/lib/utils";
-
-/** Mot de passe gardé le temps de l'onglet. */
-const STORAGE_KEY = "flagscore-admin-secret";
+import { cn, pageTitleClass } from "@flagscore/ui/styles";
 
 type View = "pending" | "published" | "reviewed" | "add";
 
@@ -59,23 +56,6 @@ const STATUS_LABEL: Record<AdminMatch["status"], string> = {
 const COMPETITION_LABEL: Record<string, string> = {
   CM: "Championnat mixte",
   CDF: "Coupe de France",
-};
-
-const readSecret = () => {
-  try {
-    return sessionStorage.getItem(STORAGE_KEY) ?? "";
-  } catch {
-    return "";
-  }
-};
-
-const saveSecret = (value: string) => {
-  try {
-    if (value) sessionStorage.setItem(STORAGE_KEY, value);
-    else sessionStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // Stockage indisponible (navigation privée) : il faudra se reconnecter.
-  }
 };
 
 const formatDate = (date: string) =>
@@ -280,48 +260,38 @@ function MatchReview({
 }
 
 export default function AdminScoresPage() {
-  const [secret, setSecret] = useState("");
-  const [input, setInput] = useState("");
   const [view, setView] = useState<View>("pending");
   const [matches, setMatches] = useState<AdminMatch[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => setSecret(readSecret()), []);
-
-  const api = useCallback(
-    async (init?: RequestInit, query = "") => {
-      const res = await fetch(`/api/admin/social-matches${query}`, {
-        ...init,
-        headers: {
-          ...init?.headers,
-          Authorization: `Bearer ${secret}`,
-          "Content-Type": "application/json",
-        },
-      });
-      const body = await res.json().catch(() => ({}));
-      if (res.status === 401) {
-        saveSecret("");
-        setSecret("");
-        throw new Error("Mot de passe incorrect");
-      }
-      if (!res.ok || !body.ok) {
-        throw new Error(body.message ?? `Erreur ${res.status}`);
-      }
-      return body;
-    },
-    [secret]
-  );
+  const api = useCallback(async (init?: RequestInit, query = "") => {
+    const res = await fetch(`/api/admin/social-matches${query}`, {
+      ...init,
+      headers: { ...init?.headers, "Content-Type": "application/json" },
+    });
+    const body = await res.json().catch(() => ({}));
+    if (res.status === 401) window.location.assign("/login?next=/scores");
+    if (!res.ok || !body.ok) {
+      throw new Error(body.message ?? `Erreur ${res.status}`);
+    }
+    return body;
+  }, []);
 
   useEffect(() => {
-    if (!secret || view === "add") return;
+    if (view === "add") return;
     setLoading(true);
     setError(null);
     api(undefined, `?view=${view}`)
       .then(body => setMatches(body.matches))
       .catch((e: Error) => setError(e.message))
       .finally(() => setLoading(false));
-  }, [api, secret, view]);
+  }, [api, view]);
+
+  const loadPublished = useCallback(
+    () => api(undefined, "?view=site").then(body => body.matches),
+    [api]
+  );
 
   const decide = useCallback(
     async (
@@ -356,46 +326,6 @@ export default function AdminScoresPage() {
     [api]
   );
 
-  if (!secret) {
-    return (
-      <div className="mx-auto max-w-md px-4 pt-10 sm:px-6">
-        <h1 className="font-score mb-6 text-4xl leading-none font-black text-chalk">
-          Validation des scores
-        </h1>
-        <form
-          onSubmit={e => {
-            e.preventDefault();
-            saveSecret(input);
-            setSecret(input);
-          }}
-          className="space-y-3"
-        >
-          <label
-            htmlFor="admin-secret"
-            className="block text-sm font-semibold text-stone"
-          >
-            Mot de passe
-          </label>
-          <input
-            id="admin-secret"
-            type="password"
-            autoComplete="current-password"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            className="h-11 w-full rounded-[4px] border border-line bg-ink-raised px-3 text-chalk focus:border-flag focus:outline-none"
-          />
-          <button
-            type="submit"
-            disabled={!input}
-            className="inline-flex min-h-11 items-center rounded-[4px] bg-flag px-4 text-sm font-bold text-ink transition-colors hover:bg-flag-deep disabled:opacity-50"
-          >
-            Se connecter
-          </button>
-        </form>
-      </div>
-    );
-  }
-
   // Regroupement par journée.
   const groups = new Map<string, AdminMatch[]>();
   for (const m of matches ?? []) {
@@ -405,22 +335,7 @@ export default function AdminScoresPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 pt-5 sm:px-6 sm:pt-10">
-      <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3">
-        <h1 className="font-score text-4xl leading-none font-black text-chalk sm:text-5xl">
-          Validation des scores
-        </h1>
-        <button
-          type="button"
-          onClick={() => {
-            saveSecret("");
-            setSecret("");
-            setMatches(null);
-          }}
-          className="min-h-11 text-sm font-semibold text-stone hover:text-chalk"
-        >
-          Se déconnecter
-        </button>
-      </div>
+      <h1 className={cn(pageTitleClass, "mb-6")}>Validation des scores</h1>
 
       <div role="tablist" className="flex gap-6 border-b border-line">
         {VIEWS.map(([value, label]) => (
@@ -459,6 +374,7 @@ export default function AdminScoresPage() {
       {view === "add" ? (
         <AddMatch
           submit={body => api({ method: "POST", body: JSON.stringify(body) })}
+          loadPublished={loadPublished}
         />
       ) : error ? (
         <p className="border-y border-line py-10 text-sm text-stone">

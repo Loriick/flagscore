@@ -6,7 +6,9 @@
   "exports": {
     "./types": "./src/types.ts",
     "./supabase-admin": "./src/supabase-admin.ts",
-    "./social/*": "./src/social/*.ts"
+    "./social/*": "./src/social/*.ts",
+    "./auth/server": "./src/auth/server.ts",
+    "./auth/proxy": "./src/auth/proxy.ts"
   },
   "scripts": {
     "type-check": "tsc --noEmit",
@@ -14,11 +16,19 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",
+    "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.76.1",
     "zod": "^4.6.7"
   },
+  "peerDependencies": {
+    "next": "16.0.11"
+  },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/react": "^19.2.2",
+    "next": "16.0.11",
+    "react": "19.2.9",
+    "react-dom": "19.2.9",
     "typescript": "^5",
     "vitest": "^4.0.2"
   }

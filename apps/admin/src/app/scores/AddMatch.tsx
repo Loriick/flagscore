@@ -1,11 +1,10 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-import { fetchSocialMatches } from "@/hooks/useSocialResults";
 import {
+  type SocialMatchRow,
   SOCIAL_CHAMPIONSHIPS,
   socialDays,
   socialMatches,
@@ -25,8 +24,10 @@ const pairKey = (a: string, b: string) => [a, b].sort().join("|");
  */
 export function AddMatch({
   submit,
+  loadPublished,
 }: {
   submit: (body: Record<string, unknown>) => Promise<{ updated?: boolean }>;
+  loadPublished: () => Promise<SocialMatchRow[]>;
 }) {
   const [championshipId, setChampionshipId] = useState(1);
   const pools = useMemo(() => socialPools(championshipId), [championshipId]);
@@ -45,10 +46,17 @@ export function AddMatch({
   const [scoreB, setScoreB] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const { data: rows = [], refetch } = useQuery({
-    queryKey: ["social-matches"],
-    queryFn: fetchSocialMatches,
-  });
+  const [rows, setRows] = useState<SocialMatchRow[]>([]);
+  const refetch = useCallback(
+    () =>
+      loadPublished()
+        .then(setRows)
+        .catch((e: Error) => toast.error(e.message)),
+    [loadPublished]
+  );
+  useEffect(() => {
+    void refetch();
+  }, [refetch]);
 
   const known = selectedDay ? socialMatches(rows, poolId, selectedDay.id) : [];
   const knownPairs = new Set(

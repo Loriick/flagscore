@@ -6,7 +6,7 @@
  * Scores affichés (voir `publishedRows`) :
  *  - ceux retenus automatiquement (`auto_apply`) : confirmés par les deux
  *    clubs, ou publiés par un seul club et rapprochés sans doute possible ;
- *  - ceux validés à la main sur /admin/scores, avec la correction éventuelle.
+ *  - ceux validés à la main sur la page Scores de l'admin, avec la correction éventuelle.
  * Les scores rejetés, à vérifier ou en conflit restent cachés.
  */
 
@@ -187,7 +187,7 @@ export function socialPoolTeams(pid: number) {
 }
 
 /**
- * Ligne `social_matches` pour un match saisi à la main sur /admin/scores
+ * Ligne `social_matches` pour un match saisi à la main sur la page Scores de l'admin
  * (score connu par un autre moyen qu'Instagram). Même clé que celle du
  * pipeline : si un post publie ce match plus tard, il complète la même ligne
  * sans écraser la saisie (stockée comme une décision humaine).

@@ -18,11 +18,63 @@ importers:
         specifier: ^5.0.0
         version: 5.9.3
 
+  apps/admin:
+    dependencies:
+      '@flagscore/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@flagscore/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      '@supabase/ssr':
+        specifier: ^0.8.0
+        version: 0.8.0(@supabase/supabase-js@2.76.1)
+      '@supabase/supabase-js':
+        specifier: ^2.76.1
+        version: 2.76.1
+      lucide-react:
+        specifier: ^0.546.0
+        version: 0.546.0(react@19.2.9)
+      next:
+        specifier: 16.0.11
+        version: 16.0.11(@babel/core@7.28.4)(@opentelemetry/api@1.10.0)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
+      react:
+        specifier: 19.2.9
+        version: 19.2.9
+      react-dom:
+        specifier: 19.2.9
+        version: 19.2.9(react@19.2.9)
+      sonner:
+        specifier: ^2.0.7
+        version: 2.0.7(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
+    devDependencies:
+      '@tailwindcss/postcss':
+        specifier: ^4
+        version: 4.1.15
+      '@types/node':
+        specifier: ^20
+        version: 20.19.23
+      '@types/react':
+        specifier: ^19.2.2
+        version: 19.2.2
+      '@types/react-dom':
+        specifier: ^19.2.2
+        version: 19.2.2(@types/react@19.2.2)
+      tailwindcss:
+        specifier: ^4
+        version: 4.1.15
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+
   apps/web:
     dependencies:
       '@flagscore/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@flagscore/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@radix-ui/react-accordion':
         specifier: ^1.2.12
         version: 1.2.12(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
@@ -162,6 +214,9 @@ importers:
       '@anthropic-ai/sdk':
         specifier: ^1.8.0
         version: 1.8.0(zod@4.6.7)
+      '@supabase/ssr':
+        specifier: ^0.8.0
+        version: 0.8.0(@supabase/supabase-js@2.76.1)
       '@supabase/supabase-js':
         specifier: ^2.76.1
         version: 2.76.1
@@ -172,12 +227,46 @@ importers:
       '@types/node':
         specifier: ^20
         version: 20.19.23
+      '@types/react':
+        specifier: ^19.2.2
+        version: 19.2.2
+      next:
+        specifier: 16.0.11
+        version: 16.0.11(@babel/core@7.28.4)(@opentelemetry/api@1.10.0)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
+      react:
+        specifier: 19.2.9
+        version: 19.2.9
+      react-dom:
+        specifier: 19.2.9
+        version: 19.2.9(react@19.2.9)
       typescript:
         specifier: ^5
         version: 5.9.3
       vitest:
         specifier: ^4.0.2
         version: 4.0.2(@types/node@20.19.23)(@vitest/ui@4.0.2)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(lightningcss@1.30.2)(yaml@2.8.1)
+
+  packages/ui:
+    dependencies:
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      tailwind-merge:
+        specifier: ^3.3.1
+        version: 3.3.1
+    devDependencies:
+      '@types/react':
+        specifier: ^19.2.2
+        version: 19.2.2
+      next:
+        specifier: 16.0.11
+        version: 16.0.11(@babel/core@7.28.4)(@opentelemetry/api@1.10.0)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
+      react:
+        specifier: 19.2.9
+        version: 19.2.9
+      react-dom:
+        specifier: 19.2.9
+        version: 19.2.9(react@19.2.9)
 
 packages:
 
@@ -1279,6 +1368,11 @@ packages:
   '@supabase/realtime-js@2.76.1':
     resolution: {integrity: sha512-B5Lfmprea2fx2FS7obp4uAWiRUlEa6j9J3+BvvETGp/2LdkSRBaLEJCBylfcZTXk67ajNPX6ppvKvAZsckqXYg==}
 
+  '@supabase/ssr@0.8.0':
+    resolution: {integrity: sha512-/PKk8kNFSs8QvvJ2vOww1mF5/c5W8y42duYtXvkOSe+yZKRgTTZywYG2l41pjhNomqESZCpZtXuWmYjFRMV+dw==}
+    peerDependencies:
+      '@supabase/supabase-js': ^2.76.1
+
   '@supabase/storage-js@2.76.1':
     resolution: {integrity: sha512-OJiNT8tocI9tcTjTjv1SBVLabzgEnS1NorZuqivkiJ0gTYmeg2c2PFmqCARhoQ4whF6zR9MVsX/Mtj2oSv4i/w==}
 
@@ -2081,6 +2175,10 @@ packages:
   cookie@0.7.1:
     resolution: {integrity: sha512-6DnInpx7SJ2AK3+CTUE/ZM0vWTUboZCegxhC2xiIydHR9jNuTAASBrfEpHhiGOZw/nX51bHt6YQl8jsGo4y/0w==}
     engines: {node: '>= 0.6'}
+
+  cookie@1.1.1:
+    resolution: {integrity: sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ==}
+    engines: {node: '>=18'}
 
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
@@ -5497,6 +5595,11 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
+  '@supabase/ssr@0.8.0(@supabase/supabase-js@2.76.1)':
+    dependencies:
+      '@supabase/supabase-js': 2.76.1
+      cookie: 1.1.1
+
   '@supabase/storage-js@2.76.1':
     dependencies:
       '@supabase/node-fetch': 2.6.15
@@ -6317,6 +6420,8 @@ snapshots:
   cookie-signature@1.0.6: {}
 
   cookie@0.7.1: {}
+
+  cookie@1.1.1: {}
 
   cross-spawn@7.0.6:
     dependencies:
