@@ -10,9 +10,9 @@ export const metadata: Metadata = { title: "Connexion" };
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string; error?: string }>;
+  searchParams: Promise<{ next?: string; error?: string; email?: string }>;
 }) {
-  const { next, error } = await searchParams;
+  const { next, error, email } = await searchParams;
   return (
     <LoginForm
       title={MATCHS_APP_NAME}
@@ -20,6 +20,8 @@ export default async function LoginPage({
       action={login}
       next={next}
       error={error}
+      email={email}
+      submitLabel="Recevoir mon lien"
     />
   );
 }

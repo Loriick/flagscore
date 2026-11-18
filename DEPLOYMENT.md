@@ -74,8 +74,8 @@ Les crons de l'import Instagram (`social-*`) sont dans `apps/admin/vercel.json` 
 Les deux apps privées se connectent par lien magique. Chaque sous-domaine a ses propres cookies.
 
 - Depuis `/login`, Supabase envoie son email standard. Le lien ne marche que dans le navigateur qui l'a demandé.
-- L'admin invite un délégué depuis la page d'un plateau. Le serveur crée le compte s'il manque, lui donne le rôle `delegate`, l'affecte au plateau, puis envoie l'invitation en français par Resend. Le lien pointe vers `MATCHS_URL/auth/callback` et marche depuis n'importe quel appareil.
-- Le lien d'invitation expire selon le réglage **Email OTP Expiration** de Supabase (1 heure par défaut). Le délégué peut ensuite demander un nouveau lien sur matchs.flagscore.fr/login, et l'admin peut renvoyer l'invitation.
+- L'admin invite un délégué depuis la page d'un plateau. Le serveur crée le compte s'il manque, lui donne le rôle `delegate`, l'affecte au plateau, puis envoie l'invitation en français par Resend.
+- L'invitation ne contient pas de lien de connexion, car un lien magique expire selon le réglage **Email OTP Expiration** de Supabase (1 heure par défaut). Son bouton ouvre `MATCHS_URL/login?email=…`, email pré-rempli. Le jour du match, le délégué touche « Recevoir mon lien » et reçoit un lien frais.
 
 ## Développement
 

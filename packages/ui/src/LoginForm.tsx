@@ -26,12 +26,17 @@ export function LoginForm({
   action,
   next,
   error,
+  email,
+  submitLabel = "Recevoir un lien de connexion",
 }: {
   title: string;
   intro: string;
   action: (state: State, formData: FormData) => Promise<State>;
   next?: string;
   error?: string;
+  /** Adresse pré-remplie (lien de l'email d'invitation). */
+  email?: string;
+  submitLabel?: string;
 }) {
   const [state, formAction, pending] = useActionState(action, {
     status: "idle",
@@ -63,6 +68,7 @@ export function LoginForm({
               type="email"
               inputMode="email"
               autoComplete="email"
+              defaultValue={email}
               required
               className={inputClass}
             />
@@ -77,7 +83,7 @@ export function LoginForm({
             disabled={pending}
             className={cn(primaryButtonClass, "w-full")}
           >
-            {pending ? "Envoi…" : "Recevoir un lien de connexion"}
+            {pending ? "Envoi…" : submitLabel}
           </button>
         </form>
       )}

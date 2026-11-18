@@ -1,92 +1,70 @@
 import "server-only";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
 
 import {
   audit,
-  describePlateau,
-  formatDay,
-  MATCHS_APP_NAME,
+  invitationEmail,
   type PlateauRow,
-  teamLabel,
 } from "@flagscore/core/sheets";
 import { getSupabaseAdmin } from "@flagscore/core/supabase-admin";
 
 function matchsUrl() {
   const url = process.env.MATCHS_URL;
   if (!url) throw new Error("MATCHS_URL n'est pas configurée");
-  return url.replace(/\/$/, "");
+  return url;
 }
 
-const escape = (s: string) =>
-  s.replace(
-    /[&<>"']/g,
-    c =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
-        c
-      ]!
-  );
+const USERS_PAGE = 1000;
 
-/**
- * Lien de connexion valable depuis n'importe quel appareil : on n'utilise
- * pas l'`action_link` de Supabase (il renvoie la session dans le fragment de
- * l'URL, illisible côté serveur) mais son `hashed_token`, vérifié par
- * /auth/callback de l'app matchs.
- */
-async function loginLink(email: string, plateauId: string) {
-  const db = getSupabaseAdmin();
-  const { data, error } = await db.auth.admin.generateLink({
-    type: "magiclink",
+/** Compte du délégué : créé s'il manque, retrouvé par son email sinon. */
+async function delegateAccount(
+  db: SupabaseClient,
+  email: string,
+  fullName: string
+): Promise<{ userId: string; created: boolean }> {
+  const created = await db.auth.admin.createUser({
     email,
+    email_confirm: true,
+    user_metadata: { full_name: fullName },
   });
-  if (error) throw new Error(error.message);
-  const params = new URLSearchParams({
-    token_hash: data.properties.hashed_token,
-    type: "magiclink",
-    next: `/plateau/${plateauId}`,
-  });
-  return {
-    userId: data.user.id,
-    url: `${matchsUrl()}/auth/callback?${params}`,
-  };
+  if (!created.error) return { userId: created.data.user.id, created: true };
+  if (created.error.code !== "email_exists") {
+    throw new Error(created.error.message);
+  }
+  // L'API admin ne cherche pas par email : on parcourt les comptes.
+  for (let page = 1; ; page++) {
+    const { data, error } = await db.auth.admin.listUsers({
+      page,
+      perPage: USERS_PAGE,
+    });
+    if (error) throw new Error(error.message);
+    const user = data.users.find(
+      u => u.email?.toLowerCase() === email.toLowerCase()
+    );
+    if (user) return { userId: user.id, created: false };
+    if (data.users.length < USERS_PAGE) {
+      throw new Error(`Compte introuvable pour ${email}`);
+    }
+  }
 }
 
 async function sendInvitation(input: {
   email: string;
   fullName: string;
   plateau: PlateauRow;
-  link: string;
 }) {
   const key = process.env.RESEND_API_KEY;
   if (!key) throw new Error("RESEND_API_KEY n'est pas configurée");
-  const { pool, stage, competition, teams } = describePlateau(input.plateau);
-  const day = formatDay(input.plateau.date);
-  const loginPage = `${matchsUrl()}/login`;
-  const before = [
-    `Bonjour ${input.fullName},`,
-    `Tu es délégué de match pour le plateau du ${day} (${input.plateau.venue}).`,
-    `${competition} · ${pool} · ${stage}`,
-    `Équipes : ${teams.map(t => teamLabel(t.ref)).join(", ")}`,
-    "Le jour J, tu saisis les scores et les blessés sur ton téléphone, puis les deux coachs et les deux capitaines signent chaque match.",
-  ];
-  const after = [
-    `Ce lien expire vite. S'il ne marche plus, demande un nouveau lien sur ${loginPage} avec cette adresse email.`,
-    "L'équipe Flagscore",
-  ];
-  const linkLabel = `Se connecter à Flagscore ${MATCHS_APP_NAME}`;
-  const text = [...before, `${linkLabel} : ${input.link}`, ...after].join(
-    "\n\n"
-  );
-  const html = [
-    ...before.map(p => `<p>${escape(p)}</p>`),
-    `<p><a href="${escape(input.link)}">${escape(linkLabel)}</a></p>`,
-    ...after.map(p => `<p>${escape(p)}</p>`),
-  ].join("\n");
-
+  const { subject, text, html } = invitationEmail({
+    ...input,
+    matchsUrl: matchsUrl(),
+  });
   const { error } = await new Resend(key).emails.send({
     from: process.env.RESEND_FROM ?? "Flagscore <onboarding@resend.dev>",
     to: input.email,
-    subject: `Délégué de match · ${day} · ${input.plateau.venue}`,
+    subject,
     text,
     html,
   });
@@ -96,7 +74,8 @@ async function sendInvitation(input: {
 /**
  * Invite (ou réinvite) un délégué sur un plateau. Rejouable : le compte, le
  * profil et l'affectation sont créés seulement s'ils manquent ; un compte
- * admin le reste.
+ * admin le reste. L'email ne contient pas de lien de connexion (voir
+ * `invitationEmail`).
  */
 export async function inviteDelegate(input: {
   plateau: PlateauRow;
@@ -105,16 +84,11 @@ export async function inviteDelegate(input: {
   actorId: string;
 }) {
   const db = getSupabaseAdmin();
-  const created = await db.auth.admin.createUser({
-    email: input.email,
-    email_confirm: true,
-    user_metadata: { full_name: input.fullName },
-  });
-  if (created.error && created.error.code !== "email_exists") {
-    throw new Error(created.error.message);
-  }
-
-  const { userId, url } = await loginLink(input.email, input.plateau.id);
+  const { userId, created } = await delegateAccount(
+    db,
+    input.email,
+    input.fullName
+  );
   const profile = await db
     .from("profiles")
     .upsert(
@@ -136,11 +110,10 @@ export async function inviteDelegate(input: {
     email: input.email,
     fullName: input.fullName,
     plateau: input.plateau,
-    link: url,
   });
   await audit(db, {
     actor: input.actorId,
-    action: created.error ? "delegate.reinvite" : "delegate.invite",
+    action: created ? "delegate.invite" : "delegate.reinvite",
     entity: "plateau",
     entityId: input.plateau.id,
     details: { user_id: userId, email: input.email },

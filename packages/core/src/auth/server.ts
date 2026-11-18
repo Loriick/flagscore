@@ -135,8 +135,8 @@ export async function sendMagicLink(
 /**
  * Retour du lien magique. Deux formes :
  *  - `?code=` : lien envoyé depuis /login (flux PKCE, même navigateur) ;
- *  - `?token_hash=&type=` : lien construit par l'admin à partir de
- *    `generateLink`, valable depuis n'importe quel appareil.
+ *  - `?token_hash=&type=` : lien d'un modèle d'email Supabase qui utilise
+ *    `{{ .TokenHash }}`, valable depuis n'importe quel appareil.
  */
 export async function handleAuthCallback(request: NextRequest) {
   const params = request.nextUrl.searchParams;
