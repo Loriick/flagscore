@@ -55,6 +55,13 @@ Les crons de l'import Instagram (`social-*`) sont dans `apps/admin/vercel.json` 
    - `https://matchs.flagscore.fr/auth/callback`
    - `http://localhost:3001/auth/callback` et `http://localhost:3002/auth/callback` pour le dev
 3. Dans **Authentication → Providers → Email**, laissez la connexion par email activée. Les inscriptions libres ne sont pas utilisées : les comptes sont créés par l'admin.
+4. Dans **Authentication → Email Templates → Magic Link**, remplacez le lien par :
+
+   ```html
+   <a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email">Me connecter</a>
+   ```
+
+   Le modèle par défaut produit un lien qui ne marche que dans le navigateur qui l'a demandé. Sur téléphone, l'app mail ouvre souvent les liens dans son propre navigateur, et la connexion échoue. Avec `token_hash`, le lien marche depuis n'importe quel navigateur. `RedirectTo` contient déjà `?next=…`, d'où le `&`.
 
 ### Créer le premier admin
 
@@ -73,7 +80,7 @@ Les crons de l'import Instagram (`social-*`) sont dans `apps/admin/vercel.json` 
 
 Les deux apps privées se connectent par lien magique. Chaque sous-domaine a ses propres cookies.
 
-- Depuis `/login`, Supabase envoie son email standard. Le lien ne marche que dans le navigateur qui l'a demandé.
+- Depuis `/login`, Supabase envoie l'email du modèle **Magic Link** (voir l'étape 4 ci-dessus).
 - L'admin invite un délégué depuis la page d'un plateau. Le serveur crée le compte s'il manque, lui donne le rôle `delegate`, l'affecte au plateau, puis envoie l'invitation en français par Resend.
 - L'invitation ne contient pas de lien de connexion, car un lien magique expire selon le réglage **Email OTP Expiration** de Supabase (1 heure par défaut). Son bouton ouvre `MATCHS_URL/login?email=…`, email pré-rempli. Le jour du match, le délégué touche « Recevoir mon lien » et reçoit un lien frais.
 
