@@ -299,6 +299,9 @@ export async function collectFinishedRuns(db: SupabaseClient) {
  * re-récupérés avec Apify, puis remis « en attente » ; l'étape process les
  * relit et le rapprochement est refait.
  */
+/** Jusqu'à cette date, seuls les 4 premiers visuels d'un carrousel étaient lus. */
+const PARTIAL_CAROUSELS_UNTIL = "2026-11-18T12:00:00Z";
+
 export async function rereadUnresolvedPosts(
   db: SupabaseClient,
   {
@@ -311,29 +314,44 @@ export async function rereadUnresolvedPosts(
     /**
      * unresolved : posts dont un score n'a pas été rattaché à un match ;
      * videos : vidéos écartées sans lecture (avant que Claude lise leur
-     * miniature).
+     * miniature) ;
+     * carousels : carrousels de plus de 4 visuels lus avant le 18 novembre
+     * 2026, quand seuls les 4 premiers étaient lus.
      */
-    what?: "unresolved" | "videos";
+    what?: "unresolved" | "videos" | "carousels";
   }
 ) {
   const rows =
-    what === "videos"
+    what === "carousels"
       ? (
           check(
             await db
               .from("social_posts")
-              .select("id")
-              .eq("status", "ignored")
-              .eq("skipped_reason", "Vidéo sans score dans la légende")
-              .limit(limit)
-          ) as Array<{ id: string }>
-        ).map(r => ({ post_id: r.id }))
-      : (check(
-          await db
-            .from("score_observations")
-            .select("post_id")
-            .in("resolution", ["ambiguous", "unmatched"])
-        ) as Array<{ post_id: string }>);
+              .select("id, image_urls")
+              .eq("media_type", "Sidecar")
+              .in("status", ["processed", "ignored"])
+              .lt("processed_at", PARTIAL_CAROUSELS_UNTIL)
+          ) as Array<{ id: string; image_urls: string[] }>
+        )
+          .filter(p => p.image_urls.length > 4)
+          .map(p => ({ post_id: p.id }))
+      : what === "videos"
+        ? (
+            check(
+              await db
+                .from("social_posts")
+                .select("id")
+                .eq("status", "ignored")
+                .eq("skipped_reason", "Vidéo sans score dans la légende")
+                .limit(limit)
+            ) as Array<{ id: string }>
+          ).map(r => ({ post_id: r.id }))
+        : (check(
+            await db
+              .from("score_observations")
+              .select("post_id")
+              .in("resolution", ["ambiguous", "unmatched"])
+          ) as Array<{ post_id: string }>);
   const postIds = [...new Set(rows.map(r => r.post_id))].slice(0, limit);
   if (postIds.length === 0) return { posts: 0, refreshed: 0 };
 
@@ -384,8 +402,11 @@ export async function rereadUnresolvedPosts(
   return { posts: posts.length, refreshed };
 }
 
-/** Nombre maximal de visuels lus par post. */
-const MAX_IMAGES = 4;
+/**
+ * Nombre maximal de visuels lus par post : certains clubs publient un visuel
+ * par match, jusqu'à 6 ou 7 par journée.
+ */
+const MAX_IMAGES = 10;
 
 // --- 3. Lire les posts en attente ----------------------------------------------
 
@@ -433,7 +454,6 @@ export async function processPendingPosts(
         try {
           // Vidéo : Claude lit sa miniature et sa légende (le score est souvent
           // affiché sur la couverture d'un Reel).
-          // Les scores sont dans les premiers visuels d'un carrousel.
           const images = (
             await Promise.allSettled(
               post.image_urls.slice(0, MAX_IMAGES).map(u => loadImage(u))
