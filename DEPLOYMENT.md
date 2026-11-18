@@ -16,6 +16,15 @@ Code partagé :
 
 Les deux packages sont publiés en TypeScript source. Chaque app les compile avec `transpilePackages`.
 
+## Ordre de déploiement
+
+Exécutez la migration `004_delegates.sql` **avant** de déployer `apps/web`.
+
+Le site public lit les colonnes `source` et `forfeit` de `social_matches`, que la migration 004 ajoute. Sans elles, la requête des résultats échoue et le site n'affiche plus aucun score.
+
+1. Exécutez la migration 004 (voir [Supabase](#supabase)).
+2. Déployez `apps/web`, `apps/admin` et `apps/matchs`, dans n'importe quel ordre.
+
 ## Projets Vercel
 
 Créez un projet Vercel par app, tous reliés au même dépôt.
@@ -40,7 +49,7 @@ Les crons de l'import Instagram (`social-*`) sont dans `apps/admin/vercel.json` 
 
 ## Supabase
 
-1. Dans le SQL Editor, exécutez `apps/web/supabase-migrations/004_delegates.sql` après les migrations 001 à 003. Le fichier est idempotent.
+1. Dans le SQL Editor, exécutez `apps/web/supabase-migrations/004_delegates.sql` après les migrations 001 à 003, et avant tout déploiement de `apps/web`. Le fichier est idempotent.
 2. Dans **Authentication → URL Configuration**, ajoutez ces adresses aux **Redirect URLs** :
    - `https://admin.flagscore.fr/auth/callback`
    - `https://matchs.flagscore.fr/auth/callback`
