@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { SEASON_2026_2027 } from "@/lib/social/calendar";
+import { SEASON_2026_2027 } from "@flagscore/core/social/calendar";
 import {
   collectFinishedRuns,
   processPendingPosts,
@@ -8,9 +8,9 @@ import {
   reconcileEvents,
   rereadUnresolvedPosts,
   startCollection,
-} from "@/lib/social/pipeline";
-import { todayInParis } from "@/lib/social/schedule";
-import { getSupabaseAdmin } from "@/lib/supabase-admin";
+} from "@flagscore/core/social/pipeline";
+import { todayInParis } from "@flagscore/core/social/schedule";
+import { getSupabaseAdmin } from "@flagscore/core/supabase-admin";
 
 export const dynamic = "force-dynamic";
 // Lecture des visuels par Claude : on laisse le temps de traiter un lot.

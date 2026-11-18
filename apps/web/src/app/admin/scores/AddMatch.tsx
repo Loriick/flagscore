@@ -11,7 +11,7 @@ import {
   socialMatches,
   socialPools,
   socialPoolTeams,
-} from "@/lib/social/results";
+} from "@flagscore/core/social/results";
 
 const fieldClass =
   "h-11 w-full rounded-[4px] border border-line bg-ink-raised px-3 text-chalk focus:border-flag focus:outline-none";

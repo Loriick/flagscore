@@ -14,7 +14,7 @@ import { SEASON_2026_2027, type Competition } from "./calendar";
 import type { PoolDefinition } from "./data/pools-2026-2027";
 import { ALL_POOLS_2026_2027, poolTeamRef } from "./season";
 
-import type { Championship, Day, Match, Pool, Ranking } from "@/app/types";
+import type { Championship, Day, Match, Pool, Ranking } from "../types";
 
 /** Ligne de `social_matches` utile à l'affichage. */
 export interface SocialMatchRow {

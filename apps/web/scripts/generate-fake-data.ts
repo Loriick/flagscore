@@ -13,11 +13,11 @@
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { CDF_POOLS_2026_2027 } from "../src/lib/social/data/cdf-2026-2027";
+import { CDF_POOLS_2026_2027 } from "@flagscore/core/social/data/cdf-2026-2027";
 import {
   POOLS_2026_2027,
   type PoolDefinition,
-} from "../src/lib/social/data/pools-2026-2027";
+} from "@flagscore/core/social/data/pools-2026-2027";
 
 // Générateur pseudo-aléatoire déterministe (mulberry32)
 let seed = 20262027;

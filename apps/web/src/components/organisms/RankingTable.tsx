@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import { Ranking } from "../../app/types";
+import { Ranking } from "@flagscore/core/types";
 
 import { cn } from "@/lib/utils";
 

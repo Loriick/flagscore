@@ -15,7 +15,7 @@ import {
   socialPools,
   socialRankings,
   type SocialMatchRow,
-} from "@/lib/social/results";
+} from "@flagscore/core/social/results";
 import { supabase } from "@/lib/supabase";
 
 /** Scores publiables, toutes compétitions : quelques centaines de lignes. */

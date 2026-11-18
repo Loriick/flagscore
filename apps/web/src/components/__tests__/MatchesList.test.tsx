@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 
 import { MatchesList } from "../MatchesList";
 
-import { Match } from "@/app/types";
+import { Match } from "@flagscore/core/types";
 
 // Mock SkeletonLoader
 vi.mock("../SkeletonLoader", () => ({

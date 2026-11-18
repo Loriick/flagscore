@@ -20,9 +20,9 @@ importers:
 
   apps/web:
     dependencies:
-      '@anthropic-ai/sdk':
-        specifier: ^1.8.0
-        version: 1.8.0(zod@4.6.7)
+      '@flagscore/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@radix-ui/react-accordion':
         specifier: ^1.2.12
         version: 1.2.12(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
@@ -157,11 +157,27 @@ importers:
         specifier: ^4.0.2
         version: 4.0.2(@types/node@20.19.23)(@vitest/ui@4.0.2)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(lightningcss@1.30.2)(yaml@2.8.1)
 
-  packages/shared:
+  packages/core:
+    dependencies:
+      '@anthropic-ai/sdk':
+        specifier: ^1.8.0
+        version: 1.8.0(zod@4.6.7)
+      '@supabase/supabase-js':
+        specifier: ^2.76.1
+        version: 2.76.1
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
+      '@types/node':
+        specifier: ^20
+        version: 20.19.23
       typescript:
-        specifier: ^5.0.0
+        specifier: ^5
         version: 5.9.3
+      vitest:
+        specifier: ^4.0.2
+        version: 4.0.2(@types/node@20.19.23)(@vitest/ui@4.0.2)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(lightningcss@1.30.2)(yaml@2.8.1)
 
 packages:
 

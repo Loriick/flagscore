@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import { Pool } from "../app/types";
+import { Pool } from "@flagscore/core/types";
 
 import { NoSSR } from "./NoSSR";
 

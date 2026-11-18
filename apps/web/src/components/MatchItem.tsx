@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import { Match } from "../app/types";
+import { Match } from "@flagscore/core/types";
 
 interface MatchItemProps {
   match: Match;

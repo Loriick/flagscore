@@ -2,10 +2,10 @@ import { timingSafeEqual } from "node:crypto";
 
 import { NextRequest, NextResponse } from "next/server";
 
-import { CLUB_INSTAGRAM, clubName } from "@/lib/social/data/pools-2026-2027";
-import { manualMatchRow } from "@/lib/social/results";
-import { normalizeHandle } from "@/lib/social/teams";
-import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { CLUB_INSTAGRAM, clubName } from "@flagscore/core/social/data/pools-2026-2027";
+import { manualMatchRow } from "@flagscore/core/social/results";
+import { normalizeHandle } from "@flagscore/core/social/teams";
+import { getSupabaseAdmin } from "@flagscore/core/supabase-admin";
 
 export const dynamic = "force-dynamic";
 

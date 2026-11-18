@@ -1,6 +1,6 @@
 import { memo, type CSSProperties } from "react";
 
-import { Match } from "../../app/types";
+import { Match } from "@flagscore/core/types";
 
 import { cn } from "@/lib/utils";
 
