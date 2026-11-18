@@ -6,6 +6,7 @@
   "exports": {
     "./theme.css": "./src/theme.css",
     "./styles": "./src/styles.ts",
+    "./ActionForm": "./src/ActionForm.tsx",
     "./AppHeader": "./src/AppHeader.tsx",
     "./LoginForm": "./src/LoginForm.tsx",
     "./SignatureSvg": "./src/SignatureSvg.tsx"

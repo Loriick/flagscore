@@ -2,9 +2,12 @@
 
 import { useActionState } from "react";
 
-import { cn, primaryButtonClass } from "@flagscore/ui/styles";
+import { cn, primaryButtonClass } from "./styles";
 
-import type { ActionState } from "@/app/plateaux/actions";
+export type ActionState =
+  | { status: "idle" }
+  | { status: "ok"; message: string }
+  | { status: "error"; message: string };
 
 /** Formulaire relié à une action serveur, avec son message de retour. */
 export function ActionForm({

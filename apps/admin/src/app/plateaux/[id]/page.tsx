@@ -34,7 +34,7 @@ import {
   resendInvite,
 } from "../actions";
 
-import { ActionForm } from "@/components/ActionForm";
+import { ActionForm } from "@flagscore/ui/ActionForm";
 import { PlateauForm } from "@/components/PlateauForm";
 
 export const metadata: Metadata = { title: "Plateau" };

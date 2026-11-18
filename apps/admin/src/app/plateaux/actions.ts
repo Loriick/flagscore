@@ -1,5 +1,6 @@
 "use server";
 
+import type { ActionState } from "@flagscore/ui/ActionForm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -19,11 +20,6 @@ import { poolEvents } from "@flagscore/core/social/results";
 import { getSupabaseAdmin } from "@flagscore/core/supabase-admin";
 
 import { inviteDelegate } from "@/lib/invite";
-
-export type ActionState =
-  | { status: "idle" }
-  | { status: "ok"; message: string }
-  | { status: "error"; message: string };
 
 const failure = (message: string): ActionState => ({
   status: "error",

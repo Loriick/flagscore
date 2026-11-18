@@ -9,7 +9,7 @@ import {
 } from "@flagscore/core/social/results";
 import { inputClass, labelClass } from "@flagscore/ui/styles";
 
-import { ActionForm } from "./ActionForm";
+import { ActionForm } from "@flagscore/ui/ActionForm";
 
 import { savePlateau } from "@/app/plateaux/actions";
 
