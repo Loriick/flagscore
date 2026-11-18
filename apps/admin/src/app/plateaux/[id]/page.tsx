@@ -113,7 +113,7 @@ export default async function PlateauPage({
             Modifier le plateau
           </summary>
           <div className="mt-4 space-y-6">
-            <PlateauForm initial={plateau} />
+            <PlateauForm initial={plateau} locked={sheets.length > 0} />
             {sheets.length === 0 && (
               <form action={deletePlateau}>
                 <input type="hidden" name="id" value={plateau.id} />

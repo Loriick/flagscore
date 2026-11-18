@@ -12,6 +12,7 @@ import {
   loadSheet,
   REQUIRED_SIGNATURES,
   reopenSheet,
+  savePlateauRow,
   saveResult,
   saveSignature,
   SheetError,
@@ -394,5 +395,36 @@ describe("feuilles en base", () => {
     expect(onSite(tables)).toEqual([
       expect.objectContaining({ score_home: 31, score_away: 12 }),
     ]);
+  });
+
+  it("refuse de changer la poule ou la journée d'un plateau qui a des feuilles", async () => {
+    const { db, tables } = setup();
+    const plateau = { ...tables.plateaux[0] } as {
+      pool_id: number;
+      event_key: string;
+      date: string;
+      venue: string;
+      host_club: string | null;
+    };
+    const other = socialPools(1).find(p => p.id !== pool.id)!;
+
+    await expect(
+      savePlateauRow(db, "p1", { ...plateau, pool_id: other.id })
+    ).rejects.toBeInstanceOf(SheetError);
+    await expect(
+      savePlateauRow(db, "p1", {
+        ...plateau,
+        event_key: "CM|Q - J2|2026-11-07",
+      })
+    ).rejects.toBeInstanceOf(SheetError);
+    expect(tables.plateaux[0]).toMatchObject({
+      pool_id: pool.id,
+      event_key: EVENT,
+    });
+
+    expect(
+      await savePlateauRow(db, "p1", { ...plateau, venue: "Vannes" })
+    ).toBe("p1");
+    expect(tables.plateaux[0]).toMatchObject({ venue: "Vannes" });
   });
 });

@@ -24,9 +24,16 @@ export interface PlateauValues {
 
 /**
  * Création ou modification d'un plateau : journée du calendrier et poule de
- * la saison, date pré-remplie depuis la journée.
+ * la saison, date pré-remplie depuis la journée. `locked` : le plateau a des
+ * feuilles, la compétition, la poule et la journée ne changent plus.
  */
-export function PlateauForm({ initial }: { initial?: PlateauValues }) {
+export function PlateauForm({
+  initial,
+  locked = false,
+}: {
+  initial?: PlateauValues;
+  locked?: boolean;
+}) {
   const [championshipId, setChampionshipId] = useState(
     initial ? Math.floor(initial.pool_id / 100) : SOCIAL_CHAMPIONSHIPS[0].id
   );
@@ -51,6 +58,16 @@ export function PlateauForm({ initial }: { initial?: PlateauValues }) {
       className="grid gap-4 sm:grid-cols-2"
     >
       {initial?.id && <input type="hidden" name="id" value={initial.id} />}
+      {locked && (
+        <>
+          <input type="hidden" name="poolId" value={poolId} />
+          <input type="hidden" name="eventKey" value={eventKey} />
+          <p className="text-sm text-stone sm:col-span-2">
+            Ce plateau a des feuilles de match : la compétition, la poule et la
+            journée sont verrouillées.
+          </p>
+        </>
+      )}
       <div className="sm:col-span-2">
         <label htmlFor="championship" className={labelClass}>
           Compétition
@@ -58,6 +75,7 @@ export function PlateauForm({ initial }: { initial?: PlateauValues }) {
         <select
           id="championship"
           value={championshipId}
+          disabled={locked}
           onChange={e => {
             const id = Number(e.target.value);
             setChampionshipId(id);
@@ -82,8 +100,9 @@ export function PlateauForm({ initial }: { initial?: PlateauValues }) {
         </label>
         <select
           id="poolId"
-          name="poolId"
+          name={locked ? undefined : "poolId"}
           value={poolId}
+          disabled={locked}
           onChange={e => {
             const id = Number(e.target.value);
             setPoolId(id);
@@ -108,8 +127,9 @@ export function PlateauForm({ initial }: { initial?: PlateauValues }) {
         </label>
         <select
           id="eventKey"
-          name="eventKey"
+          name={locked ? undefined : "eventKey"}
           value={eventKey}
+          disabled={locked}
           onChange={e => pickEvent(e.target.value)}
           className={inputClass}
         >

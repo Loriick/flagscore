@@ -352,6 +352,43 @@ async function isPublished(
   return published.length > 0;
 }
 
+export type PlateauValues = Omit<PlateauRow, "id">;
+
+/**
+ * Crée ou modifie un plateau et renvoie son id. Les feuilles d'un plateau
+ * portent la clé de match de sa poule et de sa journée : une fois la première
+ * feuille créée, ces deux champs ne changent plus.
+ */
+export async function savePlateauRow(
+  db: SupabaseClient,
+  id: string | null,
+  values: PlateauValues
+): Promise<string> {
+  if (!id) {
+    const created = check(
+      await db.from("plateaux").insert(values).select("id").single()
+    ) as { id: string };
+    return created.id;
+  }
+  const current = check(
+    await db.from("plateaux").select(PLATEAU_COLUMNS).eq("id", id).single()
+  ) as PlateauRow;
+  if (
+    current.pool_id !== values.pool_id ||
+    current.event_key !== values.event_key
+  ) {
+    const sheets = check(
+      await db.from("match_sheets").select("id").eq("plateau_id", id)
+    ) as Array<{ id: string }>;
+    if (sheets.length) throw new SheetError(PLATEAU_LOCKED);
+  }
+  check(await db.from("plateaux").update(values).eq("id", id));
+  return id;
+}
+
+const PLATEAU_LOCKED =
+  "Ce plateau a déjà des feuilles de match : la poule et la journée ne peuvent plus changer.";
+
 export async function reopenSheet(
   db: SupabaseClient,
   bundle: SheetBundle,

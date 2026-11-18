@@ -14,6 +14,7 @@ import {
   type PlateauRow,
   plateauInput,
   reopenSheet,
+  savePlateauRow,
   SheetError,
 } from "@flagscore/core/sheets";
 import { poolEvents } from "@flagscore/core/social/results";
@@ -56,25 +57,22 @@ export async function savePlateau(
     host_club: input.hostClub,
   };
   const db = getSupabaseAdmin();
-  const existingId = idInput.safeParse(formData.get("id")).data;
-  const { data, error } = existingId
-    ? await db
-        .from("plateaux")
-        .update(values)
-        .eq("id", existingId)
-        .select("id")
-        .single()
-    : await db.from("plateaux").insert(values).select("id").single();
-  if (error) return failure(error.message);
+  const existingId = idInput.safeParse(formData.get("id")).data ?? null;
+  let id: string;
+  try {
+    id = await savePlateauRow(db, existingId, values);
+  } catch (e) {
+    return failure((e as Error).message);
+  }
   await audit(db, {
     actor: session.user.id,
     action: existingId ? "plateau.update" : "plateau.create",
     entity: "plateau",
-    entityId: data.id,
+    entityId: id,
     details: values,
   });
   revalidatePath("/plateaux");
-  redirect(`/plateaux/${data.id}`);
+  redirect(`/plateaux/${id}`);
 }
 
 export async function deletePlateau(formData: FormData) {
